@@ -368,11 +368,6 @@ c  1  format(7i7,a8)
       return
       end
 c-----------------------------------------------------------------------
-
-
-#ifdef _OPENACC
-
-c-----------------------------------------------------------------------
       subroutine cg_acc(x,f,g,c,r,w,p,z,n,niter,flop_cg)
       include 'SIZE'
 
@@ -440,7 +435,11 @@ c     call tester(z,r,n)
          if (iter.eq.1) beta=0.0
          call add2s1_acc(p,z,beta,n)                                     ! 2n
 
-         call ax_acc(w,p,g,ur,us,ut,wk,n)                                ! flopa
+#ifdef CRAY_ACC
+         call ax_acc_cray(w,p,g,ur,us,ut,wk,n)                                ! flopa
+#else
+         call ax_acc_pgi (w,p,g,ur,us,ut,wk,n)                                ! flopa
+#endif
 
          pap=glsc3_acc(w,c,p,n)                                          ! 3n
 
@@ -473,8 +472,6 @@ c        if (rtr.le.rlim2) goto 1001
 
       return
       end
-
-
 c-----------------------------------------------------------------------
       subroutine maskit_acc(w,pmask,nx,ny,nz)   ! Zero out Dirichlet conditions
       include 'SIZE'
@@ -541,11 +538,8 @@ c-----------------------------------------------------------------------
 
       return
       end
-
-
-#ifdef CRAY_ACC
 c-----------------------------------------------------------------------
-      subroutine ax_acc(w,u,gxyz,ur,us,ut,wk,n) ! Matrix-vector product: w=A*u
+      subroutine ax_acc_cray(w,u,gxyz,ur,us,ut,wk,n) ! Matrix-vector product: w=A*u
 
       include 'SIZE'
       include 'TOTAL'
@@ -634,10 +628,8 @@ c      real ur(lt),us(lt),ut(lt),wk(lt)
 
       return
       end
-
-#else
 c-----------------------------------------------------------------------
-      subroutine ax_acc(w,u,gxyz,ur,us,ut,wk,n) ! Matrix-vector product: w=A*u
+      subroutine ax_acc_pgi(w,u,gxyz,ur,us,ut,wk,n) ! Matrix-vector product: w=A*u
 
 #ifdef TUNED_CUF_KERNEL
       use cudafor
@@ -648,7 +640,7 @@ c-----------------------------------------------------------------------
 
 #ifdef TUNED_CUF_KERNEL
       interface
-      attributes(global) subroutine ax_cuf2(w,u,ur,us,ut,
+      attributes(global) subroutine ax_cuda(w,u,ur,us,ut,
      &                gxyz,dxm1,dxtm1)
 
       real, intent(out) :: w(nx1,ny1,nz1,nelt)
@@ -701,15 +693,13 @@ c      dxtm1 = 1.0
 
 !$acc host_data use_device(w,u(:,:,:,:),ur,us,ut,gxyz,dxm1,dxtm1)
        if (nx1.eq.10) then
-         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1)>>>(w,u,
+         call ax_cuda<<<nelt,dim3(nx1,ny1,nz1)>>>(w,u,
      $                ur,us,ut,gxyz,dxm1,dxtm1)
        else if (nx1.eq.12) then
-         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1/2)>>>(w,u,
+         call ax_cuda<<<nelt,dim3(nx1,ny1,nz1/2)>>>(w,u,
      $                ur,us,ut,gxyz,dxm1,dxtm1)
        else
-c         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1/4)>>>(w,u,
-c     $                ur,us,ut,gxyz,dxm1,dxtm1)
-         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1/4)>>>(w,u,                            
+         call ax_cuda<<<nelt,dim3(nx1,ny1,nz1/4)>>>(w,u,
      $         ur,us,ut,gxyz,dxm1,dxtm1) 
 
        endif
@@ -717,11 +707,6 @@ c     $                ur,us,ut,gxyz,dxm1,dxtm1)
 !$acc end host_data
 
     
-!!$acc update host(w,u,ur,us,ut,gxyz,dxm1,dxtm1)
-!!$acc wait
-!      write(*,*) "www22 = ", sum(w), sum(u), w(1,1,16,:)
-c      write(*,*) "gxyz2 = ",sum(gxyz),sum(ur),sum(us),sum(ut)
-
 #else
             
 !$ACC KERNELS
@@ -797,7 +782,3 @@ c      write(*,*) "gxyz2 = ",sum(gxyz),sum(ur),sum(us),sum(ut)
 
       return
       end
-
-#endif
-
-#endif 

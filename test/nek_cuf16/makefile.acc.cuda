@@ -47,7 +47,7 @@ endif
 ifeq ($(IFMGRID),true)
 BONE += hsmg.o dsygv.o ssygv.o
 else
-BONE += hsmg_dum.o
+BONE += hsmg_acc.o
 endif
 ################################################################################
 # MXM 
@@ -133,7 +133,7 @@ $(OBJDIR)/cg.o          :$S/cg.f;                       $(F77) -c $(FL4) $< -o $
 $(OBJDIR)/prox_dssum.o  :$S/prox_dssum.f;               $(F77) -c $(FL2) $< -o $@
 $(OBJDIR)/prox_setup.o  :$S/prox_setup.f;               $(F77) -c $(FL4) $< -o $@
 $(OBJDIR)/hsmg.o        :$S/hsmg.f;                     $(F77) -c $(FL2) $< -o $@
-$(OBJDIR)/hsmg_dum.o    :$S/hsmg_dum.f;                 $(F77) -c $(FL2) $< -o $@
+$(OBJDIR)/hsmg_acc.o    :$S/hsmg_acc.f;                 $(F77) -c $(FL2) $< -o $@
 $(OBJDIR)/ssygv.o       :$S/ssygv.f;                    $(F77) -c $(FL2i4) $< -o $@
 $(OBJDIR)/dsygv.o       :$S/dsygv.f;                    $(F77) -c $(FL2i4) $< -o $@
 $(OBJDIR)/driver.o      :$S/driver.f;                   $(F77) -c $(FL2) $< -o $@
