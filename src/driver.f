@@ -97,7 +97,7 @@ c     SET UP and RUN NEKBONE
            call set_multiplicity   (c)       ! Inverse of counting matrix
 
            call proxy_setup(ah,bh,ch,dh,zh,wh,g) 
-           call h1mg_setup
+           call h1mg_setup_acc
 !$ACC UPDATE DEVICE(g,dxm1,dxtm1)
            niter = 100
            n     = nx1*ny1*nz1*nelt

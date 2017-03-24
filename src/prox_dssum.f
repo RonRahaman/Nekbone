@@ -207,9 +207,6 @@ c-----------------------------------------------------------------------
       return
       end
 c-----------------------------------------------------------------------
-
-#ifdef _OPENACC
-c-----------------------------------------------------------------------
       subroutine i8sort(a,ind,n) 
 c     Sort routine for a = int*8, ind=int.
 c     Uses heap sort (p 231 Num. Rec., 1st Ed.)
@@ -424,18 +421,17 @@ c     endif
 
       return
       end
-
 c-----------------------------------------------------------------------
       subroutine dssum_acc(u)
       include 'SIZE'
       include 'ACCNEK'
 
-      common /nekmpi/ mp
 
       parameter(lt=lx1*ly1*lz1*lelt)
-      common /nsmpi_acc/ ug(lt)
+      common /nekmpi/ mp
+      real u(lt), ug(lt)
+      common /nsmpi_acc/ ug
 
-      real u(lt),ug(lt)
 
       integer ndssum, nglobl
 
@@ -489,74 +485,68 @@ c         ngv = nv + n_nonlocal  ! Number that must be copied out
 
       return 
       end
-
-
-#if 0
 c-----------------------------------------------------------------------
-      subroutine dssum2_acc(u)
-      include 'SIZE'
-      include 'ACCNEK'
-
-      common /nekmpi/ mp
-
-      parameter(lt=lx1*ly1*lz1*lelt)
-      common /nsmpi_acc/ ug(lt)
-
-      real u(lt),ug(lt)
-
-      integer ndssum, nglobl
-
-c     call nekgsync()
-      call adelay
-
-      ndssum=ids_lgl1(0)
-      nglobl=ids_lgl2(0)
-      gs_hnd      = ids_lgl1(-1)
-      n_nonlocal  = ids_lgl2(-1)
-
-!$ACC DATA PRESENT(ids_ptr(1:nglobl+1),u(1:lt))
-!$ACC& PRESENT(ids_lgl1)
-!$ACC& PRESENT(ug(1:nglobl))
-
-!$ACC PARALLEL LOOP COLLAPSE(1) GANG VECTOR PRIVATE(il)
-      do i = 1,nglobl
-         ug(i) = 0.0
-         ! local Q^T
-!$ACC LOOP SEQ
-         do j = ids_ptr(i),ids_ptr(i+1)-1
-            il = ids_lgl1(j)
-            ug(i) = ug(i) + u(il)
-         enddo
-      enddo
-!$ACC END PARALLEL LOOP
-
-      if (n_nonlocal .gt. 1) then
-c         ngv = nv + n_nonlocal  ! Number that must be copied out
-!$acc data present(u)
-         call gs_op_fields(gsh_acc,ug(1),0,1,1,1,0) ! Gather-scatter operation  ! w   = QQ  w
-c         call gs_op(gsh_acc,ug(1),1,1,0) ! 1 ==> + 
-!$acc end data
-      endif
-
-!$ACC PARALLEL LOOP GANG VECTOR PRIVATE(il) async(1)
-      do i = 1,nglobl
-        ! local Q
-!$ACC LOOP SEQ
-         do j = ids_ptr(i),ids_ptr(i+1)-1
-            il = ids_lgl1(j)
-            u(il) = ug(i)
-        enddo
-      enddo
-!$ACC END PARALLEL LOOP
-
-!$ACC WAIT
-!$ACC END DATA
-
-      return 
-      end
-
-#else
-
+!       subroutine dssum2_acc_deprecated(u)
+!       include 'SIZE'
+!       include 'ACCNEK'
+! 
+!       common /nekmpi/ mp
+! 
+!       parameter(lt=lx1*ly1*lz1*lelt)
+!       common /nsmpi_acc/ ug(lt)
+! 
+!       real u(lt),ug(lt)
+! 
+!       integer ndssum, nglobl
+! 
+! c     call nekgsync()
+!       call adelay
+! 
+!       ndssum=ids_lgl1(0)
+!       nglobl=ids_lgl2(0)
+!       gs_hnd      = ids_lgl1(-1)
+!       n_nonlocal  = ids_lgl2(-1)
+! 
+! !$ACC DATA PRESENT(ids_ptr(1:nglobl+1),u(1:lt))
+! !$ACC& PRESENT(ids_lgl1)
+! !$ACC& PRESENT(ug(1:nglobl))
+! 
+! !$ACC PARALLEL LOOP COLLAPSE(1) GANG VECTOR PRIVATE(il)
+!       do i = 1,nglobl
+!          ug(i) = 0.0
+!          ! local Q^T
+! !$ACC LOOP SEQ
+!          do j = ids_ptr(i),ids_ptr(i+1)-1
+!             il = ids_lgl1(j)
+!             ug(i) = ug(i) + u(il)
+!          enddo
+!       enddo
+! !$ACC END PARALLEL LOOP
+! 
+!       if (n_nonlocal .gt. 1) then
+! c         ngv = nv + n_nonlocal  ! Number that must be copied out
+! !$acc data present(u)
+!          call gs_op_fields(gsh_acc,ug(1),0,1,1,1,0) ! Gather-scatter operation  ! w   = QQ  w
+! c         call gs_op(gsh_acc,ug(1),1,1,0) ! 1 ==> + 
+! !$acc end data
+!       endif
+! 
+! !$ACC PARALLEL LOOP GANG VECTOR PRIVATE(il) async(1)
+!       do i = 1,nglobl
+!         ! local Q
+! !$ACC LOOP SEQ
+!          do j = ids_ptr(i),ids_ptr(i+1)-1
+!             il = ids_lgl1(j)
+!             u(il) = ug(i)
+!         enddo
+!       enddo
+! !$ACC END PARALLEL LOOP
+! 
+! !$ACC WAIT
+! !$ACC END DATA
+! 
+!       return 
+!       end
 c-----------------------------------------------------------------------
       subroutine dssum2_acc(u)
       include 'SIZE'
@@ -574,5 +564,4 @@ c      call gs_op(gsh,u,1,1,0) ! 1 ==> +
 
       return
       end
-#endif
-#endif
+c-----------------------------------------------------------------------

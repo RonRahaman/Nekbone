@@ -9,9 +9,9 @@ if [ "$PPLIST" == "?" ]; then
   echo "available pre-processor symbols:" 
   echo "  BG        enable Blue Gene optimizations (BG/L and BG/P)"
   echo "  K10_MXM   use optimized MxM kernel for AMD Family 10h processors" 
-  echo "  NEKCOMM  nekbone communication test"
-  echo "  NEKDLAY  nekbone load imbalance simmulation"
-  echo "  MGRID    turns on Multigrid precondition"
+  echo "  NEKCOMM   nekbone communication test"
+  echo "  NEKDLAY   nekbone load imbalance simmulation"
+  echo "  NOMGRID   turns on Multigrid precondition"
   exit 1
 fi
 
@@ -31,9 +31,9 @@ CASEDIR=`pwd`
 APATH_SRC=`cd $SOURCE_ROOT; pwd`
 SOURCE_ROOT=$APATH_SRC
 
-NEKCOMM=false
-NEKDELAY=false
-MGRID=false
+IFNEKCOMM=false
+IFNEKDELAY=false
+IFMGRID=true
 
 # do some basic checks
 if [ "$CASEDIR" == "$SOURCE_ROOT" ]; then
@@ -256,8 +256,8 @@ fi
 if [ "$i" == "NEKDLAY" ]; then
      IFNEKDLAY=true
 fi
-if [ "$i" == "MGRID" ]; then
-     IFMGRID=true
+if [ "$i" == "NOMGRID" ]; then
+     IFMGRID=false
 fi
 done
 
