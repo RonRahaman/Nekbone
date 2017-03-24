@@ -157,7 +157,7 @@ fi
 
 # assign F77 compiler specific flags
 case $F77comp in
-  *pgf*)        P="-r8 -Mpreprocess"
+  *pgf*)        P="-r8 -Mpreprocess -Mfixed"
                ;;
   *gfortran*)   P="-fdefault-real-8 -x f77-cpp-input"
                ;;
@@ -191,6 +191,14 @@ esac
 for i in $PPLIST
 do
   if [ "$i" == "NEKACC" ]; then
+    IFNEKACC=true
+  fi
+  if [ "$i" == "NEKCUDA" ]; then
+    IFNEKACC=true
+    IFNEKCUDA=true
+  fi
+done
+if [ "$IFNEKACC" == "true" ]; then
     case $F77comp in
       *pgf*)  P="-acc -Minfo=accel $P"
               PPLIST="$PPLIST PGI_ACC"
@@ -205,18 +213,18 @@ do
           NOCOMPILE=1
           read;;
     esac
-  fi
-  if [ "$i" == "NEKCUDA" ]; then
+fi
+if [ "$IFNEKCUDA" == "true" ]; then
     case $F77comp in
       *pgf*)  P="-Mcuda $P"
               USR_LFLAGS="$USR_LFLAGS -Mcuda"
-              PPLIST="$PPLIST TUNED_CUF_KERNEL";;
+              IFNEKCUDA=true
+              ;;
       *)  echo "ERROR: CUDA is only supported for the PGI compilers."
           NOCOMPILE=1
           read;;
     esac
-  fi
-done
+fi
 
 export PPPO
 
@@ -324,6 +332,8 @@ sed -e "s:^F77[ ]*=.*:F77\:=$F77:" \
 -e "s/^IFNEKDLAY[ ]*=.*/IFNEKDLAY:=$IFNEKDLAY/" \
 -e "s/^IFMGRID[ ]*=.*/IFMGRID:=$IFMGRID/" \
 -e "s/^IFMPI[ ]*=.*/IFMPI:=$IFMPI/" \
+-e "s/^IFNEKACC[ ]*=.*/IFNEKACC:=$IFNEKACC/" \
+-e "s/^IFNEKCUDA[ ]*=.*/IFNEKCUDA:=$IFNEKCUDA/" \
 -e "s:^MXM[ ]*=.*:MXM=$MXM_USER:" \
 -e "s:^USR[ ]*=.*:USR\:=$USR:" \
 -e "s:^USR_LFLAGS[ ]*=.*:USR_LFLAGS\:=$USR_LFLAGS:" \

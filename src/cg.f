@@ -631,35 +631,9 @@ c      real ur(lt),us(lt),ut(lt),wk(lt)
 c-----------------------------------------------------------------------
       subroutine ax_acc_pgi(w,u,gxyz,ur,us,ut,wk,n) ! Matrix-vector product: w=A*u
 
-#ifdef TUNED_CUF_KERNEL
-      use cudafor
-#endif
-
       include 'SIZE'
       include 'TOTAL'
 
-#ifdef TUNED_CUF_KERNEL
-      interface
-      attributes(global) subroutine ax_cuda(w,u,ur,us,ut,
-     &                gxyz,dxm1,dxtm1)
-
-      real, intent(out) :: w(nx1,ny1,nz1,nelt)
-      real, intent(in)  :: u(nx1,ny1,nz1,nelt)
-      real ur  (nx1,ny1,nz1,lelt)
-      real us  (nx1,ny1,nz1,lelt)
-      real ut  (nx1,ny1,nz1,lelt)
-
-      real gxyz(nx1,ny1,nz1,2*ldim,lelt)
-
-      real, intent(in) :: dxm1(nx1,nx1)
-      real, intent(in) :: dxtm1(nx1,nx1)
-      end subroutine
-      end interface
-#endif
-c      real w(nx1*ny1*nz1,nelt),u(nx1*ny1*nz1,nelt)
-c      real gxyz(2*ldim,nx1*ny1*nz1,nelt)
-c      parameter (lt=lx1*ly1*lz1*lelt)
-c      real ur(lt),us(lt),ut(lt),wk(lt)
       common /mymask/cmask(-1:lx1*ly1*lz1*lelt)
 
       real w(nx1,ny1,nz1,nelt)
@@ -678,35 +652,10 @@ c      real ur(lt),us(lt),ut(lt),wk(lt)
 
       lt = nx1*ny1*nz1*nelt
 
+
 !$ACC DATA PRESENT(w,u(:,:,:,:),gxyz,ur,us,ut,wk,dxm1,dxtm1)
-
-#ifdef TUNED_CUF_KERNEL
-
-c      w = 0.0
-c      u = 1.0
-c      ur = -1.0
-c      us = -1.0
-c      ut = -1.0
-c      gxyz = 1.0
-c      dxm1 = 1.0
-c      dxtm1 = 1.0
-
-!$acc host_data use_device(w,u(:,:,:,:),ur,us,ut,gxyz,dxm1,dxtm1)
-       if (nx1.eq.10) then
-         call ax_cuda<<<nelt,dim3(nx1,ny1,nz1)>>>(w,u,
-     $                ur,us,ut,gxyz,dxm1,dxtm1)
-       else if (nx1.eq.12) then
-         call ax_cuda<<<nelt,dim3(nx1,ny1,nz1/2)>>>(w,u,
-     $                ur,us,ut,gxyz,dxm1,dxtm1)
-       else
-         call ax_cuda<<<nelt,dim3(nx1,ny1,nz1/4)>>>(w,u,
-     $         ur,us,ut,gxyz,dxm1,dxtm1) 
-
-       endif
-       istat = cudaDeviceSynchronize()
-!$acc end host_data
-
-    
+#ifdef NEKCUDA
+      call ax_cuda(w,u,ur,us,ut,gxyz,dxm1,dxtm1)
 #else
             
 !$ACC KERNELS
@@ -772,8 +721,6 @@ c      dxtm1 = 1.0
 
       call add2s2_acc(w,u,.1,n)   !2n
       call maskit_acc(w,cmask,nx1,ny1,nz1)  ! Zero out Dirichlet conditions
-
-!      stop
 
 !$ACC END DATA
 
