@@ -12,6 +12,8 @@ if [ "$PPLIST" == "?" ]; then
   echo "  NEKCOMM   nekbone communication test"
   echo "  NEKDLAY   nekbone load imbalance simmulation"
   echo "  NOMGRID   turns on Multigrid precondition"
+  echo "  NEKACC    compiles with OpenACC"
+  echo "  NEKCUDA   compiles with CUDA and OpenACC"
   exit 1
 fi
 
@@ -34,6 +36,8 @@ SOURCE_ROOT=$APATH_SRC
 IFNEKCOMM=false
 IFNEKDELAY=false
 IFMGRID=true
+IFNEKACC=false
+IFNEKCUDA=false
 
 # do some basic checks
 if [ "$CASEDIR" == "$SOURCE_ROOT" ]; then
@@ -122,6 +126,7 @@ then
 fi
 \rm test_underscore.* 2>/dev/null
 
+
 F77comp=$F77
 # mpi-wrappers?
 echo $F77comp | grep -i mp >/dev/null
@@ -181,26 +186,39 @@ case $F77comp in
       NOCOMPILE=1
       read;;
 esac
-export PPPO
 
-# OpenACC
-if [ "$IFPGIACC" == "true" -o "$IFCRAYACC" == "true" ]; then
-  if [ "$IFPGIACC" == "true" ]; then
-     #PGI compiler
-     PPLIST="${PPLIST} PGI_ACC "
-     P="${P} -acc -Minfo=accel"
-     USR_LFLAGS="${USR_LFLAGS} -ta=nvidia"
-  else
-     # Cray compiler
-     PPLIST="${PPLIST} CRAY_ACC"
-     P="${P} -hacc "
+# Assign extra flags for OpenACC and CUDA
+for i in $PPLIST
+do
+  if [ "$i" == "NEKACC" ]; then
+    case $F77comp in
+      *pgf*)  P="-acc -Minfo=accel $P"
+              PPLIST="$PPLIST PGI_ACC"
+              USR_LFLAGS="$USR_LFLAGS -ta=nvidia"
+              IFNEKACC=true
+              ;;
+      *ftn*)  P="-hacc $P"
+              PPLIST="$PPLIST CRAY_ACC"
+              IFNEKACC=true
+              ;;
+      *)  echo "ERROR: OpenACC is only supported for the PGI and Cray compilers."
+          NOCOMPILE=1
+          read;;
+    esac
   fi
-else
-  # default
-  IFPGIACC=false
-  IFCRAYACC=false
-fi
+  if [ "$i" == "NEKCUDA" ]; then
+    case $F77comp in
+      *pgf*)  P="-Mcuda $P"
+              USR_LFLAGS="$USR_LFLAGS -Mcuda"
+              PPLIST="$PPLIST TUNED_CUF_KERNEL";;
+      *)  echo "ERROR: CUDA is only supported for the PGI compilers."
+          NOCOMPILE=1
+          read;;
+    esac
+  fi
+done
 
+export PPPO
 
 # set preprocessor symbols
 if [ "$IFMPI" == "false" -o "$IFMPI" == "no" ]; then
