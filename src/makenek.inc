@@ -169,7 +169,7 @@ case $F77comp in
                PPPO="-WF,"
                F77="${F77} -qsuppress=cmpmsg"
                ;;
-  *ftn*)        P="-r8 -Mpreprocess"
+  *ftn*)        P="-r8 -Mpreprocess -Mfixed"
 #    *ftn*)      P="-ra -s real64 -eZ -em -Rc"
                ;;
   *sunf*)       P="-r8const -xtypemap=real:64 -fpp"
@@ -202,11 +202,10 @@ if [ "$IFNEKACC" == "true" ]; then
     case $F77comp in
       *pgf*)  P="-acc -Minfo=accel $P"
               PPLIST="$PPLIST PGI_ACC"
-              USR_LFLAGS="$USR_LFLAGS -ta=nvidia"
               IFNEKACC=true
               ;;
-      *ftn*)  P="-hacc $P"
-              PPLIST="$PPLIST CRAY_ACC"
+      *ftn*)  P="-acc -Minfo=accel $P"
+              PPLIST="$PPLIST PGI_ACC"
               IFNEKACC=true
               ;;
       *)  echo "ERROR: OpenACC is only supported for the PGI and Cray compilers."
@@ -218,6 +217,10 @@ if [ "$IFNEKCUDA" == "true" ]; then
     case $F77comp in
       *pgf*)  P="-Mcuda $P"
               USR_LFLAGS="$USR_LFLAGS -Mcuda"
+              IFNEKCUDA=true
+              ;;
+      *ftn*)  P="-Mcuda $P"
+              USR_LFLAGS="$USR_LFLAGS -Mcuda=cc35"
               IFNEKCUDA=true
               ;;
       *)  echo "ERROR: CUDA is only supported for the PGI compilers."
@@ -336,7 +339,7 @@ sed -e "s:^F77[ ]*=.*:F77\:=$F77:" \
 -e "s/^IFNEKCUDA[ ]*=.*/IFNEKCUDA:=$IFNEKCUDA/" \
 -e "s:^MXM[ ]*=.*:MXM=$MXM_USER:" \
 -e "s:^USR[ ]*=.*:USR\:=$USR:" \
--e "s:^USR_LFLAGS[ ]*=.*:USR_LFLAGS\:=$USR_LFLAGS:" \
+-e "s?^USR_LFLAGS[ ]*=.*?USR_LFLAGS\:=$USR_LFLAGS?" \
 -e "s:^S[ ]*=.*:S\:=${SOURCE_ROOT}:"  $SOURCE_ROOT/makefile.template >.makefile
 
 echo $G | grep '\-g' 1>/dev/null
