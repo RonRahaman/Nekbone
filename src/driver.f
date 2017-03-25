@@ -103,11 +103,6 @@ c     SET UP and RUN NEKBONE
            n     = nx1*ny1*nz1*nelt
 
            call set_f(f,c,n)
-!!!$ACC UPDATE HOST(f)
-
-c           write(*,*) "ffffffffffffffff "
-c           write(*,*) f
-c           stop
 
            if(nid.eq.0) write(6,*)
 

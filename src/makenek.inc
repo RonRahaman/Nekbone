@@ -201,11 +201,9 @@ done
 if [ "$IFNEKACC" == "true" ]; then
     case $F77comp in
       *pgf*)  P="-acc -Minfo=accel $P"
-              PPLIST="$PPLIST PGI_ACC"
               IFNEKACC=true
               ;;
       *ftn*)  P="-acc -Minfo=accel $P"
-              PPLIST="$PPLIST PGI_ACC"
               IFNEKACC=true
               ;;
       *)  echo "ERROR: OpenACC is only supported for the PGI and Cray compilers."

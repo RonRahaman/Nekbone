@@ -435,10 +435,10 @@ c     call tester(z,r,n)
          if (iter.eq.1) beta=0.0
          call add2s1_acc(p,z,beta,n)                                     ! 2n
 
-#ifdef CRAY_ACC
-         call ax_acc_cray(w,p,g,ur,us,ut,wk,n)                                ! flopa
+#ifdef   NEKCUDA
+         call ax_cuda  (w,p,g,ur,us,ut,wk,n)                                ! flopa
 #else
-         call ax_acc_pgi (w,p,g,ur,us,ut,wk,n)                                ! flopa
+         call ax_acc   (w,p,g,ur,us,ut,wk,n)                                ! flopa
 #endif
 
          pap=glsc3_acc(w,c,p,n)                                          ! 3n
@@ -539,15 +539,11 @@ c-----------------------------------------------------------------------
       return
       end
 c-----------------------------------------------------------------------
-      subroutine ax_acc_cray(w,u,gxyz,ur,us,ut,wk,n) ! Matrix-vector product: w=A*u
+      subroutine ax_acc(w,u,gxyz,ur,us,ut,wk,n) ! Matrix-vector product: w=A*u
 
       include 'SIZE'
       include 'TOTAL'
 
-c      real w(nx1*ny1*nz1,nelt),u(nx1*ny1*nz1,nelt)
-c      real gxyz(2*ldim,nx1*ny1*nz1,nelt)
-c      parameter (lt=lx1*ly1*lz1*lelt)
-c      real ur(lt),us(lt),ut(lt),wk(lt)
       common /mymask/cmask(-1:lx1*ly1*lz1*lelt)
 
       real w(nx1,ny1,nz1,nelt)
@@ -562,9 +558,6 @@ c      real ur(lt),us(lt),ut(lt),wk(lt)
       real wr,ws,wt,tmp
       integer i,j,k,l,e,n
 
-      integer lt
-
-      lt = nx1*ny1*nz1*nelt
 
 !$ACC DATA PRESENT(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1)
 !$ACC PARALLEL LOOP COLLAPSE(4) GANG WORKER VECTOR
@@ -629,87 +622,66 @@ c      real ur(lt),us(lt),ut(lt),wk(lt)
       return
       end
 c-----------------------------------------------------------------------
-      subroutine ax_acc_pgi(w,u,gxyz,ur,us,ut,wk,n) ! Matrix-vector product: w=A*u
+#ifdef NEKCUDA
+      subroutine ax_cuda(w,u,gxyz,ur,us,ut,wk,n)                
+      use cudafor
 
       include 'SIZE'
       include 'TOTAL'
 
-      common /mymask/cmask(-1:lx1*ly1*lz1*lelt)
+      interface
+      attributes(global) subroutine ax_cuda_16(w,u,ur,us,ut,
+     $                gxyz,dxm1,dxtm1)
 
+      real, intent(out) :: w(nx1,ny1,nz1,nelt)
+      real, intent(in)  :: u(nx1,ny1,nz1,nelt)
+      real ur  (nx1,ny1,nz1,lelt)
+      real us  (nx1,ny1,nz1,lelt)
+      real ut  (nx1,ny1,nz1,lelt)
+
+      real gxyz(nx1,ny1,nz1,2*ldim,lelt)
+
+      real, intent(in) :: dxm1(nx1,nx1)
+      real, intent(in) :: dxtm1(nx1,nx1)
+      end subroutine
+      end interface
+
+
+      common /mymask/cmask(-1:lx1*ly1*lz1*lelt)
       real w(nx1,ny1,nz1,nelt)
       real u(nx1,ny1,nz1,nelt)
       real gxyz(nx1,ny1,nz1,2*ldim,lelt)
 
-      real ur(nx1,ny1,nz1,lelt)
-      real us(nx1,ny1,nz1,lelt)
-      real ut(nx1,ny1,nz1,lelt)
-      real wk(nx1,ny1,nz1,lelt)
+      real ur  (nx1,ny1,nz1,lelt)
+      real us  (nx1,ny1,nz1,lelt)
+      real ut  (nx1,ny1,nz1,lelt)
+      real wk  (nx1,ny1,nz1,lelt)
+  
 
-      real wr,ws,wt,tmp
-      integer i,j,k,l,e,n
+!$ACC DATA PRESENT(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1)
 
-      integer lt
+!$ACC HOST_DATA USE_DEVICE(w,u,ur,us,ut,gxyz,dxm1,dxtm1)
 
-      lt = nx1*ny1*nz1*nelt
+        if     (nx1.eq.16) then
+          call ax_cuda_16<<<nelt,dim3(nx1,ny1,nz1/4)>>>(w,u,ur,us,ut,
+     $      gxyz,dxm1,dxtm1) 
+c       else if (nx1.eq.12) then
+c         call ax_cuda_12<<<nelt,dim3(nx1,ny1,nz1/2)>>>(w,u,ur,us,ut,
+c    $      gxyz,dxm1,dxtm1) 
+c       else if (nx1.eq.10) then
+c         call ax_cuda_10<<<nelt,dim3(nx1,ny1,nz1)>>>(w,u,ur,us,ut,
+c    $        gxyz,dxm1,dxtm1)
+c       else if (nx1.eq.8) then
+c         call ax_cuda_08<<<nelt,dim3(nx1,ny1,nz1)>>>(w,u,ur,us,ut,
+c    $        gxyz,dxm1,dxtm1)
+        else 
+          call err_chk(1,
+     $ "CUDA kernel supports only nx1 = 2, 8, 10, 12, or 16")
+        endif
+        istat = cudaDeviceSynchronize()
 
+!$ACC END HOST_DATA
 
-!$ACC DATA PRESENT(w,u(:,:,:,:),gxyz,ur,us,ut,wk,dxm1,dxtm1)
-#ifdef NEKCUDA
-      call ax_cuda(w,u,ur,us,ut,gxyz,dxm1,dxtm1)
-#else
-            
-!$ACC KERNELS
-      do e = 1,nelt
-!$ACC LOOP COLLAPSE(3)
-         do k=1,nz1
-         do j=1,ny1
-         do i=1,nx1
-            wr = 0      ! scalar ur gets promoted to vector register over index
-            ws = 0
-            wt = 0
-!$ACC LOOP SEQ
-            do l=1,nx1    ! serial loop, no reduction needed
-               wr = wr + dxm1(i,l)*u(l,j,k,e)
-
-               ws = ws + dxm1(j,l)*u(i,l,k,e)
-               wt = wt + dxm1(k,l)*u(i,j,l,e)
-            enddo
-            ur(i,j,k,e) = gxyz(i,j,k,1,e)*wr
-     $                  + gxyz(i,j,k,2,e)*ws
-     $                  + gxyz(i,j,k,3,e)*wt
-            us(i,j,k,e) = gxyz(i,j,k,2,e)*wr
-     $                  + gxyz(i,j,k,4,e)*ws
-     $                  + gxyz(i,j,k,5,e)*wt
-            ut(i,j,k,e) = gxyz(i,j,k,3,e)*wr
-     $                  + gxyz(i,j,k,5,e)*ws
-     $                  + gxyz(i,j,k,6,e)*wt
-         enddo
-         enddo
-         enddo
-      enddo
-!$ACC END KERNELS
-
-
-!$ACC KERNELS
-      do e=1,nelt
-!$ACC LOOP COLLAPSE(3)
-         do k=1,nz1
-         do j=1,ny1
-         do i=1,nx1
-            w(i,j,k,e) = 0.0
-!$ACC LOOP SEQ
-            do l=1,nx1    ! serial loop, no reduction needed
-               w(i,j,k,e) = w(i,j,k,e) + dxtm1(i,l)*ur(l,j,k,e)
-     $                                 + dxtm1(j,l)*us(i,l,k,e)
-     $                                 + dxtm1(k,l)*ut(i,j,l,e)
-            enddo
-         enddo
-         enddo
-         enddo
-      enddo
-!$ACC END KERNELS
-
-#endif
 
 #ifdef GPUDIRECT
       call dssum(w)         ! Gather-scatter operation  ! w   = QQ  w
@@ -729,3 +701,5 @@ c-----------------------------------------------------------------------
 
       return
       end
+#endif
+c-------------------------------------------------------------------------
