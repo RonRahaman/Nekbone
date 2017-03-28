@@ -436,7 +436,8 @@ c     call tester(z,r,n)
          call add2s1_acc(p,z,beta,n)                                     ! 2n
 
 #ifdef   NEKCUDA
-         call ax_cuda  (w,p,g,ur,us,ut,wk,n)                                ! flopa
+         !call ax_cuda  (w,p,g,ur,us,ut,wk,n)                                ! flopa
+         call ax_acc   (w,p,g,ur,us,ut,wk,n)                                ! flopa
 #else
          call ax_acc   (w,p,g,ur,us,ut,wk,n)                                ! flopa
 #endif
@@ -534,7 +535,10 @@ c-----------------------------------------------------------------------
       real z(n),r(n)
 
       nn = n
+
+#ifdef _OPENACC
       call h1mg_solve_acc(z,r,nn)
+#endif
 
       return
       end
@@ -641,7 +645,7 @@ c-----------------------------------------------------------------------
 
       real gxyz(nx1,ny1,nz1,2*ldim,lelt)
 
-      real, intent(in) :: dxm1(nx1,nx1)
+      real, intent(in) :: dxm1 (nx1,nx1)
       real, intent(in) :: dxtm1(nx1,nx1)
       end subroutine
       end interface
@@ -658,6 +662,7 @@ c-----------------------------------------------------------------------
       real wk  (nx1,ny1,nz1,lelt)
   
 
+!!!!!$ACC DATA PRESENT(w,u(:,:,:,:),gxyz,ur,us,ut,wk,dxm1,dxtm1)
 !$ACC DATA PRESENT(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1)
 
 !$ACC HOST_DATA USE_DEVICE(w,u,ur,us,ut,gxyz,dxm1,dxtm1)
@@ -675,8 +680,7 @@ c       else if (nx1.eq.8) then
 c         call ax_cuda_08<<<nelt,dim3(nx1,ny1,nz1)>>>(w,u,ur,us,ut,
 c    $        gxyz,dxm1,dxtm1)
         else 
-          call err_chk(1,
-     $ "CUDA kernel supports only nx1 = 2, 8, 10, 12, or 16")
+          call err_chk(1,"CUDA kernel supports only nx1 = 16")
         endif
         istat = cudaDeviceSynchronize()
 
@@ -687,7 +691,7 @@ c    $        gxyz,dxm1,dxtm1)
       call dssum(w)         ! Gather-scatter operation  ! w   = QQ  w
                                                             !        L
 #else
-      call dssum_acc(w)         ! Gather-scatter operation  ! w   = QQ  w
+      call dssum2_acc(w)         ! Gather-scatter operation  ! w   = QQ  w
                                                             !        L
 #endif
 
