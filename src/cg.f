@@ -436,8 +436,7 @@ c     call tester(z,r,n)
          call add2s1_acc(p,z,beta,n)                                     ! 2n
 
 #ifdef   NEKCUDA
-         !call ax_cuda  (w,p,g,ur,us,ut,wk,n)                                ! flopa
-         call ax_acc   (w,p,g,ur,us,ut,wk,n)                                ! flopa
+         call ax_cuda  (w,p,g,ur,us,ut,wk,n)                                ! flopa
 #else
          call ax_acc   (w,p,g,ur,us,ut,wk,n)                                ! flopa
 #endif
@@ -660,16 +659,19 @@ c-----------------------------------------------------------------------
       real us  (nx1,ny1,nz1,lelt)
       real ut  (nx1,ny1,nz1,lelt)
       real wk  (nx1,ny1,nz1,lelt)
-  
+
+      integer cuda_err
 
 !!!!!$ACC DATA PRESENT(w,u(:,:,:,:),gxyz,ur,us,ut,wk,dxm1,dxtm1)
-!$ACC DATA PRESENT(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1)
+!$ACC DATA PRESENT(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1) CREATE(cuda_err)
 
 !$ACC HOST_DATA USE_DEVICE(w,u,ur,us,ut,gxyz,dxm1,dxtm1)
 
         if     (nx1.eq.16) then
+
           call ax_cuda_16<<<nelt,dim3(nx1,ny1,nz1/4)>>>(w,u,ur,us,ut,
      $      gxyz,dxm1,dxtm1) 
+          
 c       else if (nx1.eq.12) then
 c         call ax_cuda_12<<<nelt,dim3(nx1,ny1,nz1/2)>>>(w,u,ur,us,ut,
 c    $      gxyz,dxm1,dxtm1) 
@@ -679,10 +681,26 @@ c    $        gxyz,dxm1,dxtm1)
 c       else if (nx1.eq.8) then
 c         call ax_cuda_08<<<nelt,dim3(nx1,ny1,nz1)>>>(w,u,ur,us,ut,
 c    $        gxyz,dxm1,dxtm1)
+
+          cuda_err = cudaGetLastError()
+          if (cuda_err /= cudaSuccess) then
+            write(6, 815) cuda_err, cudaGetErrorString(cuda_err)
+            call exitt
+          endif
+
         else 
           call err_chk(1,"CUDA kernel supports only nx1 = 16")
         endif
+
         istat = cudaDeviceSynchronize()
+
+        cuda_err = cudaGetLastError()
+        if (cuda_err /= cudaSuccess) then
+          write(6, 815) cuda_err, cudaGetErrorString(cuda_err)
+          call exitt
+        endif
+
+  815 format('CUDA ERROR', I3, ': ', A)
 
 !$ACC END HOST_DATA
 
