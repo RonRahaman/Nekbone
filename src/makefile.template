@@ -1,173 +1,176 @@
-BINNAME=nekbone
-CASENAME=
-CASEDIR=
-S=
-J:=$S/jl
-OPT_INCDIR:=./
-OBJDIR=obj
-IFMPI= 
-IFNEKCOMM=
-IFNEKDLAY=
-IFMGRID=
-IFNEKACC=
-IFNEKCUDA=
-F77=
-CC=
-P=
-PPPO=
-PPS=
-G=
-OPT_FLAGS_STD=
-USR=
-USR_LFLAGS=
+# ================================================================================================
+# Compilation and build environment
+# ================================================================================================
 
-################################################################################
+vendor   = pgi     # Your compiler vendor [ gnu | intel | pgi | cray | ibm ]
 
-lFLAGS = $(USR_LFLAGS)
+CC       = mpicc   # Your C compiler
+CFLAGS   =         # Debugging and optimization flags for C compiler
+CPPFLAGS =         # C preprocessor options (-D)
 
-PPS_F = $(patsubst %,$(PPPO)-D%,$(PPS))
-PPS_C = $(patsubst %,-D%,$(PPS))
+FC       = mpif90  # Your Fortran90 compiler
+FCFLAGS  =         # Debugging and optimization flags for Fortran90 compiler
 
-#NEW #########################################################################
-BONE = cg.o driver.o math.o mxm_wrapper.o prox_dssum.o\
-prox_setup.o semhat.o speclib.o 
+LDFLAGS  =         # Linker options (-L and -s)
+LIBS     =         # Libraries (-l)
+FLIBS    =         # Additionl libs needed to compile Fortran
 
-ifeq ($(IFNEKCOMM),true)
-BONE = driver_comm.o math.o mxm_wrapper.o \
-speclib.o delay_dum.o
+builddir = $(shell pwd)        # The build direcory.  Must contain the size file
+srcdir   = $(builddir)/../../  # The top-level Nekbone directory
+
+# ================================================================================================
+# Nekbone options
+# ================================================================================================
+
+
+
+# ================================================================================================
+# Source and destination directories
+# ================================================================================================
+
+objdir     = $(builddir)/obj
+includedir = $(builddir)/include
+VPATH      = $(srcdir)/src:$(srcdir)/src/jl
+
+override CPPFLAGS += -I$(builddir) -I$(includedir) -I$(srcdir)/src -I$(srcdir)/src/jl
+
+ifeq $(vendor) gnu
+override FCFLAGS += -fdefault-real-8 -cpp -ffixed-form
 else
-ifeq ($(IFNEKDLAY),true)
-BONE += delay.o
+ifeq $(vendor) intel
+override FCFLAGS += -r8 -fpconstant -fpp -fixed
 else
-BONE += delay_dum.o
-endif
-endif
-
-ifeq ($(IFMGRID),true)
-BONE += hsmg.o hsmg_acc.o dsygv.o ssygv.o
+ifeq $(vendor) pgi
+override FCFLAGS += -r8 -Mpreprocess -Mfixed
 else
-BONE += hsmg.o hsmg_acc.o
-endif
-
-ifeq ($(IFNEKCUDA),true)
-BONE += ax_cuda.o
-endif
-
-################################################################################
-# MXM 
-MXM = mxm_std.o
-
-# JL Routines ###################################################################
-JO  = jl_
-JL := -DPREFIX=jl_
-
-JLCORE = $(JO)gs.o $(JO)sort.o $(JO)sarray_transfer.o $(JO)sarray_sort.o \
-$(JO)gs_local.o $(JO)crystal.o $(JO)comm.o $(JO)tensor.o $(JO)fail.o \
-$(JO)fcrystal.o 
-#JLCORE += $(JO)sleep.o $(JO)gs_acc.o 
-
-COMM_MPI := comm_mpi.o
-ifeq ($(IFMPI),false)
-  COMM_MPI := ${COMM_MPI} mpi_dummy.o
-endif
-
-ifeq ($(IFMPI),false)
-	DUMMY:= $(shell cp $S/mpi_dummy.h $S/mpif.h) 
+ifeq $(vendor) cray
+override FCFLAGS += -r8 -Mpreprocess -Mfixed
 else
-	DUMMY:= $(shell rm -rf $S/mpif.h) 
+ifeq $(vendor) ibm
+override FCFLAGS += -qrealsize=8 -qdpc=e -qsuffix=cpp=f
+else
+$(error 'Must specify one of the following vendors in makefile: gnu, intel, pgi, cray, ibm')
+endif
+endif
+endif
+endif
 endif
 
-#####################################################################################
-TMPBON = $(BONE) $(COMM_MPI) $(MXM)
-NOBJS_Fbon = $(patsubst %,$(OBJDIR)/%,$(TMPBON))
-
-TMP0c = $(JLCORE)
-NOBJS_C0 = $(patsubst %,$(OBJDIR)/%,$(TMP0c))
-
-NOBJS0_bone = $(NOBJS_Fbon) $(NOBJS_C0)
-##############################################################################
-
-L0 = $(G) -O0
-L2 = $(G) $(OPT_FLAGS_STD)
-L3 = $(G) $(OPT_FLAGS_STD)
-L4 = $(L3)
-
-FL0   = $(L0) $(P) $(PPS_F) -I$(CASEDIR) -I$S -I$(OPT_INCDIR)
-FL2i4 = $(L0)      $(PPS_F) -I$(CASEDIR) -I$S -I$(OPT_INCDIR)
-FL2   = $(L2) $(P) $(PPS_F) -I$(CASEDIR) -I$S -I$(OPT_INCDIR)
-FL3   = $(L3) $(P) $(PPS_F) -I$(CASEDIR) -I$S -I$(OPT_INCDIR)
-FL4   = $(L4) $(P) $(PPS_F) -I$(CASEDIR) -I$S -I$(OPT_INCDIR)
-
-cFL0   = $(L0) $(PPS_C) 
-cFL2   = $(L2) $(PPS_C) 
-cFL3   = $(L3) $(PPS_C) 
-cFL4   = $(L4) $(PPS_C) 
-################################################################################
-all : nekbone
-
-objdir: 
-	@mkdir $(OBJDIR) 2>/dev/null; cat /dev/null 
-
-nekbone: 	objdir $(NOBJS0_bone)
-	$(F77) -o ${BINNAME} $G $(NOBJS0_bone) $(lFLAGS)
-	@if test -f ${BINNAME}; then \
-	echo "#############################################################"; \
-	echo "#                  Compilation successful!                  #"; \
-	echo "#############################################################"; \
-        size ${BINNAME}; \
-        echo ""; \
-	else \
-	echo -e "\033[1;31;38m" "ERROR: Compilation failed!"; \
-	echo -e "\033[0m"; \
-	fi
-ifeq ($(IFMPI),false) 
-	@rm -rf $S/mpif.h
+ifeq $(vendor) ibm
+FC_DEFINE = '-WF,-D'
+else
+FC_DEFINE = '-D'
 endif
+override FCFLAGS  += $(subst -D, $(FC_DEFINE), $(CPPFLAGS))
+
+# ================================================================================================
+# FORTRAN objects
+# ================================================================================================
+
+# TODO: 
+# * Should hsmg_acc always be included?
+# * Which flags are necessary for FCFLAGS and LDFLAGS
+
+f_drive_obj    = # The driver
+f_opt_std_obj  = # Objects that will be compiled with standard optimation (-02)
+f_opt_max_obj  = # Objects that will be compiled with maximum optimation (-03)
+f_opt_null_obj = # Objects that will be compiled with no optimation (-00)
+f_mpi_obj      = # MPI objects
+f_cuda_obj     = # CUDA Fortran objects
+
+ifdef NEKCOMM
+# Running communication benchmark
+f_drive_obj        = $(addprefix $(objdir)/, driver_comm.o)
+f_opt_std_obj     += $(addprefix $(objdir)/, delay_dum.o hsmg.o hsmg_acc.o mxm_wrapper.o speclib.o)
+f_opt_max_obj     += $(addprefix $(objdir)/, math.o mxm_std.o)
+override CPPFLAGS += -DNEKCOMM
+else
+# Not running communication benchmark
+f_drive_obj        = $(addprefix, $(objdir)/, driver.o)
+f_opt_std_obj     += $(addprefix, $(objdir)/, hsmg.o hsmg_acc.o mxm_wrapper.o prox_dssum.o speclib.o)
+f_opt_max_obj     += $(addprefix, $(objdir)/, cg.o math.o mxm_std.o prox_setup.o semhat.o)
+ifdef NEKDLAY
+# Running load-balance benchmark
+f_opt_std_obj     += $(addprefix, $(objdir), delay.o)
+override CPPFLAGS += -DNEKDLAY
+else
+# Not running load-balance benchmark
+f_opt_std_obj     += $(addprefix, $(objdir), delay_dum.o)
+endif
+endif
+
+# If using multigrid
+ifdef MGRID
+f_opt_null_obj    += $(addprefix, $(objdir), dsygv.o ssygv.o)
+override CPPFLAGS += -DMGRID
+endif
+
+# If compiling with MPI
+ifdef MPI
+f_mpi_obj          = $(addprefix, $(objdir), comm_mpi.o)
+else
+f_mpi_obj          = $(addprefix, $(objdir), mpi_dummy.o)
+endif
+
+# If using GPU
+ifdef OPENACC
+f_opt_std_obj      += 
+override FCFLAGS   += $(OPENACC_FCFLAGS)
+ifdef CUDA
+# If using CUDA
+f_cuda_obj         = $(addprefix, $(objdir), ax_cuda.o)
+override FCFLAGS   += $(CUDA_FCFLAGS)
+endif
+endif
+
+f_lib_obj = $(f_opt_std_obj) $(f_opt_max_obj) $(f_opt_null_obj) $(f_mpi_obj) $(f_cuda_obj)
+
+# ================================================================================================
+# C objects
+# ================================================================================================
+
+jl_prefix  = jl_
+
+jl_lib_obj = $(addprefix $(objdir)/$(jl_prefix), gs.o sort.o sarray_transfer.o sarray_sort.o \
+             gs_local.o crystal.o comm.o tensor.o fail.o fcrystal.o)
+
+# ================================================================================================
+# Rules
+# ================================================================================================
+
+nekbone : $(f_drive_obj) $(f_lib_obj) $(jl_lib_obj)
+	$(FC) -o $@ $^ $(LDFLAGS) $(LIBS) $(FLIBS)
+	@size nek5000
+
+$(f_drive_obj) $(f_opt_std_obj) : $(objdir)/%.o : %.f SIZE | $(objdir)
+	$(FC) -c $(FCFLAGS) -O2 $< -o $@
+
+$(f_opt_null_obj) : $(objdir)/%.o : %.f SIZE | $(objdir)
+	$(FC) -c $(FCFLAGS) -O0 $< -o $@
+
+$(f_opt_max_obj) : $(objdir)/%.o : %.f SIZE | $(objdir)
+	$(FC) -c $(FCFLAGS) -O3 $< -o $@
+
+$(f_mpi_obj) : $(objdir)/%.o : %.f SIZE mpiheader | $(objdir)
+	$(FC) -c $(FCFLAGS) -O2 $< -o $@
+
+$(f_cuda_obj) : $(objdir)/%.o : %.cuf SIZE mpiheader | $(objdir)
+	$(FC) -c $(FCFLAGS) -O2 $< -o $@
+
+$(jl_obj) : $(objdir)/$(jl_prefix)%.o : %.c | $(objdir)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
+
+mpiheader: | $(includedir)
+ifneq ($(findstring mpi_dummy.o, $(nek_mpi_obj)),)
+	cp $(srcdir)/Nek5000/core/mpi_dummy.h $(includedir)/mpif.h
+else
+	rm -rf $(srcdir)/Nek5000/core/mpif.h $(includedir)/mpif.h
+endif
+
+$(objdir) $(includedir):
+	mkdir -p $@
 
 clean:
-	rm -rf ./obj ${BINNAME}
+	rm -rf nekbone $(f_drive_obj) $(f_lib_obj) $(jl_obj) $(srcdir)/Nek5000/core/mpif.h $(includedir)/mpif.h
 
-$(NOBJS_Fbon) : SIZE
-# CORE      #############################################################################
-$(OBJDIR)/cg.o          :$S/cg.f;                       $(F77) -c $(FL4) $< -o $@
-$(OBJDIR)/prox_dssum.o  :$S/prox_dssum.f;               $(F77) -c $(FL2) $< -o $@
-$(OBJDIR)/prox_setup.o  :$S/prox_setup.f;               $(F77) -c $(FL4) $< -o $@
-$(OBJDIR)/hsmg.o        :$S/hsmg.f;                     $(F77) -c $(FL2) $< -o $@
-$(OBJDIR)/hsmg_acc.o    :$S/hsmg_acc.f;                 $(F77) -c $(FL2) $< -o $@
-$(OBJDIR)/ssygv.o       :$S/ssygv.f;                    $(F77) -c $(FL2i4) $< -o $@
-$(OBJDIR)/dsygv.o       :$S/dsygv.f;                    $(F77) -c $(FL2i4) $< -o $@
-$(OBJDIR)/driver.o      :$S/driver.f;                   $(F77) -c $(FL2) $< -o $@
-$(OBJDIR)/driver_comm.o	:$S/driver_comm.f;		$(F77) -c $(FL2) $< -o $@
-$(OBJDIR)/math.o	:$S/math.f;			$(F77) -c $(FL4) $< -o $@
-$(OBJDIR)/semhat.o	:$S/semhat.f;			$(F77) -c $(FL4) $< -o $@
-$(OBJDIR)/speclib.o	:$S/speclib.f;			$(F77) -c $(FL2) $< -o $@
-$(OBJDIR)/blas.o        :$S/blas.f; 		        $(F77) -c $(FL2i4) $< -o $@
-$(OBJDIR)/comm_mpi.o	:$S/comm_mpi.f;			$(F77) -c $(FL2) $< -o $@
-$(OBJDIR)/mpi_dummy.o	:$S/mpi_dummy.f;		$(F77) -c $(FL2) $< -o $@
-$(OBJDIR)/delay.o	:$S/delay.f;			$(F77) -c $(FL2) $< -o $@
-$(OBJDIR)/delay_dum.o	:$S/delay_dum.f;		$(F77) -c $(FL2) $< -o $@
-# MXM       #############################################################################
-$(OBJDIR)/mxm_wrapper.o	  :$S/mxm_wrapper.f;		$(F77) -c $(FL2) $< -o $@ 
-$(OBJDIR)/mxm_std.o	  :$S/mxm_std.f;		$(F77) -c $(FL4) $< -o $@
-$(OBJDIR)/bg_aligned3.o	  :$S/bg_aligned3.s;		$(CC) -c $< -o $@
-$(OBJDIR)/bg_mxm3.o	  :$S/bg_mxm3.s;		$(CC) -c $< -o $@
-$(OBJDIR)/bg_mxm44.o	  :$S/bg_mxm44.s;		$(CC) -c $< -o $@
-$(OBJDIR)/bg_mxm44_uneven.o :$S/bg_mxm44_uneven.s;	$(CC) -c $< -o $@
-$(OBJDIR)/k10_mxm.o	  :$S/k10_mxm.c;		$(CC)  -c $(cFL2) $(JL) $< -o $@
-# C Files ###############################################################################
-$(OBJDIR)/byte.o                 :$S/byte.c;              $(CC) -c $(cFL2) $(JL) $< -o $@
-$(OBJDIR)/chelpers.o             :$S/chelpers.c;          $(CC) -c $(cFL2) $(JL) $< -o $@
-$(OBJDIR)/$(JO)fail.o            :$(J)/fail.c;            $(CC) -c $(cFL2) $(JL) $< -o $@
-$(OBJDIR)/$(JO)tensor.o          :$(J)/tensor.c;          $(CC) -c $(cFL2) $(JL) $< -o $@
-$(OBJDIR)/$(JO)sort.o            :$(J)/sort.c;            $(CC) -c $(cFL2) $(JL) $< -o $@
-$(OBJDIR)/$(JO)sarray_sort.o     :$(J)/sarray_sort.c;     $(CC) -c $(cFL2) $(JL) $< -o $@
-$(OBJDIR)/$(JO)comm.o            :$(J)/comm.c;            $(CC) -c $(cFL2) $(JL) $< -o $@
-$(OBJDIR)/$(JO)crystal.o         :$(J)/crystal.c;         $(CC) -c $(cFL2) $(JL) $< -o $@
-$(OBJDIR)/$(JO)sarray_transfer.o :$(J)/sarray_transfer.c; $(CC) -c $(cFL2) $(JL) $< -o $@
-$(OBJDIR)/$(JO)fcrystal.o        :$(J)/fcrystal.c;        $(CC) -c $(cFL2) $(JL) $< -o $@
-$(OBJDIR)/$(JO)gs.o              :$(J)/gs.c;              $(CC) -c $(cFL2) $(JL) $< -o $@
-$(OBJDIR)/$(JO)gs_local.o        :$(J)/gs_local.c;        $(CC) -c $(cFL2) $(JL) $< -o $@
-#$(OBJDIR)/$(JO)sleep.o		:$(J)/sleep.c;		$(CC) -c $(cFL2) $(JL) $< -o $@
-#$(OBJDIR)/$(JO)gs_acc.o        :$(J)/gs_acc.c;            $(CC) -c $(cFL2) $(JL) $< -o $@
-# CUF ####################################################################################
-$(OBJDIR)/ax_cuda.o  :$(S)/ax_cuda.cuf; $(F77) $(FL2) -c $< -o $@ 
+.PHONY: mpiheader clean
