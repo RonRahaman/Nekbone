@@ -11,9 +11,7 @@ if [ "$PPLIST" == "?" ]; then
   echo "  K10_MXM   use optimized MxM kernel for AMD Family 10h processors" 
   echo "  NEKCOMM   nekbone communication test"
   echo "  NEKDLAY   nekbone load imbalance simmulation"
-  echo "  NOMGRID   turns on Multigrid precondition"
-  echo "  NEKACC    compiles with OpenACC"
-  echo "  NEKCUDA   compiles with CUDA and OpenACC"
+  echo "  MGRID    turns on Multigrid precondition"
   exit 1
 fi
 
@@ -126,7 +124,6 @@ then
 fi
 \rm test_underscore.* 2>/dev/null
 
-
 F77comp=$F77
 # mpi-wrappers?
 echo $F77comp | grep -i mp >/dev/null
@@ -181,7 +178,6 @@ case $F77comp in
       echo "        - don't know how to invoke the C pre-processor (CPP) before compilation"
       echo "       Please edit the makefile and specify the requested compiler flags using the P variable."
       echo ""
-
       P="<specify your compiler flags here>"
       NOCOMPILE=1
       read;;
@@ -283,8 +279,8 @@ fi
 if [ "$i" == "NEKDLAY" ]; then
      IFNEKDLAY=true
 fi
-if [ "$i" == "NOMGRID" ]; then
-     IFMGRID=false
+if [ "$i" == "MGRID" ]; then
+     IFMGRID=true
 fi
 done
 
@@ -320,7 +316,7 @@ rm -rf makefile 2>/dev/null
 
 sed -e "s:^F77[ ]*=.*:F77\:=$F77:" \
 -e "s:^CC[ ]*=.*:CC\:=$CC:" \
--e "s:^G[ ]*=.*:G\:=$G:" \
+-e "s?^G[ ]*=.*?G\:=$G?" \
 -e "s:^OPT_FLAGS[ ]*=.*:OPT_FLAGS\:=$OPT_FLAGS:" \
 -e "s/^P[ ]*=.*/P:=$P/" \
 -e "s/^L0[ ]*=.*/L0=$L0/" \
