@@ -1,40 +1,57 @@
 #ifdef _CUDA
 
-      attributes(global) subroutine ax_cuf2(w,u,ur,us,ut,
-     &                gxyz,dxm1,dxtm1)
+      attributes(device) subroutine get_idx(ijk, nx, ny, nz,
+     $    i, j, k)
+        implicit none
+        integer, device, intent(in) :: ijk, nx, ny, nz
+        integer, device, intent(out) :: i, j, k
 
-      include 'SIZE'
+        i = mod((ijk - 1), nx) + 1 
+        j = mod((ijk - 1) / nx, ny) + 1 
+        k = mod((ijk - 1) / (nx * ny), nz) + 1 
 
-      real, intent(out) :: w(lx1,ly1,lz1,lelt)
-      real u(lx1,ly1,lz1,lelt)
-      real ur  (lx1,ly1,lz1,lelt)
-      real us  (lx1,ly1,lz1,lelt)
-      real ut  (lx1,ly1,lz1,lelt)
+        return
+      end
 
-      real gxyz(lx1,ly1,lz1,2*ldim,lelt)
+      attributes(global) subroutine ax_cuf2(w, u,
+     &                ur, us, ut, gxyz, dxm1, dxtm1
+     &                lx, ly, lz, ldim, lelt)
 
-      real, intent(in) :: dxm1(lx1,lx1)
-      real, intent(in) :: dxtm1(lx1,lx1)
+      implicit none
+
+      real, intent(out) :: w(lx1*ly1*lz1, lelt)
+      real u   (lx1*ly1*lz1, lelt)
+      real ur  (lx1*ly1*lz1, lelt)
+      real us  (lx1*ly1*lz1, lelt)
+      real ut  (lx1*ly1*lz1, lelt)
+
+      real gxyz(lx1*ly1*lz1, 2*ldim, lelt)
+
+      real, intent(in) :: dxm1(lx1, lx1)
+      real, intent(in) :: dxtm1(lx1, lx1)
+      integer, intent(in) :: lx, ly, lz, ldim, lelt
 
       real rtmp,stmp,ttmp,wijke
       real, shared :: shdxm1(lx1,ly1)
       real, shared :: shdxtm1(lx1,ly1)
-      integer l,e,i,j,k,kk,n,nstrides
+      integer l,lxyz,e,i,j,k,kk,n,nstrides
+      integer ijk
 
-      e = blockIdx%x
-      k = threadIdx%z
-      j = threadIdx%y
-      i = threadIdx%x
+      e   = blockIdx%x
+      ijk = threadIdx%x
+      lxyz = lx * ly * lz
+
+      call get_idx(ijk, lx, ly, lz, i, j, k)
 
       if (k.eq.1) then
-         shdxm1(i,j) = dxm1(i,j)
-         shdxtm1(i,j) = dxtm1(i,j)
+        shdxm1(i,j) = dxm1(i,j)
+        shdxtm1(i,j) = dxtm1(i,j)
       end if
       call syncthreads()
 
 c Figure out how many strided accesses that this block needs to perform
-      nstrides = lz1 / blockDim%z
-      if (mod(lz1, blockDim%z) .gt. 0) then
+      nstrides = lxyz / blockDim%x
+      if (mod(lxyz, blockDim%x) .gt. 0) then
         nstrides = nstrides + 1
       endif
 

@@ -425,18 +425,23 @@ c-----------------------------------------------------------------------
 #ifdef _CUDA
 
 !$acc host_data use_device(w,u(:,:,:,:),ur,us,ut,gxyz,dxm1,dxtm1)
-       if (nx1.eq.10) then
-         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1)>>>(w,u,
-     $                ur,us,ut,gxyz,dxm1,dxtm1)
-       else if (nx1.eq.12) then
-         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1/2)>>>(w,u,
-     $                ur,us,ut,gxyz,dxm1,dxtm1)
-       else
+
+         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1/4)>>>(w, u,
+     $         ur, us, ut, gxyz, dxm1, dxtm1
+     $         lx, ly, lz, ldim, lelt) 
+
+c       if (nx1.eq.10) then
+c         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1)>>>(w,u,
+c     $                ur,us,ut,gxyz,dxm1,dxtm1)
+c       else if (nx1.eq.12) then
+c         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1/2)>>>(w,u,
+c     $                ur,us,ut,gxyz,dxm1,dxtm1)
+c       else
 c         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1/4)>>>(w,u,
 c     $                ur,us,ut,gxyz,dxm1,dxtm1)
-         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1/4)>>>(w,u,
-     $         ur,us,ut,gxyz,dxm1,dxtm1) 
-       endif
+c         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1/4)>>>(w,u,
+c     $         ur,us,ut,gxyz,dxm1,dxtm1) 
+c       endif
        
        cuda_err = cudaGetLastError()
        if (cuda_err /= cudaSuccess) then
