@@ -1,0 +1,956 @@
+ Number of processors:            4
+ REAL    wdsize      :            8
+ INTEGER wdsize      :            4
+ ifmgrid    :  F     ifbrick    :  T
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=            2            2            1
+ Local Element Distribution: mx,my,mz=            1            1            1
+gs_setup: 370 unique labels shared
+   pairwise times (avg, min, max): 3.20077e-06 3.12328e-06 3.26633e-06
+   crystal router                : 3.60608e-06 3.50475e-06 3.69549e-06
+   all reduce                    : 1.06931e-05 1.06573e-05 1.07288e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  3.3172E+01
+cg: 101  3.1435E-14  4.1217E-01  4.5779E-01  5.9628E-27
+cg:   0  3.3172E+01
+cg: 101  3.1435E-14  4.1217E-01  4.5779E-01  5.9628E-27
+ 
+nelt =       1, np =         4, nx1 =      10, elements =         4
+Tot MFlops =   1.0623E+04, MFlops      =   2.6558E+03
+Setup Flop =   1.3900E+07, Solver Flop =   1.5150E+06
+Solve Time =   0.5804E-02
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=            4            2            1
+ Local Element Distribution: mx,my,mz=            2            1            1
+gs_setup: 550 unique labels shared
+   pairwise times (avg, min, max): 3.3915e-06 3.29018e-06 3.45707e-06
+   crystal router                : 4.51803e-06 4.43459e-06 4.62532e-06
+   all reduce                    : 1.19388e-05 1.18494e-05 1.19925e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  4.7630E+01
+cg: 101  2.1294E-09  4.0491E-01  6.4614E-01  1.8099E-17
+cg:   0  5.3187E+01
+cg: 101  3.2556E-09  4.3124E-01  6.3677E-01  3.9727E-17
+ 
+nelt =       2, np =         4, nx1 =      10, elements =         8
+Tot MFlops =   1.3810E+04, MFlops      =   3.4524E+03
+Setup Flop =   2.7800E+07, Solver Flop =   3.0300E+06
+Solve Time =   0.8930E-02
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=            6            2            1
+ Local Element Distribution: mx,my,mz=            3            1            1
+gs_setup: 730 unique labels shared
+   pairwise times (avg, min, max): 3.52859e-06 3.48091e-06 3.57628e-06
+   crystal router                : 5.35846e-06 5.24521e-06 5.45979e-06
+   all reduce                    : 1.41799e-05 1.39475e-05 1.44005e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  5.8368E+01
+cg: 101  3.3162E-09  3.9307E-01  6.6706E-01  4.3244E-17
+cg:   0  6.6502E+01
+cg: 101  5.6970E-09  4.0761E-01  6.3963E-01  1.2314E-16
+ 
+nelt =       3, np =         4, nx1 =      10, elements =        12
+Tot MFlops =   1.4578E+04, MFlops      =   3.6445E+03
+Setup Flop =   4.1700E+07, Solver Flop =   4.5450E+06
+Solve Time =   0.1269E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=            4            4            1
+ Local Element Distribution: mx,my,mz=            2            2            1
+gs_setup: 730 unique labels shared
+   pairwise times (avg, min, max): 3.46303e-06 3.40939e-06 3.55244e-06
+   crystal router                : 4.91142e-06 4.8399e-06 4.98295e-06
+   all reduce                    : 1.39415e-05 1.38283e-05 1.40429e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  6.7293E+01
+cg: 101  4.5056E-09  4.2185E-01  6.3842E-01  7.3069E-17
+cg:   0  7.6600E+01
+cg: 101  6.8098E-09  4.2530E-01  6.4396E-01  1.6792E-16
+ 
+nelt =       4, np =         4, nx1 =      10, elements =        16
+Tot MFlops =   1.5171E+04, MFlops      =   3.7929E+03
+Setup Flop =   5.5600E+07, Solver Flop =   6.0600E+06
+Solve Time =   0.1626E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           10            2            1
+ Local Element Distribution: mx,my,mz=            5            1            1
+gs_setup: 1090 unique labels shared
+   pairwise times (avg, min, max): 3.86238e-06 3.79086e-06 3.91006e-06
+   crystal router                : 7.31349e-06 7.24792e-06 7.39098e-06
+   all reduce                    : 1.75238e-05 1.71661e-05 1.78337e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  7.5051E+01
+cg: 101  6.5269E-09  4.2276E-01  6.0900E-01  1.6351E-16
+cg:   0  8.6669E+01
+cg: 101  9.6638E-09  4.2330E-01  6.1534E-01  3.5474E-16
+ 
+nelt =       5, np =         4, nx1 =      10, elements =        20
+Tot MFlops =   1.5375E+04, MFlops      =   3.8438E+03
+Setup Flop =   6.9500E+07, Solver Flop =   7.5750E+06
+Solve Time =   0.2005E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=            6            4            1
+ Local Element Distribution: mx,my,mz=            3            2            1
+gs_setup: 910 unique labels shared
+   pairwise times (avg, min, max): 4.17829e-06 4.12464e-06 4.22001e-06
+   crystal router                : 4.78625e-06 4.72069e-06 4.86374e-06
+   all reduce                    : 1.41561e-05 1.4019e-05 1.43051e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  8.2677E+01
+cg: 101  5.9459E-09  4.1917E-01  6.3496E-01  1.3206E-16
+cg:   0  9.4442E+01
+cg: 101  8.2461E-09  4.2243E-01  6.3990E-01  2.5171E-16
+ 
+nelt =       6, np =         4, nx1 =      10, elements =        24
+Tot MFlops =   1.9507E+04, MFlops      =   4.8768E+03
+Setup Flop =   8.3400E+07, Solver Flop =   9.0900E+06
+Solve Time =   0.1897E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           14            2            1
+ Local Element Distribution: mx,my,mz=            7            1            1
+gs_setup: 1450 unique labels shared
+   pairwise times (avg, min, max): 3.62396e-06 3.52859e-06 3.71933e-06
+   crystal router                : 1.01745e-05 1.00851e-05 1.02758e-05
+   all reduce                    : 1.66595e-05 1.64747e-05 1.68324e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  8.8528E+01
+cg: 101  7.8084E-09  3.9661E-01  6.2942E-01  2.4772E-16
+cg:   0  1.0323E+02
+cg: 101  1.1350E-08  4.0191E-01  6.3344E-01  5.0306E-16
+ 
+nelt =       7, np =         4, nx1 =      10, elements =        28
+Tot MFlops =   1.6202E+04, MFlops      =   4.0505E+03
+Setup Flop =   9.7300E+07, Solver Flop =   1.0605E+07
+Solve Time =   0.2664E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=            4            4            2
+ Local Element Distribution: mx,my,mz=            2            2            2
+gs_setup: 1387 unique labels shared
+   pairwise times (avg, min, max): 8.40425e-06 8.13007e-06 9.08375e-06
+   crystal router                : 9.63807e-06 9.56059e-06 9.75132e-06
+   all reduce                    : 2.47777e-05 2.45333e-05 2.49624e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  9.6175E+01
+cg: 101  7.0055E-09  4.0225E-01  6.3835E-01  1.8649E-16
+cg:   0  1.0651E+02
+cg: 101  1.0422E-08  4.1139E-01  6.3623E-01  4.0479E-16
+ 
+nelt =       8, np =         4, nx1 =      10, elements =        32
+Tot MFlops =   1.5696E+04, MFlops      =   3.9241E+03
+Setup Flop =   1.1120E+08, Solver Flop =   1.2120E+07
+Solve Time =   0.3143E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=            6            6            1
+ Local Element Distribution: mx,my,mz=            3            3            1
+gs_setup: 1090 unique labels shared
+   pairwise times (avg, min, max): 9.53078e-06 9.32217e-06 9.75132e-06
+   crystal router                : 8.30889e-06 8.22544e-06 8.41618e-06
+   all reduce                    : 2.33352e-05 2.30789e-05 2.35081e-05
+   used all_to_all method: crystal router
+ 
+cg:   0  1.0115E+02
+cg: 101  8.2121E-09  4.0413E-01  6.5487E-01  2.5546E-16
+cg:   0  1.1557E+02
+cg: 101  1.1831E-08  4.1490E-01  6.3887E-01  5.2249E-16
+ 
+nelt =       9, np =         4, nx1 =      10, elements =        36
+Tot MFlops =   1.5766E+04, MFlops      =   3.9415E+03
+Setup Flop =   1.2510E+08, Solver Flop =   1.3635E+07
+Solve Time =   0.3520E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           10            4            1
+ Local Element Distribution: mx,my,mz=            5            2            1
+gs_setup: 1270 unique labels shared
+   pairwise times (avg, min, max): 7.6592e-06 7.53403e-06 7.93934e-06
+   crystal router                : 1.23203e-05 1.2207e-05 1.24454e-05
+   all reduce                    : 1.95324e-05 1.90973e-05 2.04802e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.0643E+02
+cg: 101  9.1420E-09  4.0474E-01  6.3655E-01  3.1703E-16
+cg:   0  1.2200E+02
+cg: 101  1.1121E-08  4.1324E-01  6.2545E-01  4.5854E-16
+ 
+nelt =      10, np =         4, nx1 =      10, elements =        40
+Tot MFlops =   1.8789E+04, MFlops      =   4.6973E+03
+Setup Flop =   1.3900E+08, Solver Flop =   1.5150E+07
+Solve Time =   0.3282E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           22            2            1
+ Local Element Distribution: mx,my,mz=           11            1            1
+gs_setup: 2170 unique labels shared
+   pairwise times (avg, min, max): 7.37309e-06 7.12872e-06 7.72476e-06
+   crystal router                : 1.80662e-05 1.80006e-05 1.81437e-05
+   all reduce                    : 2.97904e-05 2.96593e-05 2.99454e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.1065E+02
+cg: 101  9.6396E-09  4.0677E-01  6.3417E-01  3.6195E-16
+cg:   0  1.2982E+02
+cg: 101  1.4176E-08  4.0610E-01  6.3000E-01  7.7684E-16
+ 
+nelt =      11, np =         4, nx1 =      10, elements =        44
+Tot MFlops =   2.1815E+04, MFlops      =   5.4538E+03
+Setup Flop =   1.5290E+08, Solver Flop =   1.6665E+07
+Solve Time =   0.3109E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=            6            4            2
+ Local Element Distribution: mx,my,mz=            3            2            2
+gs_setup: 1729 unique labels shared
+   pairwise times (avg, min, max): 7.47442e-06 7.22408e-06 7.84397e-06
+   crystal router                : 1.28865e-05 1.27792e-05 1.29938e-05
+   all reduce                    : 2.52962e-05 2.48671e-05 2.6226e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.1786E+02
+cg: 101  9.8119E-09  4.1684E-01  6.2681E-01  3.6047E-16
+cg:   0  1.2997E+02
+cg: 101  1.2861E-08  4.1509E-01  6.2765E-01  6.2084E-16
+ 
+nelt =      12, np =         4, nx1 =      10, elements =        48
+Tot MFlops =   2.1982E+04, MFlops      =   5.4955E+03
+Setup Flop =   1.6680E+08, Solver Flop =   1.8180E+07
+Solve Time =   0.3366E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           26            2            1
+ Local Element Distribution: mx,my,mz=           13            1            1
+gs_setup: 2530 unique labels shared
+   pairwise times (avg, min, max): 6.49691e-06 6.31809e-06 6.67572e-06
+   crystal router                : 2.23696e-05 2.22683e-05 2.2459e-05
+   all reduce                    : 3.2717e-05 3.25441e-05 3.28541e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.2045E+02
+cg: 101  1.0859E-08  4.0502E-01  6.3736E-01  4.6419E-16
+cg:   0  1.4145E+02
+cg: 101  1.5001E-08  4.0611E-01  6.3355E-01  8.7613E-16
+ 
+nelt =      13, np =         4, nx1 =      10, elements =        52
+Tot MFlops =   2.2073E+04, MFlops      =   5.5182E+03
+Setup Flop =   1.8070E+08, Solver Flop =   1.9695E+07
+Solve Time =   0.3632E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           14            4            1
+ Local Element Distribution: mx,my,mz=            7            2            1
+gs_setup: 1630 unique labels shared
+   pairwise times (avg, min, max): 7.236e-06 7.05719e-06 7.48634e-06
+   crystal router                : 1.36316e-05 1.35899e-05 1.36852e-05
+   all reduce                    : 2.49207e-05 2.47717e-05 2.5034e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.2555E+02
+cg: 101  1.2138E-08  3.9876E-01  6.5737E-01  5.8119E-16
+cg:   0  1.4448E+02
+cg: 101  1.6530E-08  3.9760E-01  6.5382E-01  1.0890E-15
+ 
+nelt =      14, np =         4, nx1 =      10, elements =        56
+Tot MFlops =   2.2276E+04, MFlops      =   5.5690E+03
+Setup Flop =   1.9460E+08, Solver Flop =   2.1210E+07
+Solve Time =   0.3875E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           10            6            1
+ Local Element Distribution: mx,my,mz=            5            3            1
+gs_setup: 1450 unique labels shared
+   pairwise times (avg, min, max): 7.29561e-06 7.05719e-06 7.51019e-06
+   crystal router                : 1.2356e-05 1.22786e-05 1.24454e-05
+   all reduce                    : 2.12312e-05 2.11239e-05 2.13146e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.3014E+02
+cg: 101  1.3083E-08  4.0034E-01  6.2447E-01  6.8864E-16
+cg:   0  1.4891E+02
+cg: 101  1.7878E-08  4.0682E-01  6.2957E-01  1.2261E-15
+ 
+nelt =      15, np =         4, nx1 =      10, elements =        60
+Tot MFlops =   2.2225E+04, MFlops      =   5.5562E+03
+Setup Flop =   2.0850E+08, Solver Flop =   2.2725E+07
+Solve Time =   0.4162E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=            8            4            2
+ Local Element Distribution: mx,my,mz=            4            2            2
+gs_setup: 2071 unique labels shared
+   pairwise times (avg, min, max): 8.35061e-06 8.08239e-06 8.60691e-06
+   crystal router                : 1.63794e-05 1.62363e-05 1.65462e-05
+   all reduce                    : 3.08335e-05 3.06368e-05 3.10421e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.3646E+02
+cg: 101  1.4092E-08  4.0914E-01  6.4040E-01  7.5311E-16
+cg:   0  1.5005E+02
+cg: 101  1.8478E-08  4.0929E-01  6.5692E-01  1.2834E-15
+ 
+nelt =      16, np =         4, nx1 =      10, elements =        64
+Tot MFlops =   2.2183E+04, MFlops      =   5.5459E+03
+Setup Flop =   2.2240E+08, Solver Flop =   2.4240E+07
+Solve Time =   0.4447E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           34            2            1
+ Local Element Distribution: mx,my,mz=           17            1            1
+gs_setup: 3250 unique labels shared
+   pairwise times (avg, min, max): 6.93798e-06 6.69956e-06 7.29561e-06
+   crystal router                : 2.52366e-05 2.5034e-05 2.54631e-05
+   all reduce                    : 3.71456e-05 3.70026e-05 3.73125e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.3752E+02
+cg: 101  1.3969E-08  4.0665E-01  6.2385E-01  7.6350E-16
+cg:   0  1.6215E+02
+cg: 101  2.0209E-08  4.1117E-01  6.3018E-01  1.5491E-15
+ 
+nelt =      17, np =         4, nx1 =      10, elements =        68
+Tot MFlops =   2.2095E+04, MFlops      =   5.5238E+03
+Setup Flop =   2.3630E+08, Solver Flop =   2.5755E+07
+Solve Time =   0.4744E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=            6            6            2
+ Local Element Distribution: mx,my,mz=            3            3            2
+gs_setup: 2071 unique labels shared
+   pairwise times (avg, min, max): 9.03606e-06 8.86917e-06 9.25064e-06
+   crystal router                : 1.48833e-05 1.4782e-05 1.50204e-05
+   all reduce                    : 3.17156e-05 3.15666e-05 3.18527e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.4477E+02
+cg: 101  1.3238E-08  4.1684E-01  6.3163E-01  6.3844E-16
+cg:   0  1.5845E+02
+cg: 101  1.7094E-08  4.1512E-01  6.3346E-01  1.0816E-15
+ 
+nelt =      18, np =         4, nx1 =      10, elements =        72
+Tot MFlops =   2.2117E+04, MFlops      =   5.5292E+03
+Setup Flop =   2.5020E+08, Solver Flop =   2.7270E+07
+Solve Time =   0.5018E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           38            2            1
+ Local Element Distribution: mx,my,mz=           19            1            1
+gs_setup: 3610 unique labels shared
+   pairwise times (avg, min, max): 8.73804e-06 8.53539e-06 8.96454e-06
+   crystal router                : 2.83182e-05 2.80619e-05 2.85625e-05
+   all reduce                    : 4.22597e-05 4.19855e-05 4.251e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.4545E+02
+cg: 101  1.4615E-08  4.0543E-01  6.3003E-01  8.3214E-16
+cg:   0  1.7164E+02
+cg: 101  2.1173E-08  4.0777E-01  6.2880E-01  1.7255E-15
+ 
+nelt =      19, np =         4, nx1 =      10, elements =        76
+Tot MFlops =   2.2176E+04, MFlops      =   5.5439E+03
+Setup Flop =   2.6410E+08, Solver Flop =   2.8785E+07
+Solve Time =   0.5283E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           10            4            2
+ Local Element Distribution: mx,my,mz=            5            2            2
+gs_setup: 2413 unique labels shared
+   pairwise times (avg, min, max): 6.37174e-06 6.29425e-06 6.53267e-06
+   crystal router                : 1.7643e-05 1.74761e-05 1.78099e-05
+   all reduce                    : 3.46959e-05 3.44753e-05 3.49283e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.5252E+02
+cg: 101  1.5364E-08  4.0772E-01  6.4532E-01  9.0681E-16
+cg:   0  1.6719E+02
+cg: 101  2.0330E-08  4.0544E-01  6.4760E-01  1.6101E-15
+ 
+nelt =      20, np =         4, nx1 =      10, elements =        80
+Tot MFlops =   2.2148E+04, MFlops      =   5.5371E+03
+Setup Flop =   2.7800E+08, Solver Flop =   3.0300E+07
+Solve Time =   0.5568E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           14            6            1
+ Local Element Distribution: mx,my,mz=            7            3            1
+gs_setup: 1810 unique labels shared
+   pairwise times (avg, min, max): 7.96318e-06 7.72476e-06 8.22544e-06
+   crystal router                : 1.41621e-05 1.40905e-05 1.42336e-05
+   all reduce                    : 2.64645e-05 2.62976e-05 2.66552e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.5443E+02
+cg: 101  1.5457E-08  4.0987E-01  6.5170E-01  9.3535E-16
+cg:   0  1.7650E+02
+cg: 101  1.9678E-08  4.0641E-01  6.3817E-01  1.5455E-15
+ 
+nelt =      21, np =         4, nx1 =      10, elements =        84
+Tot MFlops =   2.1691E+04, MFlops      =   5.4227E+03
+Setup Flop =   2.9190E+08, Solver Flop =   3.1815E+07
+Solve Time =   0.5970E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           22            4            1
+ Local Element Distribution: mx,my,mz=           11            2            1
+gs_setup: 2350 unique labels shared
+   pairwise times (avg, min, max): 5.56111e-06 5.34058e-06 5.84126e-06
+   crystal router                : 2.09987e-05 2.00272e-05 2.141e-05
+   all reduce                    : 3.21209e-05 3.19958e-05 3.2258e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.5793E+02
+cg: 101  1.6197E-08  3.9958E-01  6.4920E-01  1.0447E-15
+cg:   0  1.8171E+02
+cg: 101  2.2252E-08  4.0170E-01  6.4655E-01  1.9432E-15
+ 
+nelt =      22, np =         4, nx1 =      10, elements =        88
+Tot MFlops =   2.2506E+04, MFlops      =   5.6266E+03
+Setup Flop =   3.0580E+08, Solver Flop =   3.3330E+07
+Solve Time =   0.6027E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           46            2            1
+ Local Element Distribution: mx,my,mz=           23            1            1
+gs_setup: 4330 unique labels shared
+   pairwise times (avg, min, max): 7.06911e-06 6.8903e-06 7.31945e-06
+   crystal router                : 3.23415e-05 3.22342e-05 3.24488e-05
+   all reduce                    : 5.12481e-05 5.09024e-05 5.16176e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.6040E+02
+cg: 101  1.5699E-08  4.0725E-01  6.2355E-01  9.6088E-16
+cg:   0  1.8923E+02
+cg: 101  2.2449E-08  4.1044E-01  6.2460E-01  1.9305E-15
+ 
+nelt =      23, np =         4, nx1 =      10, elements =        92
+Tot MFlops =   2.2348E+04, MFlops      =   5.5871E+03
+Setup Flop =   3.1970E+08, Solver Flop =   3.4845E+07
+Solve Time =   0.6346E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=            8            6            2
+ Local Element Distribution: mx,my,mz=            4            3            2
+gs_setup: 2413 unique labels shared
+   pairwise times (avg, min, max): 5.91874e-06 5.74589e-06 6.10352e-06
+   crystal router                : 1.95146e-05 1.93596e-05 1.96695e-05
+   all reduce                    : 3.27706e-05 3.25441e-05 3.29971e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.6789E+02
+cg: 101  1.5506E-08  4.2017E-01  6.3269E-01  8.9972E-16
+cg:   0  1.8288E+02
+cg: 101  1.9826E-08  4.1918E-01  6.2965E-01  1.4814E-15
+ 
+nelt =      24, np =         4, nx1 =      10, elements =        96
+Tot MFlops =   2.2440E+04, MFlops      =   5.6101E+03
+Setup Flop =   3.3360E+08, Solver Flop =   3.6360E+07
+Solve Time =   0.6595E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           10           10            1
+ Local Element Distribution: mx,my,mz=            5            5            1
+gs_setup: 1810 unique labels shared
+   pairwise times (avg, min, max): 7.49826e-06 7.27177e-06 7.7486e-06
+   crystal router                : 1.28031e-05 1.266e-05 1.29461e-05
+   all reduce                    : 2.70188e-05 2.68221e-05 2.71797e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.6876E+02
+cg: 101  1.6714E-08  4.0141E-01  6.3298E-01  1.1327E-15
+cg:   0  1.9213E+02
+cg: 101  2.2277E-08  4.0594E-01  6.3579E-01  1.9587E-15
+ 
+nelt =      25, np =         4, nx1 =      10, elements =       100
+Tot MFlops =   2.2522E+04, MFlops      =   5.6305E+03
+Setup Flop =   3.4750E+08, Solver Flop =   3.7875E+07
+Solve Time =   0.6844E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           26            4            1
+ Local Element Distribution: mx,my,mz=           13            2            1
+gs_setup: 2710 unique labels shared
+   pairwise times (avg, min, max): 6.50287e-06 6.31809e-06 6.77109e-06
+   crystal router                : 2.16484e-05 2.1553e-05 2.17199e-05
+   all reduce                    : 3.40283e-05 3.38793e-05 3.41892e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.7172E+02
+cg: 101  1.5136E-08  4.0784E-01  6.3851E-01  8.9578E-16
+cg:   0  1.9755E+02
+cg: 101  2.1231E-08  4.0866E-01  6.4180E-01  1.7449E-15
+ 
+nelt =      26, np =         4, nx1 =      10, elements =       104
+Tot MFlops =   2.2504E+04, MFlops      =   5.6261E+03
+Setup Flop =   3.6140E+08, Solver Flop =   3.9390E+07
+Solve Time =   0.7124E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=            6            6            3
+ Local Element Distribution: mx,my,mz=            3            3            3
+gs_setup: 3052 unique labels shared
+   pairwise times (avg, min, max): 7.37309e-06 7.20024e-06 7.60555e-06
+   crystal router                : 1.95444e-05 1.94311e-05 1.96218e-05
+   all reduce                    : 3.78728e-05 3.77655e-05 3.80278e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.7887E+02
+cg: 101  1.6355E-08  4.0636E-01  6.5194E-01  1.0110E-15
+cg:   0  1.9253E+02
+cg: 101  2.0253E-08  4.0652E-01  6.4685E-01  1.5627E-15
+ 
+nelt =      27, np =         4, nx1 =      10, elements =       108
+Tot MFlops =   2.2429E+04, MFlops      =   5.6073E+03
+Setup Flop =   3.7530E+08, Solver Flop =   4.0905E+07
+Solve Time =   0.7423E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           14            4            2
+ Local Element Distribution: mx,my,mz=            7            2            2
+gs_setup: 3097 unique labels shared
+   pairwise times (avg, min, max): 7.236e-06 7.00951e-06 7.4625e-06
+   crystal router                : 2.42531e-05 2.41518e-05 2.43425e-05
+   all reduce                    : 3.75867e-05 3.73363e-05 3.78609e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.8080E+02
+cg: 101  1.7374E-08  4.1107E-01  6.5244E-01  1.1192E-15
+cg:   0  1.9806E+02
+cg: 101  2.0674E-08  4.1226E-01  6.4665E-01  1.5929E-15
+ 
+nelt =      28, np =         4, nx1 =      10, elements =       112
+Tot MFlops =   2.1899E+04, MFlops      =   5.4747E+03
+Setup Flop =   3.8920E+08, Solver Flop =   4.2420E+07
+Solve Time =   0.7884E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           58            2            1
+ Local Element Distribution: mx,my,mz=           29            1            1
+gs_setup: 5410 unique labels shared
+   pairwise times (avg, min, max): 1.13249e-05 1.11341e-05 1.15156e-05
+   crystal router                : 3.83854e-05 3.8147e-05 3.86e-05
+   all reduce                    : 5.82695e-05 5.7888e-05 5.87225e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.8017E+02
+cg: 101  1.7635E-08  4.1015E-01  6.2495E-01  1.1904E-15
+cg:   0  2.1280E+02
+cg: 101  2.4772E-08  4.1240E-01  6.2008E-01  2.3339E-15
+ 
+nelt =      29, np =         4, nx1 =      10, elements =       116
+Tot MFlops =   2.1876E+04, MFlops      =   5.4691E+03
+Setup Flop =   4.0310E+08, Solver Flop =   4.3935E+07
+Solve Time =   0.8174E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           10            6            2
+ Local Element Distribution: mx,my,mz=            5            3            2
+gs_setup: 2755 unique labels shared
+   pairwise times (avg, min, max): 7.56383e-06 7.29561e-06 7.77245e-06
+   crystal router                : 1.91689e-05 1.89781e-05 1.93834e-05
+   all reduce                    : 3.44753e-05 3.42369e-05 3.47376e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.8732E+02
+cg: 101  1.8521E-08  4.0490E-01  6.4663E-01  1.3288E-15
+cg:   0  2.0407E+02
+cg: 101  2.2299E-08  4.0491E-01  6.4596E-01  1.9198E-15
+ 
+nelt =      30, np =         4, nx1 =      10, elements =       120
+Tot MFlops =   2.1973E+04, MFlops      =   5.4933E+03
+Setup Flop =   4.1700E+08, Solver Flop =   4.5450E+07
+Solve Time =   0.8419E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           62            2            1
+ Local Element Distribution: mx,my,mz=           31            1            1
+gs_setup: 5770 unique labels shared
+   pairwise times (avg, min, max): 9.82881e-06 9.77516e-06 9.87053e-06
+   crystal router                : 3.58045e-05 3.56913e-05 3.59297e-05
+   all reduce                    : 6.26922e-05 6.22034e-05 6.32048e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.8606E+02
+cg: 101  1.8173E-08  4.0656E-01  6.2656E-01  1.2737E-15
+cg:   0  2.1990E+02
+cg: 101  2.5692E-08  4.0802E-01  6.2492E-01  2.5243E-15
+ 
+nelt =      31, np =         4, nx1 =      10, elements =       124
+Tot MFlops =   2.1907E+04, MFlops      =   5.4767E+03
+Setup Flop =   4.3090E+08, Solver Flop =   4.6965E+07
+Solve Time =   0.8725E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=            8            8            2
+ Local Element Distribution: mx,my,mz=            4            4            2
+gs_setup: 2755 unique labels shared
+   pairwise times (avg, min, max): 7.28369e-06 7.12872e-06 7.53403e-06
+   crystal router                : 1.82986e-05 1.81198e-05 1.85013e-05
+   all reduce                    : 3.74973e-05 3.72171e-05 3.77417e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.9370E+02
+cg: 101  1.8570E-08  4.1156E-01  6.4904E-01  1.2915E-15
+cg:   0  2.1058E+02
+cg: 101  2.3952E-08  4.1030E-01  6.4699E-01  2.1767E-15
+ 
+nelt =      32, np =         4, nx1 =      10, elements =       128
+Tot MFlops =   2.1984E+04, MFlops      =   5.4961E+03
+Setup Flop =   4.4480E+08, Solver Flop =   4.8480E+07
+Solve Time =   0.8975E-01
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           22            6            1
+ Local Element Distribution: mx,my,mz=           11            3            1
+gs_setup: 2530 unique labels shared
+   pairwise times (avg, min, max): 5.64456e-06 5.53131e-06 5.84126e-06
+   crystal router                : 2.16842e-05 2.15054e-05 2.1863e-05
+   all reduce                    : 3.34382e-05 3.31879e-05 3.36647e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.9392E+02
+cg: 101  1.8777E-08  4.1052E-01  6.4518E-01  1.3829E-15
+cg:   0  2.2141E+02
+cg: 101  2.5466E-08  4.0963E-01  6.4516E-01  2.5462E-15
+ 
+nelt =      33, np =         4, nx1 =      10, elements =       132
+Tot MFlops =   2.0116E+04, MFlops      =   5.0289E+03
+Setup Flop =   4.5870E+08, Solver Flop =   4.9995E+07
+Solve Time =   0.1012E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           34            4            1
+ Local Element Distribution: mx,my,mz=           17            2            1
+gs_setup: 3430 unique labels shared
+   pairwise times (avg, min, max): 8.39233e-06 8.2016e-06 8.53539e-06
+   crystal router                : 2.65956e-05 2.55346e-05 2.76566e-05
+   all reduce                    : 3.99649e-05 3.97205e-05 4.02212e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.9654E+02
+cg: 101  1.9433E-08  4.0272E-01  6.4269E-01  1.5272E-15
+cg:   0  2.2617E+02
+cg: 101  2.6745E-08  4.0309E-01  6.4560E-01  2.8452E-15
+ 
+nelt =      34, np =         4, nx1 =      10, elements =       136
+Tot MFlops =   2.0530E+04, MFlops      =   5.1324E+03
+Setup Flop =   4.7260E+08, Solver Flop =   5.1510E+07
+Solve Time =   0.1021E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           14           10            1
+ Local Element Distribution: mx,my,mz=            7            5            1
+gs_setup: 2170 unique labels shared
+   pairwise times (avg, min, max): 6.22272e-06 6.00815e-06 6.53267e-06
+   crystal router                : 1.87099e-05 1.8549e-05 1.88828e-05
+   all reduce                    : 2.8801e-05 2.86341e-05 2.8944e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  1.9986E+02
+cg: 101  1.8770E-08  4.1428E-01  6.3635E-01  1.3670E-15
+cg:   0  2.2726E+02
+cg: 101  2.4544E-08  4.0913E-01  6.2979E-01  2.3827E-15
+ 
+nelt =      35, np =         4, nx1 =      10, elements =       140
+Tot MFlops =   2.0260E+04, MFlops      =   5.0649E+03
+Setup Flop =   4.8650E+08, Solver Flop =   5.3025E+07
+Solve Time =   0.1065E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=            8            6            3
+ Local Element Distribution: mx,my,mz=            4            3            3
+gs_setup: 3556 unique labels shared
+   pairwise times (avg, min, max): 9.09567e-06 8.89301e-06 9.53674e-06
+   crystal router                : 2.19524e-05 2.1863e-05 2.20776e-05
+   all reduce                    : 4.24743e-05 4.22001e-05 4.27485e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  2.0656E+02
+cg: 101  1.9104E-08  4.0060E-01  6.3966E-01  1.4374E-15
+cg:   0  2.2140E+02
+cg: 101  2.3901E-08  4.0129E-01  6.4494E-01  2.2430E-15
+ 
+nelt =      36, np =         4, nx1 =      10, elements =       144
+Tot MFlops =   2.1596E+04, MFlops      =   5.3991E+03
+Setup Flop =   5.0040E+08, Solver Flop =   5.4540E+07
+Solve Time =   0.1028E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           74            2            1
+ Local Element Distribution: mx,my,mz=           37            1            1
+gs_setup: 6850 unique labels shared
+   pairwise times (avg, min, max): 1.21593e-05 1.19209e-05 1.24693e-05
+   crystal router                : 4.57525e-05 4.55856e-05 4.58956e-05
+   all reduce                    : 6.93619e-05 6.88553e-05 6.98805e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  2.0363E+02
+cg: 101  1.9633E-08  4.1228E-01  6.2398E-01  1.4665E-15
+cg:   0  2.4059E+02
+cg: 101  2.7853E-08  4.1362E-01  6.2147E-01  2.9445E-15
+ 
+nelt =      37, np =         4, nx1 =      10, elements =       148
+Tot MFlops =   2.1605E+04, MFlops      =   5.4013E+03
+Setup Flop =   5.1430E+08, Solver Flop =   5.6055E+07
+Solve Time =   0.1056E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           38            4            1
+ Local Element Distribution: mx,my,mz=           19            2            1
+gs_setup: 3790 unique labels shared
+   pairwise times (avg, min, max): 7.36713e-06 7.1764e-06 7.55787e-06
+   crystal router                : 2.7132e-05 2.68936e-05 2.73705e-05
+   all reduce                    : 4.42386e-05 4.39167e-05 4.45366e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  2.0775E+02
+cg: 101  2.0452E-08  4.0522E-01  6.3929E-01  1.6310E-15
+cg:   0  2.3909E+02
+cg: 101  2.7928E-08  4.0596E-01  6.3485E-01  3.0209E-15
+ 
+nelt =      38, np =         4, nx1 =      10, elements =       152
+Tot MFlops =   2.1684E+04, MFlops      =   5.4209E+03
+Setup Flop =   5.2820E+08, Solver Flop =   5.7570E+07
+Solve Time =   0.1081E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           26            6            1
+ Local Element Distribution: mx,my,mz=           13            3            1
+gs_setup: 2890 unique labels shared
+   pairwise times (avg, min, max): 6.01411e-06 5.76973e-06 6.27041e-06
+   crystal router                : 2.15709e-05 2.07186e-05 2.19822e-05
+   all reduce                    : 3.98815e-05 3.96252e-05 4.01735e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  2.1095E+02
+cg: 101  1.8794E-08  4.1687E-01  6.3443E-01  1.3450E-15
+cg:   0  2.4078E+02
+cg: 101  2.6420E-08  4.1476E-01  6.2985E-01  2.6946E-15
+ 
+nelt =      39, np =         4, nx1 =      10, elements =       156
+Tot MFlops =   2.1810E+04, MFlops      =   5.4524E+03
+Setup Flop =   5.4210E+08, Solver Flop =   5.9085E+07
+Solve Time =   0.1103E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           10            8            2
+ Local Element Distribution: mx,my,mz=            5            4            2
+gs_setup: 3097 unique labels shared
+   pairwise times (avg, min, max): 9.38773e-06 9.27448e-06 9.53674e-06
+   crystal router                : 2.12967e-05 2.11716e-05 2.141e-05
+   all reduce                    : 3.75748e-05 3.72887e-05 3.78609e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  2.1678E+02
+cg: 101  2.0646E-08  4.0578E-01  6.5650E-01  1.6505E-15
+cg:   0  2.3537E+02
+cg: 101  2.5691E-08  4.0458E-01  6.5149E-01  2.5741E-15
+ 
+nelt =      40, np =         4, nx1 =      10, elements =       160
+Tot MFlops =   2.1740E+04, MFlops      =   5.4349E+03
+Setup Flop =   5.5600E+08, Solver Flop =   6.0600E+07
+Solve Time =   0.1135E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           82            2            1
+ Local Element Distribution: mx,my,mz=           41            1            1
+gs_setup: 7570 unique labels shared
+   pairwise times (avg, min, max): 1.17838e-05 1.15156e-05 1.21117e-05
+   crystal router                : 6.51181e-05 6.49214e-05 6.53505e-05
+   all reduce                    : 7.21395e-05 7.15256e-05 7.27654e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  2.1438E+02
+cg: 101  2.0859E-08  4.0569E-01  6.2934E-01  1.6881E-15
+cg:   0  2.5339E+02
+cg: 101  2.9874E-08  4.0657E-01  6.2544E-01  3.4449E-15
+ 
+nelt =      41, np =         4, nx1 =      10, elements =       164
+Tot MFlops =   2.1611E+04, MFlops      =   5.4028E+03
+Setup Flop =   5.6990E+08, Solver Flop =   6.2115E+07
+Solve Time =   0.1170E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           14            6            2
+ Local Element Distribution: mx,my,mz=            7            3            2
+gs_setup: 3439 unique labels shared
+   pairwise times (avg, min, max): 9.17912e-06 9.03606e-06 9.32217e-06
+   crystal router                : 2.38359e-05 2.36988e-05 2.39849e-05
+   all reduce                    : 4.32551e-05 4.2963e-05 4.35591e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  2.2184E+02
+cg: 101  1.9874E-08  4.0434E-01  6.4076E-01  1.5157E-15
+cg:   0  2.4125E+02
+cg: 101  2.5005E-08  4.0091E-01  6.3397E-01  2.4644E-15
+ 
+nelt =      42, np =         4, nx1 =      10, elements =       168
+Tot MFlops =   2.1721E+04, MFlops      =   5.4303E+03
+Setup Flop =   5.8380E+08, Solver Flop =   6.3630E+07
+Solve Time =   0.1192E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           86            2            1
+ Local Element Distribution: mx,my,mz=           43            1            1
+gs_setup: 7930 unique labels shared
+   pairwise times (avg, min, max): 1.51157e-05 1.47581e-05 1.54495e-05
+   crystal router                : 5.76913e-05 5.74589e-05 5.78165e-05
+   all reduce                    : 7.52926e-05 7.46012e-05 7.60078e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  2.1938E+02
+cg: 101  2.1506E-08  4.0646E-01  6.3167E-01  1.7959E-15
+cg:   0  2.5935E+02
+cg: 101  3.0572E-08  4.0621E-01  6.2543E-01  3.6284E-15
+ 
+nelt =      43, np =         4, nx1 =      10, elements =       172
+Tot MFlops =   2.1557E+04, MFlops      =   5.3893E+03
+Setup Flop =   5.9770E+08, Solver Flop =   6.5145E+07
+Solve Time =   0.1230E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           22            4            2
+ Local Element Distribution: mx,my,mz=           11            2            2
+gs_setup: 4465 unique labels shared
+   pairwise times (avg, min, max): 7.54595e-06 7.34329e-06 7.79629e-06
+   crystal router                : 3.10481e-05 3.07322e-05 3.13282e-05
+   all reduce                    : 5.00023e-05 4.96626e-05 5.0354e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  2.2666E+02
+cg: 101  2.1418E-08  4.0392E-01  6.5693E-01  1.7510E-15
+cg:   0  2.4817E+02
+cg: 101  2.7322E-08  4.0157E-01  6.5211E-01  2.8969E-15
+ 
+nelt =      44, np =         4, nx1 =      10, elements =       176
+Tot MFlops =   2.1810E+04, MFlops      =   5.4525E+03
+Setup Flop =   6.1160E+08, Solver Flop =   6.6660E+07
+Solve Time =   0.1244E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           10            6            3
+ Local Element Distribution: mx,my,mz=            5            3            3
+gs_setup: 4060 unique labels shared
+   pairwise times (avg, min, max): 8.52942e-06 8.32081e-06 8.79765e-06
+   crystal router                : 2.61843e-05 2.54154e-05 2.69413e-05
+   all reduce                    : 4.43339e-05 4.40359e-05 4.4632e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  2.3040E+02
+cg: 101  2.1764E-08  4.0827E-01  6.4469E-01  1.8267E-15
+cg:   0  2.4670E+02
+cg: 101  2.5135E-08  4.0805E-01  6.4719E-01  2.4392E-15
+ 
+nelt =      45, np =         4, nx1 =      10, elements =       180
+Tot MFlops =   2.1769E+04, MFlops      =   5.4424E+03
+Setup Flop =   6.2550E+08, Solver Flop =   6.8175E+07
+Solve Time =   0.1275E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           46            4            1
+ Local Element Distribution: mx,my,mz=           23            2            1
+gs_setup: 4510 unique labels shared
+   pairwise times (avg, min, max): 7.21812e-06 6.93798e-06 7.55787e-06
+   crystal router                : 3.21984e-05 3.20196e-05 3.23534e-05
+   all reduce                    : 4.92036e-05 4.88043e-05 4.96149e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  2.2863E+02
+cg: 101  2.1966E-08  4.1307E-01  6.3137E-01  1.8551E-15
+cg:   0  2.6316E+02
+cg: 101  2.9471E-08  4.1157E-01  6.2547E-01  3.3503E-15
+ 
+nelt =      46, np =         4, nx1 =      10, elements =       184
+Tot MFlops =   2.1812E+04, MFlops      =   5.4529E+03
+Setup Flop =   6.3940E+08, Solver Flop =   6.9690E+07
+Solve Time =   0.1300E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           94            2            1
+ Local Element Distribution: mx,my,mz=           47            1            1
+gs_setup: 8650 unique labels shared
+   pairwise times (avg, min, max): 1.38521e-05 1.21355e-05 1.48296e-05
+   crystal router                : 5.68032e-05 5.66483e-05 5.69344e-05
+   all reduce                    : 9.17852e-05 9.12905e-05 9.21726e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  2.2942E+02
+cg: 101  2.2572E-08  4.0496E-01  6.3305E-01  1.9738E-15
+cg:   0  2.7134E+02
+cg: 101  3.1923E-08  4.0500E-01  6.2689E-01  3.9425E-15
+ 
+nelt =      47, np =         4, nx1 =      10, elements =       188
+Tot MFlops =   2.1656E+04, MFlops      =   5.4141E+03
+Setup Flop =   6.5330E+08, Solver Flop =   7.1205E+07
+Solve Time =   0.1338E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=            8            8            3
+ Local Element Distribution: mx,my,mz=            4            4            3
+gs_setup: 4060 unique labels shared
+   pairwise times (avg, min, max): 9.56059e-06 9.32217e-06 9.799e-06
+   crystal router                : 2.20597e-05 2.19107e-05 2.21968e-05
+   all reduce                    : 4.44114e-05 4.41074e-05 4.46796e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  2.3854E+02
+cg: 101  2.0592E-08  4.0187E-01  6.4715E-01  1.6610E-15
+cg:   0  2.5490E+02
+cg: 101  2.4998E-08  4.0142E-01  6.5061E-01  2.4582E-15
+ 
+nelt =      48, np =         4, nx1 =      10, elements =       192
+Tot MFlops =   2.1762E+04, MFlops      =   5.4405E+03
+Setup Flop =   6.6720E+08, Solver Flop =   7.2720E+07
+Solve Time =   0.1360E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           14           14            1
+ Local Element Distribution: mx,my,mz=            7            7            1
+gs_setup: 2530 unique labels shared
+   pairwise times (avg, min, max): 7.37906e-06 7.22408e-06 7.67708e-06
+   crystal router                : 1.71959e-05 1.70469e-05 1.7333e-05
+   all reduce                    : 3.11613e-05 3.09467e-05 3.13759e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  2.3666E+02
+cg: 101  2.1358E-08  4.1025E-01  6.3508E-01  1.8071E-15
+cg:   0  2.6855E+02
+cg: 101  2.8260E-08  4.0794E-01  6.2443E-01  3.1920E-15
+ 
+nelt =      49, np =         4, nx1 =      10, elements =       196
+Tot MFlops =   2.1374E+04, MFlops      =   5.3434E+03
+Setup Flop =   6.8110E+08, Solver Flop =   7.4235E+07
+Solve Time =   0.1414E+00
+ 
+ Processor Distribution:  npx,npy,npz=            2            2            1
+ Element Distribution: nelx,nely,nelz=           10           10            2
+ Local Element Distribution: mx,my,mz=            5            5            2
+gs_setup: 3439 unique labels shared
+   pairwise times (avg, min, max): 7.65324e-06 7.43866e-06 7.82013e-06
+   crystal router                : 2.23756e-05 2.21491e-05 2.26021e-05
+   all reduce                    : 4.05908e-05 4.04119e-05 4.07696e-05
+   used all_to_all method: pairwise
+ 
+cg:   0  2.4272E+02
+cg: 101  2.3672E-08  4.0225E-01  6.5066E-01  2.1845E-15
+cg:   0  2.6281E+02
+cg: 101  2.8643E-08  4.0041E-01  6.5161E-01  3.2437E-15
+ 
+nelt =      50, np =         4, nx1 =      10, elements =       200
+Tot MFlops =   2.1283E+04, MFlops      =   5.3207E+03
+Setup Flop =   6.9500E+08, Solver Flop =   7.5750E+07
+Solve Time =   0.1449E+00
+Avg MFlops =   2.0568E+04
+ Exitting....

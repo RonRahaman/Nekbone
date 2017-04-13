@@ -1,0 +1,756 @@
+ Number of processors:            1
+ REAL    wdsize      :            8
+ INTEGER wdsize      :            4
+ ifmgrid    :  F     ifbrick    :  T
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            1            1            1
+ Local Element Distribution: mx,my,mz=            1            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.6117E+01
+cg: 101  1.3185E-29  3.7009E-01  1.9081E-01  2.3652E-57
+cg:   0  1.6117E+01
+cg: 101  1.3185E-29  3.7009E-01  1.9081E-01  2.3652E-57
+ 
+nelt =       1, np =         1, nx1 =      10, elements =         1
+Tot MFlops =   4.2952E+03, MFlops      =   4.2952E+03
+Setup Flop =   1.3900E+07, Solver Flop =   1.5150E+06
+Solve Time =   0.3589E-02
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            2            1            1
+ Local Element Distribution: mx,my,mz=            2            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  2.3316E+01
+cg: 101  4.8816E-10  3.7169E-01  5.7078E-01  9.4695E-19
+cg:   0  2.7435E+01
+cg: 101  7.6055E-10  4.2092E-01  5.6914E-01  2.3332E-18
+ 
+nelt =       2, np =         1, nx1 =      10, elements =         2
+Tot MFlops =   4.7895E+03, MFlops      =   4.7895E+03
+Setup Flop =   2.7800E+07, Solver Flop =   3.0300E+06
+Solve Time =   0.6437E-02
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            3            1            1
+ Local Element Distribution: mx,my,mz=            3            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  2.8593E+01
+cg: 101  1.0874E-09  4.0486E-01  5.9306E-01  5.0184E-18
+cg:   0  3.4403E+01
+cg: 101  1.9534E-09  3.9077E-01  5.8698E-01  1.7308E-17
+ 
+nelt =       3, np =         1, nx1 =      10, elements =         3
+Tot MFlops =   4.6006E+03, MFlops      =   4.6006E+03
+Setup Flop =   4.1700E+07, Solver Flop =   4.5450E+06
+Solve Time =   0.1005E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            2            2            1
+ Local Element Distribution: mx,my,mz=            2            2            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  3.3158E+01
+cg: 101  1.7418E-09  4.4364E-01  6.1160E-01  1.1150E-17
+cg:   0  3.9563E+01
+cg: 101  3.1855E-09  4.1493E-01  6.0990E-01  4.0129E-17
+ 
+nelt =       4, np =         1, nx1 =      10, elements =         4
+Tot MFlops =   4.5418E+03, MFlops      =   4.5418E+03
+Setup Flop =   5.5600E+07, Solver Flop =   6.0600E+06
+Solve Time =   0.1358E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            5            1            1
+ Local Element Distribution: mx,my,mz=            5            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  3.6808E+01
+cg: 101  2.1730E-09  4.0511E-01  6.5504E-01  1.9767E-17
+cg:   0  4.4943E+01
+cg: 101  3.6320E-09  4.1134E-01  6.3244E-01  5.1706E-17
+ 
+nelt =       5, np =         1, nx1 =      10, elements =         5
+Tot MFlops =   4.5057E+03, MFlops      =   4.5057E+03
+Setup Flop =   6.9500E+07, Solver Flop =   7.5750E+06
+Solve Time =   0.1711E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            3            2            1
+ Local Element Distribution: mx,my,mz=            3            2            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  4.0801E+01
+cg: 101  2.5729E-09  4.2039E-01  6.3997E-01  2.4370E-17
+cg:   0  4.8537E+01
+cg: 101  3.1341E-09  4.1952E-01  6.4068E-01  3.8035E-17
+ 
+nelt =       6, np =         1, nx1 =      10, elements =         6
+Tot MFlops =   4.7463E+03, MFlops      =   4.7463E+03
+Setup Flop =   8.3400E+07, Solver Flop =   9.0900E+06
+Solve Time =   0.1949E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            7            1            1
+ Local Element Distribution: mx,my,mz=            7            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  4.3501E+01
+cg: 101  3.3309E-09  4.2589E-01  6.3137E-01  3.9549E-17
+cg:   0  5.3614E+01
+cg: 101  5.0258E-09  4.4619E-01  6.0338E-01  9.5182E-17
+ 
+nelt =       7, np =         1, nx1 =      10, elements =         7
+Tot MFlops =   6.2405E+03, MFlops      =   6.2405E+03
+Setup Flop =   9.7300E+07, Solver Flop =   1.0605E+07
+Solve Time =   0.1729E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            2            2            2
+ Local Element Distribution: mx,my,mz=            2            2            2
+gs_setup: 0 unique labels shared
+ 
+cg:   0  4.7332E+01
+cg: 101  3.1162E-09  4.0371E-01  6.4802E-01  3.7198E-17
+cg:   0  5.5214E+01
+cg: 101  4.4659E-09  3.8472E-01  6.2563E-01  8.3193E-17
+ 
+nelt =       8, np =         1, nx1 =      10, elements =         8
+Tot MFlops =   6.2246E+03, MFlops      =   6.2246E+03
+Setup Flop =   1.1120E+08, Solver Flop =   1.2120E+07
+Solve Time =   0.1981E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            3            3            1
+ Local Element Distribution: mx,my,mz=            3            3            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  5.0048E+01
+cg: 101  4.3444E-09  4.3708E-01  6.2745E-01  6.6549E-17
+cg:   0  5.9138E+01
+cg: 101  6.3208E-09  4.1116E-01  6.5387E-01  1.5176E-16
+ 
+nelt =       9, np =         1, nx1 =      10, elements =         9
+Tot MFlops =   6.2060E+03, MFlops      =   6.2060E+03
+Setup Flop =   1.2510E+08, Solver Flop =   1.3635E+07
+Solve Time =   0.2236E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            5            2            1
+ Local Element Distribution: mx,my,mz=            5            2            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  5.2644E+01
+cg: 101  4.0867E-09  4.0701E-01  6.1260E-01  7.0387E-17
+cg:   0  6.2555E+01
+cg: 101  5.8351E-09  4.2387E-01  6.1518E-01  1.2361E-16
+ 
+nelt =      10, np =         1, nx1 =      10, elements =        10
+Tot MFlops =   6.2035E+03, MFlops      =   6.2035E+03
+Setup Flop =   1.3900E+08, Solver Flop =   1.5150E+07
+Solve Time =   0.2485E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           11            1            1
+ Local Element Distribution: mx,my,mz=           11            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  5.4394E+01
+cg: 101  4.5191E-09  4.2427E-01  6.4140E-01  7.7629E-17
+cg:   0  6.7422E+01
+cg: 101  7.0206E-09  3.9984E-01  6.4075E-01  2.0079E-16
+ 
+nelt =      11, np =         1, nx1 =      10, elements =        11
+Tot MFlops =   4.4374E+03, MFlops      =   4.4374E+03
+Setup Flop =   1.5290E+08, Solver Flop =   1.6665E+07
+Solve Time =   0.3821E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            3            2            2
+ Local Element Distribution: mx,my,mz=            3            2            2
+gs_setup: 0 unique labels shared
+ 
+cg:   0  5.8143E+01
+cg: 101  5.0586E-09  4.0993E-01  6.1611E-01  9.7275E-17
+cg:   0  6.7047E+01
+cg: 101  5.6627E-09  4.2925E-01  6.2357E-01  1.2090E-16
+ 
+nelt =      12, np =         1, nx1 =      10, elements =        12
+Tot MFlops =   4.8801E+03, MFlops      =   4.8801E+03
+Setup Flop =   1.6680E+08, Solver Flop =   1.8180E+07
+Solve Time =   0.3790E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           13            1            1
+ Local Element Distribution: mx,my,mz=           13            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  5.9231E+01
+cg: 101  5.1580E-09  4.1666E-01  6.4824E-01  1.0317E-16
+cg:   0  7.3456E+01
+cg: 101  7.5266E-09  4.1278E-01  6.3780E-01  2.2690E-16
+ 
+nelt =      13, np =         1, nx1 =      10, elements =        13
+Tot MFlops =   6.1789E+03, MFlops      =   6.1789E+03
+Setup Flop =   1.8070E+08, Solver Flop =   1.9695E+07
+Solve Time =   0.3243E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            7            2            1
+ Local Element Distribution: mx,my,mz=            7            2            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  6.2151E+01
+cg: 101  5.6229E-09  3.9859E-01  6.4116E-01  1.2640E-16
+cg:   0  7.4026E+01
+cg: 101  8.4764E-09  3.9865E-01  6.3904E-01  2.8941E-16
+ 
+nelt =      14, np =         1, nx1 =      10, elements =        14
+Tot MFlops =   6.1542E+03, MFlops      =   6.1542E+03
+Setup Flop =   1.9460E+08, Solver Flop =   2.1210E+07
+Solve Time =   0.3507E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            5            3            1
+ Local Element Distribution: mx,my,mz=            5            3            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  6.4573E+01
+cg: 101  6.2651E-09  3.9165E-01  6.1270E-01  1.5880E-16
+cg:   0  7.6019E+01
+cg: 101  9.1431E-09  4.0967E-01  6.1912E-01  3.1438E-16
+ 
+nelt =      15, np =         1, nx1 =      10, elements =        15
+Tot MFlops =   6.1359E+03, MFlops      =   6.1359E+03
+Setup Flop =   2.0850E+08, Solver Flop =   2.2725E+07
+Solve Time =   0.3768E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            4            2            2
+ Local Element Distribution: mx,my,mz=            4            2            2
+gs_setup: 0 unique labels shared
+ 
+cg:   0  6.7422E+01
+cg: 101  6.8593E-09  4.0475E-01  6.6632E-01  1.7387E-16
+cg:   0  7.7160E+01
+cg: 101  8.9745E-09  4.2609E-01  6.4785E-01  2.8659E-16
+ 
+nelt =      16, np =         1, nx1 =      10, elements =        16
+Tot MFlops =   6.1016E+03, MFlops      =   6.1016E+03
+Setup Flop =   2.2240E+08, Solver Flop =   2.4240E+07
+Solve Time =   0.4042E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           17            1            1
+ Local Element Distribution: mx,my,mz=           17            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  6.7645E+01
+cg: 101  6.4587E-09  4.1915E-01  6.4366E-01  1.6018E-16
+cg:   0  8.4268E+01
+cg: 101  9.7652E-09  4.2188E-01  6.4326E-01  3.6643E-16
+ 
+nelt =      17, np =         1, nx1 =      10, elements =        17
+Tot MFlops =   6.1292E+03, MFlops      =   6.1292E+03
+Setup Flop =   2.3630E+08, Solver Flop =   2.5755E+07
+Solve Time =   0.4276E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            3            3            2
+ Local Element Distribution: mx,my,mz=            3            3            2
+gs_setup: 0 unique labels shared
+ 
+cg:   0  7.1640E+01
+cg: 101  6.7634E-09  4.3493E-01  6.1957E-01  1.6247E-16
+cg:   0  8.1265E+01
+cg: 101  9.5219E-09  4.2922E-01  6.1006E-01  3.2900E-16
+ 
+nelt =      18, np =         1, nx1 =      10, elements =        18
+Tot MFlops =   6.0513E+03, MFlops      =   6.0513E+03
+Setup Flop =   2.5020E+08, Solver Flop =   2.7270E+07
+Solve Time =   0.4585E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           19            1            1
+ Local Element Distribution: mx,my,mz=           19            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  7.1537E+01
+cg: 101  6.8815E-09  4.1479E-01  6.4523E-01  1.8246E-16
+cg:   0  8.9202E+01
+cg: 101  1.0561E-08  4.1934E-01  6.4136E-01  4.2629E-16
+ 
+nelt =      19, np =         1, nx1 =      10, elements =        19
+Tot MFlops =   6.0859E+03, MFlops      =   6.0859E+03
+Setup Flop =   2.6410E+08, Solver Flop =   2.8785E+07
+Solve Time =   0.4813E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            5            2            2
+ Local Element Distribution: mx,my,mz=            5            2            2
+gs_setup: 0 unique labels shared
+ 
+cg:   0  7.5457E+01
+cg: 101  6.9142E-09  4.3773E-01  6.2267E-01  1.7087E-16
+cg:   0  8.5924E+01
+cg: 101  9.3745E-09  4.3895E-01  6.1688E-01  3.1551E-16
+ 
+nelt =      20, np =         1, nx1 =      10, elements =        20
+Tot MFlops =   6.0119E+03, MFlops      =   6.0119E+03
+Setup Flop =   2.7800E+08, Solver Flop =   3.0300E+07
+Solve Time =   0.5128E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            7            3            1
+ Local Element Distribution: mx,my,mz=            7            3            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  7.6640E+01
+cg: 101  7.3263E-09  4.1333E-01  6.3636E-01  2.0683E-16
+cg:   0  8.9920E+01
+cg: 101  1.0156E-08  4.0803E-01  6.1670E-01  4.0451E-16
+ 
+nelt =      21, np =         1, nx1 =      10, elements =        21
+Tot MFlops =   6.0302E+03, MFlops      =   6.0302E+03
+Setup Flop =   2.9190E+08, Solver Flop =   3.1815E+07
+Solve Time =   0.5368E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           11            2            1
+ Local Element Distribution: mx,my,mz=           11            2            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  7.8259E+01
+cg: 101  7.7104E-09  4.1157E-01  6.2905E-01  2.3001E-16
+cg:   0  9.2996E+01
+cg: 101  1.1368E-08  4.1617E-01  6.3117E-01  4.9239E-16
+ 
+nelt =      22, np =         1, nx1 =      10, elements =        22
+Tot MFlops =   6.0278E+03, MFlops      =   6.0278E+03
+Setup Flop =   3.0580E+08, Solver Flop =   3.3330E+07
+Solve Time =   0.5626E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           23            1            1
+ Local Element Distribution: mx,my,mz=           23            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  7.8908E+01
+cg: 101  7.4618E-09  4.1761E-01  6.3483E-01  2.1256E-16
+cg:   0  9.8330E+01
+cg: 101  1.1591E-08  4.1918E-01  6.4119E-01  5.1468E-16
+ 
+nelt =      23, np =         1, nx1 =      10, elements =        23
+Tot MFlops =   6.0360E+03, MFlops      =   6.0360E+03
+Setup Flop =   3.1970E+08, Solver Flop =   3.4845E+07
+Solve Time =   0.5874E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            4            3            2
+ Local Element Distribution: mx,my,mz=            4            3            2
+gs_setup: 0 unique labels shared
+ 
+cg:   0  8.3248E+01
+cg: 101  7.7987E-09  3.9525E-01  6.4513E-01  2.3611E-16
+cg:   0  9.3530E+01
+cg: 101  1.1243E-08  3.9869E-01  6.4710E-01  4.8177E-16
+ 
+nelt =      24, np =         1, nx1 =      10, elements =        24
+Tot MFlops =   5.9901E+03, MFlops      =   5.9901E+03
+Setup Flop =   3.3360E+08, Solver Flop =   3.6360E+07
+Solve Time =   0.6176E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            5            5            1
+ Local Element Distribution: mx,my,mz=            5            5            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  8.3892E+01
+cg: 101  7.8445E-09  4.1582E-01  6.1020E-01  2.3935E-16
+cg:   0  9.7576E+01
+cg: 101  1.0697E-08  4.2437E-01  6.1136E-01  4.2539E-16
+ 
+nelt =      25, np =         1, nx1 =      10, elements =        25
+Tot MFlops =   5.9969E+03, MFlops      =   5.9969E+03
+Setup Flop =   3.4750E+08, Solver Flop =   3.7875E+07
+Solve Time =   0.6426E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           13            2            1
+ Local Element Distribution: mx,my,mz=           13            2            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  8.5129E+01
+cg: 101  7.4843E-09  4.1866E-01  6.3495E-01  2.1281E-16
+cg:   0  1.0099E+02
+cg: 101  1.0688E-08  4.2107E-01  6.3264E-01  4.3121E-16
+ 
+nelt =      26, np =         1, nx1 =      10, elements =        26
+Tot MFlops =   5.9907E+03, MFlops      =   5.9907E+03
+Setup Flop =   3.6140E+08, Solver Flop =   3.9390E+07
+Solve Time =   0.6690E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            3            3            3
+ Local Element Distribution: mx,my,mz=            3            3            3
+gs_setup: 0 unique labels shared
+ 
+cg:   0  8.8498E+01
+cg: 101  8.0665E-09  4.1883E-01  6.4822E-01  2.3308E-16
+cg:   0  9.8816E+01
+cg: 101  1.0480E-08  4.1723E-01  6.3300E-01  4.0442E-16
+ 
+nelt =      27, np =         1, nx1 =      10, elements =        27
+Tot MFlops =   5.9613E+03, MFlops      =   5.9613E+03
+Setup Flop =   3.7530E+08, Solver Flop =   4.0905E+07
+Solve Time =   0.6982E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            7            2            2
+ Local Element Distribution: mx,my,mz=            7            2            2
+gs_setup: 0 unique labels shared
+ 
+cg:   0  8.9507E+01
+cg: 101  7.9405E-09  4.0066E-01  6.4735E-01  2.4569E-16
+cg:   0  1.0157E+02
+cg: 101  1.0389E-08  4.0157E-01  6.4404E-01  4.1586E-16
+ 
+nelt =      28, np =         1, nx1 =      10, elements =        28
+Tot MFlops =   5.9847E+03, MFlops      =   5.9847E+03
+Setup Flop =   3.8920E+08, Solver Flop =   4.2420E+07
+Solve Time =   0.7212E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           29            1            1
+ Local Element Distribution: mx,my,mz=           29            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  8.8648E+01
+cg: 101  8.3061E-09  4.1811E-01  6.3777E-01  2.5886E-16
+cg:   0  1.1055E+02
+cg: 101  1.2545E-08  4.1899E-01  6.3483E-01  5.9767E-16
+ 
+nelt =      29, np =         1, nx1 =      10, elements =        29
+Tot MFlops =   6.0230E+03, MFlops      =   6.0230E+03
+Setup Flop =   4.0310E+08, Solver Flop =   4.3935E+07
+Solve Time =   0.7422E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            5            3            2
+ Local Element Distribution: mx,my,mz=            5            3            2
+gs_setup: 0 unique labels shared
+ 
+cg:   0  9.2960E+01
+cg: 101  8.6916E-09  4.2100E-01  6.2668E-01  2.7812E-16
+cg:   0  1.0433E+02
+cg: 101  1.1453E-08  4.0943E-01  6.3120E-01  4.9240E-16
+ 
+nelt =      30, np =         1, nx1 =      10, elements =        30
+Tot MFlops =   5.9639E+03, MFlops      =   5.9639E+03
+Setup Flop =   4.1700E+08, Solver Flop =   4.5450E+07
+Solve Time =   0.7754E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           31            1            1
+ Local Element Distribution: mx,my,mz=           31            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  9.1550E+01
+cg: 101  8.5097E-09  4.1803E-01  6.3924E-01  2.7609E-16
+cg:   0  1.1426E+02
+cg: 101  1.2748E-08  4.1999E-01  6.3567E-01  6.2451E-16
+ 
+nelt =      31, np =         1, nx1 =      10, elements =        31
+Tot MFlops =   6.0072E+03, MFlops      =   6.0072E+03
+Setup Flop =   4.3090E+08, Solver Flop =   4.6965E+07
+Solve Time =   0.7955E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            4            4            2
+ Local Element Distribution: mx,my,mz=            4            4            2
+gs_setup: 0 unique labels shared
+ 
+cg:   0  9.6111E+01
+cg: 101  8.5989E-09  4.0203E-01  6.4197E-01  2.9141E-16
+cg:   0  1.0742E+02
+cg: 101  1.2267E-08  4.0062E-01  6.3632E-01  5.9745E-16
+ 
+nelt =      32, np =         1, nx1 =      10, elements =        32
+Tot MFlops =   5.9535E+03, MFlops      =   5.9535E+03
+Setup Flop =   4.4480E+08, Solver Flop =   4.8480E+07
+Solve Time =   0.8286E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           11            3            1
+ Local Element Distribution: mx,my,mz=           11            3            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  9.6336E+01
+cg: 101  9.5050E-09  4.0141E-01  6.4505E-01  3.5619E-16
+cg:   0  1.1257E+02
+cg: 101  1.3702E-08  4.0249E-01  6.4912E-01  7.3000E-16
+ 
+nelt =      33, np =         1, nx1 =      10, elements =        33
+Tot MFlops =   5.7358E+03, MFlops      =   5.7358E+03
+Setup Flop =   4.5870E+08, Solver Flop =   4.9995E+07
+Solve Time =   0.8869E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           17            2            1
+ Local Element Distribution: mx,my,mz=           17            2            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  9.7459E+01
+cg: 101  9.1873E-09  4.2049E-01  6.2986E-01  3.2021E-16
+cg:   0  1.1557E+02
+cg: 101  1.3644E-08  4.2331E-01  6.2901E-01  6.9622E-16
+ 
+nelt =      34, np =         1, nx1 =      10, elements =        34
+Tot MFlops =   5.7469E+03, MFlops      =   5.7469E+03
+Setup Flop =   4.7260E+08, Solver Flop =   5.1510E+07
+Solve Time =   0.9120E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            7            5            1
+ Local Element Distribution: mx,my,mz=            7            5            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  9.9397E+01
+cg: 101  9.0484E-09  4.0484E-01  6.3945E-01  3.1612E-16
+cg:   0  1.1518E+02
+cg: 101  1.2637E-08  4.0544E-01  6.3370E-01  6.1417E-16
+ 
+nelt =      35, np =         1, nx1 =      10, elements =        35
+Tot MFlops =   5.7270E+03, MFlops      =   5.7270E+03
+Setup Flop =   4.8650E+08, Solver Flop =   5.3025E+07
+Solve Time =   0.9421E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            4            3            3
+ Local Element Distribution: mx,my,mz=            4            3            3
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.0240E+02
+cg: 101  9.3364E-09  4.2234E-01  6.3524E-01  3.2517E-16
+cg:   0  1.1334E+02
+cg: 101  1.3027E-08  4.0016E-01  6.4906E-01  6.6473E-16
+ 
+nelt =      36, np =         1, nx1 =      10, elements =        36
+Tot MFlops =   5.7103E+03, MFlops      =   5.7103E+03
+Setup Flop =   5.0040E+08, Solver Flop =   5.4540E+07
+Solve Time =   0.9718E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           37            1            1
+ Local Element Distribution: mx,my,mz=           37            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.0021E+02
+cg: 101  9.3505E-09  4.1425E-01  6.4271E-01  3.3820E-16
+cg:   0  1.2501E+02
+cg: 101  1.4074E-08  4.1674E-01  6.4387E-01  7.6556E-16
+ 
+nelt =      37, np =         1, nx1 =      10, elements =        37
+Tot MFlops =   5.7640E+03, MFlops      =   5.7640E+03
+Setup Flop =   5.1430E+08, Solver Flop =   5.6055E+07
+Solve Time =   0.9895E-01
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           19            2            1
+ Local Element Distribution: mx,my,mz=           19            2            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.0302E+02
+cg: 101  9.5652E-09  4.2023E-01  6.3321E-01  3.4341E-16
+cg:   0  1.2221E+02
+cg: 101  1.3872E-08  4.1801E-01  6.2974E-01  7.3010E-16
+ 
+nelt =      38, np =         1, nx1 =      10, elements =        38
+Tot MFlops =   5.6891E+03, MFlops      =   5.6891E+03
+Setup Flop =   5.2820E+08, Solver Flop =   5.7570E+07
+Solve Time =   0.1030E+00
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           13            3            1
+ Local Element Distribution: mx,my,mz=           13            3            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.0482E+02
+cg: 101  9.6001E-09  4.1279E-01  6.4677E-01  3.5035E-16
+cg:   0  1.2235E+02
+cg: 101  1.3887E-08  4.1144E-01  6.3897E-01  7.3744E-16
+ 
+nelt =      39, np =         1, nx1 =      10, elements =        39
+Tot MFlops =   5.7468E+03, MFlops      =   5.7468E+03
+Setup Flop =   5.4210E+08, Solver Flop =   5.9085E+07
+Solve Time =   0.1046E+00
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            5            4            2
+ Local Element Distribution: mx,my,mz=            5            4            2
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.0764E+02
+cg: 101  9.9225E-09  4.1719E-01  6.4659E-01  3.7186E-16
+cg:   0  1.1991E+02
+cg: 101  1.2988E-08  4.1765E-01  6.4126E-01  6.3349E-16
+ 
+nelt =      40, np =         1, nx1 =      10, elements =        40
+Tot MFlops =   5.7336E+03, MFlops      =   5.7336E+03
+Setup Flop =   5.5600E+08, Solver Flop =   6.0600E+07
+Solve Time =   0.1075E+00
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           41            1            1
+ Local Element Distribution: mx,my,mz=           41            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.0549E+02
+cg: 101  9.9315E-09  4.1321E-01  6.4293E-01  3.8047E-16
+cg:   0  1.3170E+02
+cg: 101  1.5208E-08  4.1457E-01  6.4800E-01  8.9480E-16
+ 
+nelt =      41, np =         1, nx1 =      10, elements =        41
+Tot MFlops =   5.7780E+03, MFlops      =   5.7780E+03
+Setup Flop =   5.6990E+08, Solver Flop =   6.2115E+07
+Solve Time =   0.1094E+00
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            7            3            2
+ Local Element Distribution: mx,my,mz=            7            3            2
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.1008E+02
+cg: 101  9.8722E-09  4.1638E-01  6.3659E-01  3.6584E-16
+cg:   0  1.2299E+02
+cg: 101  1.3735E-08  4.1600E-01  6.3313E-01  7.1562E-16
+ 
+nelt =      42, np =         1, nx1 =      10, elements =        42
+Tot MFlops =   5.7274E+03, MFlops      =   5.7274E+03
+Setup Flop =   5.8380E+08, Solver Flop =   6.3630E+07
+Solve Time =   0.1130E+00
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           43            1            1
+ Local Element Distribution: mx,my,mz=           43            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.0795E+02
+cg: 101  1.0287E-08  4.1184E-01  6.4427E-01  4.0800E-16
+cg:   0  1.3480E+02
+cg: 101  1.5548E-08  4.1260E-01  6.4584E-01  9.3866E-16
+ 
+nelt =      43, np =         1, nx1 =      10, elements =        43
+Tot MFlops =   5.7687E+03, MFlops      =   5.7687E+03
+Setup Flop =   5.9770E+08, Solver Flop =   6.5145E+07
+Solve Time =   0.1149E+00
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           11            2            2
+ Local Element Distribution: mx,my,mz=           11            2            2
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.1231E+02
+cg: 101  1.0127E-08  4.1992E-01  6.3791E-01  3.8656E-16
+cg:   0  1.2712E+02
+cg: 101  1.4192E-08  4.1815E-01  6.3423E-01  7.6730E-16
+ 
+nelt =      44, np =         1, nx1 =      10, elements =        44
+Tot MFlops =   5.7300E+03, MFlops      =   5.7300E+03
+Setup Flop =   6.1160E+08, Solver Flop =   6.6660E+07
+Solve Time =   0.1184E+00
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            5            3            3
+ Local Element Distribution: mx,my,mz=            5            3            3
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.1434E+02
+cg: 101  1.0721E-08  4.1479E-01  6.4387E-01  4.3186E-16
+cg:   0  1.2620E+02
+cg: 101  1.2462E-08  4.1711E-01  6.4057E-01  5.8638E-16
+ 
+nelt =      45, np =         1, nx1 =      10, elements =        45
+Tot MFlops =   5.7216E+03, MFlops      =   5.7216E+03
+Setup Flop =   6.2550E+08, Solver Flop =   6.8175E+07
+Solve Time =   0.1212E+00
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           23            2            1
+ Local Element Distribution: mx,my,mz=           23            2            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.1334E+02
+cg: 101  1.0742E-08  4.1524E-01  6.4028E-01  4.2955E-16
+cg:   0  1.3451E+02
+cg: 101  1.5300E-08  4.1302E-01  6.3329E-01  8.8017E-16
+ 
+nelt =      46, np =         1, nx1 =      10, elements =        46
+Tot MFlops =   5.7450E+03, MFlops      =   5.7450E+03
+Setup Flop =   6.3940E+08, Solver Flop =   6.9690E+07
+Solve Time =   0.1234E+00
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=           47            1            1
+ Local Element Distribution: mx,my,mz=           47            1            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.1290E+02
+cg: 101  1.0776E-08  4.1578E-01  6.4171E-01  4.4089E-16
+cg:   0  1.4108E+02
+cg: 101  1.6232E-08  4.1679E-01  6.4760E-01  1.0082E-15
+ 
+nelt =      47, np =         1, nx1 =      10, elements =        47
+Tot MFlops =   5.7693E+03, MFlops      =   5.7693E+03
+Setup Flop =   6.5330E+08, Solver Flop =   7.1205E+07
+Solve Time =   0.1256E+00
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            4            4            3
+ Local Element Distribution: mx,my,mz=            4            4            3
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.1835E+02
+cg: 101  1.0856E-08  4.2037E-01  6.3541E-01  4.3925E-16
+cg:   0  1.3011E+02
+cg: 101  1.3685E-08  4.1914E-01  6.3479E-01  7.0579E-16
+ 
+nelt =      48, np =         1, nx1 =      10, elements =        48
+Tot MFlops =   5.7177E+03, MFlops      =   5.7177E+03
+Setup Flop =   6.6720E+08, Solver Flop =   7.2720E+07
+Solve Time =   0.1294E+00
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            7            7            1
+ Local Element Distribution: mx,my,mz=            7            7            1
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.1783E+02
+cg: 101  1.0796E-08  3.9700E-01  6.4294E-01  4.6830E-16
+cg:   0  1.3588E+02
+cg: 101  1.4581E-08  3.9888E-01  6.3114E-01  8.4456E-16
+ 
+nelt =      49, np =         1, nx1 =      10, elements =        49
+Tot MFlops =   5.7291E+03, MFlops      =   5.7291E+03
+Setup Flop =   6.8110E+08, Solver Flop =   7.4235E+07
+Solve Time =   0.1318E+00
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            5            5            2
+ Local Element Distribution: mx,my,mz=            5            5            2
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.2064E+02
+cg: 101  1.0789E-08  4.2498E-01  6.3134E-01  4.3755E-16
+cg:   0  1.3361E+02
+cg: 101  1.3657E-08  4.2128E-01  6.2979E-01  7.1154E-16
+ 
+nelt =      50, np =         1, nx1 =      10, elements =        50
+Tot MFlops =   5.7070E+03, MFlops      =   5.7070E+03
+Setup Flop =   6.9500E+08, Solver Flop =   7.5750E+07
+Solve Time =   0.1351E+00
+Avg MFlops =   5.7147E+03
+ Exitting....
