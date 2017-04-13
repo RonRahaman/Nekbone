@@ -1,0 +1,21 @@
+ Number of processors:            1
+ REAL    wdsize      :            8
+ INTEGER wdsize      :            4
+ ifmgrid    :  F     ifbrick    :  T
+ 
+ Processor Distribution:  npx,npy,npz=            1            1            1
+ Element Distribution: nelx,nely,nelz=            5            5            2
+ Local Element Distribution: mx,my,mz=            5            5            2
+gs_setup: 0 unique labels shared
+ 
+cg:   0  1.2064E+02
+cg: 101  1.0789E-08  4.2498E-01  6.3134E-01  4.3755E-16
+cg:   0  1.3361E+02
+cg: 101  1.3657E-08  4.2128E-01  6.2979E-01  7.1154E-16
+ 
+nelt =      50, np =         1, nx1 =      10, elements =        50
+Tot MFlops =   5.6832E+03, MFlops      =   5.6832E+03
+Setup Flop =   6.9500E+08, Solver Flop =   7.5750E+07
+Solve Time =   0.1356E+00
+Avg MFlops =   5.6832E+03
+ Exitting....
