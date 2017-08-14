@@ -1,6 +1,19 @@
+#ifdef TIMERS
+#define NBTIMER(a) a = dnekclock()
+#define STIMER(a) a = dnekclock_sync()
+#define ACCUMTIMER(b,a) b = b + (dnekclock()- a )
+#else
+#define NBTIMER(a)
+#define STIMER(a)
+#define ACCUMTIMER(a,b)
+#endif
+
+
 c-----------------------------------------------------------------------
       subroutine cg(x,f,g,c,r,w,p,z,n,niter,flop_cg)
       include 'SIZE'
+      include 'TIMER'
+
 
 c     Solve Ax=f where A is SPD and is invoked by ax()
 c
@@ -24,6 +37,7 @@ c
       real x(n),f(n),r(n),w(n),p(n),z(n),g(1),c(n)
 
       character*1 ans
+      integer fiter, tmt
 
       pap = 0.0
 
@@ -35,39 +49,67 @@ c     set machine tolerances
 
       rtz1=1.0
 
+      NBTIMER(ttemp1)
       call rzero(x,n)
+      ACCUMTIMER(trzero(tmt), ttemp1)
+
+      NBTIMER(ttemp1)
       call copy (r,f,n)
+      ACCUMTIMER(tcopy(tmt), ttemp1)
       call maskit (r,cmask,nx1,ny1,nz1) ! Zero out Dirichlet conditions
 
+      NBTIMER(ttemp1)
       rnorm = sqrt(glsc3(r,c,r,n))
+      ACCUMTIMER(tglsc3a(tmt), ttemp1)
       iter = 0
-      if (nid.eq.0)  write(6,6) iter,rnorm
+c     if (nid.eq.0)  write(6,6) iter,rnorm
 
       miter = niter
 c     call tester(z,r,n)  
       do iter=1,miter
+#ifdef LOG
+         if ((nid.eq.0) .and. (thread.eq.0)) write(*,*) "iter = ", iter
+#endif
+         NBTIMER(ttemp1)
          call solveM(z,r,n) ! preconditioner here
+         ACCUMTIMER(tsolvem(tmt), ttemp1)
 
          rtz2=rtz1                                                       ! OPS
+         NBTIMER(ttemp1)
          rtz1=glsc3(r,c,z,n)   ! parallel weighted inner product r^T C z ! 3n
+         ACCUMTIMER(tglsc3b(tmt), ttemp1)
 
          beta = rtz1/rtz2
          if (iter.eq.1) beta=0.0
+         NBTIMER(ttemp1)
          call add2s1(p,z,beta,n)                                         ! 2n
+         ACCUMTIMER(tadd2s1(tmt), ttemp1)
 
          call ax(w,p,g,ur,us,ut,wk,n)                                    ! flopa
+         NBTIMER(ttemp1)
          pap=glsc3(w,c,p,n)                                              ! 3n
+         ACCUMTIMER(tglsc3c(tmt), ttemp1)
 
          alpha=rtz1/pap
          alphm=-alpha
+
+         NBTIMER(ttemp1)
          call add2s2(x,p,alpha,n)                                        ! 2n
+         ACCUMTIMER(tadd2s2b(tmt), ttemp1)
+
+         NBTIMER(ttemp1)
          call add2s2(r,w,alphm,n)                                        ! 2n
+         ACCUMTIMER(tadd2s2c(tmt), ttemp1)
+
+         NBTIMER(ttemp1)
          rtr = glsc3(r,c,r,n)                                            ! 3n
+         ACCUMTIMER(tglsc3d(tmt), ttemp1)
+
          if (iter.eq.1) rlim2 = rtr*eps**2
          if (iter.eq.1) rtr0  = rtr
          rnorm = sqrt(rtr)
-c        if (nid.eq.0.and.mod(iter,100).eq.0) 
-c     $        write(6,6) iter,rnorm,alpha,beta,pap
+c       if (nid.eq.0.and.mod(iter,100).eq.0) 
+c    $        write(6,6) iter,rnorm,alpha,beta,pap
 
     6    format('cg:',i4,1p4e12.4)
 c        if (rtr.le.rlim2) goto 1001
@@ -114,7 +156,9 @@ c-----------------------------------------------------------------------
 
       call dssum(w)         ! Gather-scatter operation  ! w   = QQ  w
                                                         !            L
+      NBTIMER(ttemp2)
       call add2s2(w,u,.1,n)   !2n
+      ACCUMTIMER(tadd2s2a(tmt),ttemp2)
       call maskit(w,cmask,nx1,ny1,nz1)  ! Zero out Dirichlet conditions
 
       nxyz=nx1*ny1*nz1
@@ -141,6 +185,7 @@ c-------------------------------------------------------------------------
       subroutine ax_e(w,u,g,ur,us,ut,wk) ! Local matrix-vector product
       include 'SIZE'
       include 'TOTAL'
+      include 'TIMER'
 
       parameter (lxyz=lx1*ly1*lz1)
       real ur(lxyz),us(lxyz),ut(lxyz),wk(lxyz)
@@ -150,8 +195,11 @@ c-------------------------------------------------------------------------
       nxyz = nx1*ny1*nz1
       n    = nx1-1
 
+      NBTIMER(ttemp3)
       call local_grad3(ur,us,ut,u,n,dxm1,dxtm1)
+      ACCUMTIMER(tlocalgrad3(tmt),ttemp3)
 
+      NBTIMER(ttemp3)
       do i=1,nxyz
          wr = g(i,1)*ur(i) + g(i,2)*us(i) + g(i,3)*ut(i)
          ws = g(i,2)*ur(i) + g(i,4)*us(i) + g(i,5)*ut(i)
@@ -160,8 +208,11 @@ c-------------------------------------------------------------------------
          us(i) = ws
          ut(i) = wt
       enddo
+      ACCUMTIMER(twrwswt(tmt),ttemp3)
 
+      NBTIMER(ttemp3)
       call local_grad3_t(w,ur,us,ut,n,dxm1,dxtm1,wk)
+      ACCUMTIMER(tlocalgrad3t(tmt),ttemp3)
 
       return
       end
@@ -575,7 +626,7 @@ c     set machine tolerances
       call rzero_acc(x,n)
       rnorm = sqrt(glsc3_acc(r,c,r,n))
       iter = 0
-      if (nid.eq.0)  write(6,6) iter,rnorm
+c     if (nid.eq.0)  write(6,6) iter,rnorm
 
       miter = niter
 c     call tester(z,r,n)  
@@ -602,10 +653,10 @@ c     call tester(z,r,n)
          if (iter.eq.1) rlim2 = rtr*eps**2
          if (iter.eq.1) rtr0  = rtr
          rnorm = sqrt(rtr)
-C        if (nid.eq.0.and.mod(iter,100).eq.0) 
-C    $      write(6,6) iter,rnorm,alpha,beta,pap
-        if (nid.eq.0.) 
-     $        write(6,6) iter,rnorm,alpha,beta,pap
+c        if (nid.eq.0.and.mod(iter,100).eq.0) 
+c    $      write(6,6) iter,rnorm,alpha,beta,pap
+c       if (nid.eq.0.) 
+c    $        write(6,6) iter,rnorm,alpha,beta,pap
 
     6    format('cg:',i4,1p4e12.4)
 c        if (rtr.le.rlim2) goto 1001

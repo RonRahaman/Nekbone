@@ -15,6 +15,7 @@ c-----------------------------------------------------------------------
 
       real g(6,lt)
       real mfloplist(1024), avmflop
+      real tstart, tstop
       integer icount  
 
       logical ifbrick
@@ -46,6 +47,21 @@ c     iverbose = 1
 c     call platform_timer(iverbose)   ! iverbose=0 or 1
 
       icount = 0
+
+#ifndef NITER 
+#define NITER 100
+#endif
+      niter = NITER
+
+      if (nid.eq.0) then
+        write(*,*) "Number of iterations: ", niter
+      end if
+
+#ifdef LOG
+#define WLOG(X) if (nid .eq. 0) write(*,*) X 
+#else 
+#define WLOG(X) 
+#endif
 
 c     SET UP and RUN NEKBONE
 
@@ -97,29 +113,40 @@ c     SET UP and RUN NEKBONE
 
 #else 
       do nx1=nx0,nxN,nxD
+         WLOG("calling init_dim")
          call init_dim
          do nelt=iel0,ielN,ielD
+           WLOG("calling init_mesh")
            call init_mesh(ifbrick,cmask,npx,npy,npz,mx,my,mz)
+           WLOG("calling prox_setupds")
            call proxy_setupds    (gsh,nx1) ! Has nekmpi common block
+           WLOG("calling set_multiplicity")
            call set_multiplicity (c)       ! Inverse of counting matrix
 
+           WLOG("calling proxy_setup")
            call proxy_setup(ah,bh,ch,dh,zh,wh,g) 
+           WLOG("calling h1mg_setup")
            call h1mg_setup
 
-           niter = 100
            n     = nx1*ny1*nz1*nelt
 
+           WLOG("calling set_f")
            call set_f(f,c,n)
-
+           WLOG("calling cg")
            if(nid.eq.0) write(6,*)
            call cg(x,f,g,c,r,w,p,z,n,niter,flop_cg)
 
+           WLOG("calling nekgsync")
            call nekgsync()
 
+           WLOG("calling set_timer_flop_count")
            call set_timer_flop_cnt(0)
+           WLOG("calling cg")
            call cg(x,f,g,c,r,w,p,z,n,niter,flop_cg)
+           WLOG("calling set_timer_flop_count")
            call set_timer_flop_cnt(1)
 
+           WLOG("calling gs_free")
            call gs_free(gsh)
            
            icount = icount + 1
@@ -131,16 +158,21 @@ c     SET UP and RUN NEKBONE
       do i = 1,icount
          avmflop = avmflop+mfloplist(i)
       enddo
+
       if(icount.ne.0) then
          avmflop=avmflop/icount
       endif
       if(nid.eq.0) then
          write(6,1) avmflop
       endif
-  1   format('Avg MFlops = ',1pe12.4)
+    1 format('Avg MFlops = ', 1pe12.4)
 
 c     TEST BANDWIDTH BISECTION CAPACITY
 c     call xfer(np,cr_h)
+
+      call nekgsync()
+      tstop = dnekclock()
+      if (nid .eq.0) write(*,*) "Total run time = ", tstop-tstart
 
       call exitt0
 
