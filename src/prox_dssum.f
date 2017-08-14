@@ -466,11 +466,7 @@ c     call nekgsync()
       if (n_nonlocal .gt. 1) then
 
 c         ngv = nv + n_nonlocal  ! Number that must be copied out
-!$ACC UPDATE HOST(ug(1:n_nonlocal)) async(1)
-!$ACC WAIT
          call gs_op(gsh_acc,ug(1),1,1,0) ! 1 ==> +
-
-!$ACC UPDATE DEVICE(ug(1:n_nonlocal)) async(1)
       endif
 
 !$ACC PARALLEL LOOP GANG VECTOR PRIVATE(il) async(1)
