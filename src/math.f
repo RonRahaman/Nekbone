@@ -1,3 +1,14 @@
+#ifdef TIMERS
+#define NBTIMER(a) a = dnekclock()
+#define STIMER(a) a = dnekclock_sync()
+#define ACCUMTIMER(b,a) b = b + (dnekclock()- a)
+#else
+#define NBTIMER(a)
+#define STIMER(a)
+#define ACCUMTIMER(a,b)
+#endif
+
+
 c-----------------------------------------------------------------------
       SUBROUTINE BLANK(A,N)
       CHARACTER*1 A(1)
@@ -601,18 +612,29 @@ C     appropriate routines which take into account the specific architecture.
 C
 C----------------------------------------------------------------------------
       function glsc3(a,b,mult,n)
+      include 'TIMER'
 C
 C     Perform inner-product in double precision
 C
       real a(1),b(1),mult(1)
       real tmp,work(1)
+      integer i, tmt, thread
+      integer omp_get_thread_num
+
+      thread = 0
+#ifdef _OPENMP
+      thread = omp_get_thread_num()
+#endif
+      tmt = thread + 1
  
       tmp = 0.0
       do 10 i=1,n
          tmp = tmp + a(i)*b(i)*mult(i)
  10   continue
+      NBTIMER(ttemp4)
       call gop(tmp,work,'+  ',1)
       glsc3 = tmp
+      ACCUMTIMER(tgop(gopi(tmt),tmt), ttemp4)
       return
       end
 c-----------------------------------------------------------------------

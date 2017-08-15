@@ -63,6 +63,7 @@ c     set machine tolerances
       ACCUMTIMER(tcopy(tmt), ttemp1)
       call maskit (r,cmask,nx1,ny1,nz1) ! Zero out Dirichlet conditions
 
+      gopi(tmt)=1
       NBTIMER(ttemp1)
       rnorm = sqrt(glsc3(r,c,r,n))
       ACCUMTIMER(tglsc3a(tmt), ttemp1)
@@ -80,17 +81,21 @@ c     call tester(z,r,n)
          ACCUMTIMER(tsolvem(tmt), ttemp1)
 
          rtz2=rtz1                                                       ! OPS
+         gopi(tmt)=2
          NBTIMER(ttemp1)
          rtz1=glsc3(r,c,z,n)   ! parallel weighted inner product r^T C z ! 3n
          ACCUMTIMER(tglsc3b(tmt), ttemp1)
 
          beta = rtz1/rtz2
          if (iter.eq.1) beta=0.0
+
          NBTIMER(ttemp1)
          call add2s1(p,z,beta,n)                                         ! 2n
          ACCUMTIMER(tadd2s1(tmt), ttemp1)
 
          call ax(w,p,g,ur,us,ut,wk,n)                                    ! flopa
+
+         gopi(tmt)=3
          NBTIMER(ttemp1)
          pap=glsc3(w,c,p,n)                                              ! 3n
          ACCUMTIMER(tglsc3c(tmt), ttemp1)
@@ -106,6 +111,7 @@ c     call tester(z,r,n)
          call add2s2(r,w,alphm,n)                                        ! 2n
          ACCUMTIMER(tadd2s2c(tmt), ttemp1)
 
+         gopi(tmt)=4
          NBTIMER(ttemp1)
          rtr = glsc3(r,c,r,n)                                            ! 3n
          ACCUMTIMER(tglsc3d(tmt), ttemp1)
