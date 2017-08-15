@@ -5,6 +5,7 @@ c-----------------------------------------------------------------------
       include 'TOTAL'
       include 'SEMHAT'
       include 'mpif.h'
+      include 'TIMER'
 
       common /mymask/cmask(-1:lx1*ly1*lz1*lelt)
       parameter (lxyz = lx1*ly1*lz1)
@@ -409,6 +410,11 @@ c-----------------------------------------------------------------------
       subroutine set_timer_flop_cnt(iset)
       include 'SIZE'
       include 'TOTAL'
+      include 'TIMER'
+
+      integer i, numThrd, totThd
+      integer omp_get_max_threads
+      real tmp1(20), tmp2(20), tmp3(20), tmp4(20)
 
       real time0,time1
       save time0,time1
@@ -416,22 +422,231 @@ c-----------------------------------------------------------------------
       if (iset.eq.0) then
          flop_a  = 0
          flop_cg = 0
+
+         do i = 1, tmax
+           trzero(i) = 0
+           tcopy(i) = 0
+           tsolvem(i) = 0
+           tglsc3a(i) = 0
+           tglsc3b(i) = 0
+           tglsc3c(i) = 0
+           tglsc3d(i) = 0
+           tadd2s1(i) = 0
+           tadd2s2a(i) = 0
+           tadd2s2b(i) = 0
+           tadd2s2c(i) = 0
+           tlocalgrad3(i) = 0
+           twrwswt(i) = 0
+           tlocalgrad3t(i) = 0
+           tgsop(i) = 0
+           tgop(1,i) = 0
+           tgop(2,i) = 0
+           tgop(3,i) = 0
+           tgop(4,i) = 0
+         end do
+
          time0   = dnekclock()
       else
         time1   = dnekclock()-time0
         if (time1.gt.0) mflops = (flop_a+flop_cg)/(1.e6*time1)
+
         if (nid.eq.0) then
-          write(6,*)
           write(6,1) nelt,np,nx1, nelt*np
           write(6,2) mflops*np, mflops
-          write(6,3) flop_a,flop_cg
-          write(6,4) time1
-        endif
-    1   format('nelt = ',i7, ', np = ', i9,', nx1 = ', i7,
+          write(6,3) flop_a,flop_cg,time1
+        end if
+
+    1   format('nelt = ', i7, ', np = ', i9, ', nx1 = ', i7,
      &         ', elements =', i10 )
-    2   format('Tot MFlops = ', 1pe12.4, ', MFlops      = ', e12.4)
-    3   format('Setup Flop = ', 1pe12.4, ', Solver Flop = ', e12.4)
-    4   format('Solve Time = ', e12.4)
+    2   format('Tot MFlops = ', 1pe12.5, ', MFlops = ', e12.5)
+    3   format('Ax FOp = ', 1pe12.5, ', CG FOp = ', e12.5,
+     &         ', Solve Time = ', e12.5)
+
+#ifdef TIMERS
+        numThrd = 1
+#ifdef _OPENMP
+        numThrd = omp_get_max_threads()
+#endif
+        totThd = numThrd*np
+
+        do i = 1, numThrd
+          tglsc3a(i) = tglsc3a(i) - tgop(1,i)
+          tglsc3b(i) = tglsc3b(i) - tgop(2,i)
+          tglsc3c(i) = tglsc3c(i) - tgop(3,i)
+          tglsc3d(i) = tglsc3d(i) - tgop(4,i)
+        end do
+
+        do i = 1,20
+          tmp1(i) = 0.0
+        end do
+        
+        tmp1(1)= time1
+        do i = 1, numThrd
+          tmp1(2)= tmp1(2) + trzero(i)
+          tmp1(3)= tmp1(3) + tcopy(i)
+          tmp1(4)= tmp1(4) + tsolvem(i)
+          tmp1(5)= tmp1(5) + tglsc3a(i)
+          tmp1(6)= tmp1(6) + tglsc3b(i)
+          tmp1(7)= tmp1(7) + tglsc3c(i)
+          tmp1(8)= tmp1(8) + tglsc3d(i)
+          tmp1(9)= tmp1(9) + tadd2s1(i)
+          tmp1(10)= tmp1(10) + tadd2s2a(i)
+          tmp1(11)= tmp1(11) + tadd2s2b(i)
+          tmp1(12)= tmp1(12) + tadd2s2c(i)
+          tmp1(13)= tmp1(13) + tlocalgrad3(i)
+          tmp1(14)= tmp1(14) + twrwswt(i)
+          tmp1(15)= tmp1(15) + tlocalgrad3t(i)
+          tmp1(16)= tmp1(16) + tgsop(i)
+          tmp1(17)= tmp1(17) + tgop(1,i)
+          tmp1(18)= tmp1(18) + tgop(2,i)
+          tmp1(19)= tmp1(19) + tgop(3,i)
+          tmp1(20)= tmp1(20) + tgop(4,i)
+        end do
+
+        call gop(tmp1, tmp4, '+  ', 20)
+
+        tmp2(1)= time1
+        tmp2(2)= trzero(1)
+        tmp2(3)= tcopy(1)
+        tmp2(4)= tsolvem(1)
+        tmp2(5)= tglsc3a(1)
+        tmp2(6)= tglsc3b(1)
+        tmp2(7)= tglsc3c(1)
+        tmp2(8)= tglsc3d(1)
+        tmp2(9)= tadd2s1(1)
+        tmp2(10)= tadd2s2a(1)
+        tmp2(11)= tadd2s2b(1)
+        tmp2(12)= tadd2s2c(1)
+        tmp2(13)= tlocalgrad3(1)
+        tmp2(14)= twrwswt(1)
+        tmp2(15)= tlocalgrad3t(1)
+        tmp2(16)= tgsop(1)
+        tmp2(17)= tgop(1,1)
+        tmp2(18)= tgop(2,1)
+        tmp2(19)= tgop(3,1)
+        tmp2(20)= tgop(4,1)
+
+        do i = 2, numThrd
+          if (trzero(i) < tmp2(2)) tmp2(2)= trzero(i)
+          if (tcopy(i) < tmp2(3)) tmp2(3)= tcopy(i)
+          if (tsolvem(i) < tmp2(4)) tmp2(4)= tsolvem(i)
+          if (tglsc3a(i) < tmp2(5)) tmp2(5)= tglsc3a(i)
+          if (tglsc3b(i) < tmp2(6)) tmp2(6)= tglsc3b(i)
+          if (tglsc3c(i) < tmp2(7)) tmp2(7)= tglsc3c(i)
+          if (tglsc3d(i) < tmp2(8)) tmp2(8)= tglsc3d(i)
+          if (tadd2s1(i) < tmp2(9)) tmp2(9)= tadd2s1(i)
+          if (tadd2s2a(i) < tmp2(10)) tmp2(10)= tadd2s2a(i)
+          if (tadd2s2b(i) < tmp2(11)) tmp2(11)= tadd2s2b(i)
+          if (tadd2s2c(i) < tmp2(12)) tmp2(12)= tadd2s2c(i)
+          if (tlocalgrad3(i) < tmp2(13)) tmp2(13)= tlocalgrad3(i)
+          if (twrwswt(i) < tmp2(14)) tmp2(14)= twrwswt(i)
+          if (tlocalgrad3t(i) < tmp2(15)) tmp2(15)= tlocalgrad3t(i)
+          if (tgsop(i) < tmp2(16)) tmp2(16)= tgsop(i)
+          if (tgop(1,i) < tmp2(17)) tmp2(17)= tgop(1,i)
+          if (tgop(2,i) < tmp2(18)) tmp2(18)= tgop(2,i)
+          if (tgop(3,i) < tmp2(19)) tmp2(19)= tgop(3,i)
+          if (tgop(4,i) < tmp2(20)) tmp2(20)= tgop(4,i)
+        end do
+
+        call gop(tmp2, tmp4, 'm  ', 20)
+
+        tmp3(1)= time1
+        tmp3(2)= trzero(1)
+        tmp3(3)= tcopy(1)
+        tmp3(4)= tsolvem(1)
+        tmp3(5)= tglsc3a(1)
+        tmp3(6)= tglsc3b(1)
+        tmp3(7)= tglsc3c(1)
+        tmp3(8)= tglsc3d(1)
+        tmp3(9)= tadd2s1(1)
+        tmp3(10)= tadd2s2a(1)
+        tmp3(11)= tadd2s2b(1)
+        tmp3(12)= tadd2s2c(1)
+        tmp3(13)= tlocalgrad3(1)
+        tmp3(14)= twrwswt(1)
+        tmp3(15)= tlocalgrad3t(1)
+        tmp3(16)= tgsop(1)
+        tmp3(17)= tgop(1,1)
+        tmp3(18)= tgop(2,1)
+        tmp3(19)= tgop(3,1)
+        tmp3(20)= tgop(4,1)
+
+        do i = 2, numThrd
+          if (trzero(i) > tmp3(2)) tmp3(2)= trzero(i)
+          if (tcopy(i) > tmp3(3)) tmp3(3)= tcopy(i)
+          if (tsolvem(i) > tmp3(4)) tmp3(4)= tsolvem(i)
+          if (tglsc3a(i) > tmp3(5)) tmp3(5)= tglsc3a(i)
+          if (tglsc3b(i) > tmp3(6)) tmp3(6)= tglsc3b(i)
+          if (tglsc3c(i) > tmp3(7)) tmp3(7)= tglsc3c(i)
+          if (tglsc3d(i) > tmp3(8)) tmp3(8)= tglsc3d(i)
+          if (tadd2s1(i) > tmp3(9)) tmp3(9)= tadd2s1(i)
+          if (tadd2s2a(i) > tmp3(10)) tmp3(10)= tadd2s2a(i)
+          if (tadd2s2b(i) > tmp3(11)) tmp3(11)= tadd2s2b(i)
+          if (tadd2s2c(i) > tmp3(12)) tmp3(12)= tadd2s2c(i)
+          if (tlocalgrad3(i) > tmp3(13)) tmp3(13)= tlocalgrad3(i)
+          if (twrwswt(i) > tmp3(14)) tmp3(14)= twrwswt(i)
+          if (tlocalgrad3t(i) > tmp3(15)) tmp3(15)= tlocalgrad3t(i)
+          if (tgsop(i) > tmp3(16)) tmp3(16)= tgsop(i)
+          if (tgop(1,i) > tmp3(17)) tmp3(17)= tgop(1,i)
+          if (tgop(2,i) > tmp3(18)) tmp3(18)= tgop(2,i)
+          if (tgop(3,i) > tmp3(19)) tmp3(19)= tgop(3,i)
+          if (tgop(4,i) > tmp3(20)) tmp3(20)= tgop(4,i)
+        end do
+
+        call gop(tmp3, tmp4, 'M  ', 20)
+
+        if (nid.eq.0) then
+          write(6,4) "time       = ",tmp1(1)/np, tmp2(1), tmp3(1)
+          write(6,4) "rzero      = ",tmp1(2)/totThd, tmp2(2), tmp3(2)
+          write(6,4) "copy       = ",tmp1(3)/totThd, tmp2(3), tmp3(3)
+          write(6,4) "glsc3a     = ",tmp1(5)/totThd, tmp2(5), tmp3(5)
+          write(6,4) "gopa       = ",tmp1(17)/totThd, tmp2(17), tmp3(17)
+          write(6,4) "solveM     = ",tmp1(4)/totThd, tmp2(4), tmp3(4)
+          write(6,4) "glsc3b     = ",tmp1(6)/totThd, tmp2(6), tmp3(6)
+          write(6,4) "gopb       = ",tmp1(18)/totThd, tmp2(18), tmp3(18)
+          write(6,4) "add2s1     = ",tmp1(9)/totThd, tmp2(9), tmp3(9)
+          write(6,4) "localgrad3 = ",tmp1(13)/totThd, tmp2(13), tmp3(13)
+          write(6,4) "wrwswt     = ",tmp1(14)/totThd, tmp2(14), tmp3(14)
+          write(6,4) "localgradt = ",tmp1(15)/totThd, tmp2(15), tmp3(15)
+          write(6,4) "gsop       = ",tmp1(16)/totThd, tmp2(16), tmp3(16)
+          write(6,4) "add2s2a    = ",tmp1(10)/totThd, tmp2(10), tmp3(10)
+          write(6,4) "glsc3c     = ",tmp1(7)/totThd, tmp2(7), tmp3(7)
+          write(6,4) "gopc       = ",tmp1(19)/totThd, tmp2(19), tmp3(19)
+          write(6,4) "add2s2b    = ",tmp1(11)/totThd, tmp2(11), tmp3(11)
+          write(6,4) "add2s2c    = ",tmp1(12)/totThd, tmp2(12), tmp3(12)
+          write(6,4) "glsc3d     = ",tmp1(8)/totThd, tmp2(8), tmp3(8)
+          write(6,4) "gopd       = ",tmp1(20)/totThd, tmp2(20), tmp3(20)
+        endif
+
+    4   format(A, 1pe12.4, e12.4, e12.4)
+
+c       if (nid.eq.0) then
+c         write(6,4) "av time: ", tmp2(1)/np, tmp2(2)/totThd,
+c    &               tmp2(3)/totThd, tmp2(4)/totThd, tmp2(5)/totThd
+c         write(6,5) "av time: ", tmp2(5)/totThd, tmp2(6)/totThd,
+c    &               tmp2(7)/totThd, tmp2(8)/totThd
+c       endif
+
+c       if (nid.eq.0) then
+c         write(6,4) "min time: ", tmp2(1), tmp2(2), tmp2(3),
+c    &               tmp2(4), tmp2(5)
+c         write(6,5) "min time: ", tmp2(5), tmp2(6), tmp2(7),
+c    &               tmp2(8)
+c       endif
+
+c       if (nid.eq.0) then
+c         write(6,4) "max time: ", tmp2(1), tmp2(2), tmp2(3),
+c    &               tmp2(4), tmp2(5)
+c         write(6,5) "max time: ", tmp2(5), tmp2(6), tmp2(7),
+c    &               tmp2(8)
+c       endif
+
+c   4   format(A, ' cg= ', 1pe12.4, ', zcm= ', e12.4,
+c    &         ', glsc3= ', e12.4, ', add2sx= ', e12.4,
+c    &         ', ax= ', e12.4)
+c   5   format(A, ' ax= ', 1pe12.4, ', add2s2= ', e12.4,
+c    &         ', gsop= ', e12.4, ', axe= ', e12.4)
+#endif
       endif
 
       return

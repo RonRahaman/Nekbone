@@ -14,6 +14,7 @@
 
       real*8 dnekclock
 
-      common /timer/ trzero, tcopy, tsolvem, tglsc3a, tglsc3b, tglsc3c,
+      common /newtimer/ trzero, tcopy, tsolvem, tglsc3a, tglsc3b, tglsc3c,
      +tglsc3d, tadd2s1, tadd2s2a, tadd2s2b, tadd2s2c, tlocalgrad3,
      +twrwswt, tlocalgrad3t, tgsop, tgop, gopi
+      save /newtimer/

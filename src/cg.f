@@ -36,6 +36,7 @@ c
 
       real x(n),f(n),r(n),w(n),p(n),z(n),g(1),c(n)
 
+      integer thread, numth, find, lind, fel, lel
       character*1 ans
       integer fiter, tmt
 
@@ -48,6 +49,10 @@ c     set machine tolerances
       if (one+eps .eq. one) eps = 1.e-7
 
       rtz1=1.0
+
+      thread = 0
+      numth = 1
+      tmt = thread + 1
 
       NBTIMER(ttemp1)
       call rzero(x,n)
@@ -139,6 +144,7 @@ c-----------------------------------------------------------------------
 
       include 'SIZE'
       include 'TOTAL'
+      include 'TIMER'
 
       real w(nx1*ny1*nz1,nelt),u(nx1*ny1*nz1,nelt)
       real gxyz(nx1*ny1*nz1,2*ldim,nelt)
@@ -147,7 +153,7 @@ c-----------------------------------------------------------------------
       real ur(lt),us(lt),ut(lt),wk(lt)
       common /mymask/cmask(-1:lx1*ly1*lz1*lelt)
 
-      integer e
+      integer e,thread, tmt, omp_get_thread_num
 
       do e=1,nelt                                ! ~
          call ax_e( w(1,e),u(1,e),gxyz(1,1,e)    ! w   = A  u
@@ -190,7 +196,7 @@ c-------------------------------------------------------------------------
       parameter (lxyz=lx1*ly1*lz1)
       real ur(lxyz),us(lxyz),ut(lxyz),wk(lxyz)
       real w(nx1*ny1*nz1),u(nx1*ny1*nz1),g(nx1*ny1*nz1,2*ldim)
-
+      integer thread, tmt, omp_get_thread_num
 
       nxyz = nx1*ny1*nz1
       n    = nx1-1
