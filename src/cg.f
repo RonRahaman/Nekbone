@@ -372,14 +372,14 @@ c-----------------------------------------------------------------------
 c-----------------------------------------------------------------------
       subroutine ax_acc(w,u,gxyz,ur,us,ut,wk,n) ! Matrix-vector product: w=A*u
 
-#ifdef _CUDA
+#if defined(_CUDA) && defined (CUDA_AX)
       use cudafor
 #endif
 
       include 'SIZE'
       include 'TOTAL'
 
-#ifdef _CUDA
+#if defined(_CUDA) && defined (CUDA_AX)
       interface
       attributes(global) subroutine ax_cuf2(w,u,ur,us,ut,
      &                gxyz,dxm1,dxtm1)
@@ -420,7 +420,7 @@ c-----------------------------------------------------------------------
 
 !$ACC DATA PRESENT(w,u(:,:,:,:),gxyz,ur,us,ut,wk,dxm1,dxtm1)
 
-#ifdef _CUDA
+#if defined(_CUDA) && defined (CUDA_AX)
 
 !$ACC HOST_DATA USE_DEVICE(w,u(:,:,:,:),ur,us,ut,gxyz,dxm1,dxtm1)
        if (nx1.le.10) then
