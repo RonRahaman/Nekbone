@@ -37,7 +37,7 @@ def nb_make_input(lx1, lelt):
 if __name__ == '__main__':
 
     import os
-    from subprocess import check_call, STDOUT
+    from subprocess import check_call, call, STDOUT
     from datetime import datetime
 
     # =============================================================================================
@@ -49,10 +49,6 @@ if __name__ == '__main__':
     if not os.path.exists(logdir):
         os.makedirs(logdir)
 
-    # Make the SIZE file
-    with open('SIZE', 'w') as f:
-        f.write(size_template.format(lx1=16, lelt=2048, lp=16))
-
     # Print the header
     print('mode,\tnx1,\tnelt,\ttime,\tMflops')
 
@@ -60,7 +56,8 @@ if __name__ == '__main__':
     # TEST PHASES
     # =============================================================================================
 
-    for mode in ['serial', 'mpi', 'acc', 'cuda']:
+    #for mode in ['acc', 'mpi']:
+    for mode in ['acc', 'mpi']:
 
         # -----------------------------------------------------------------------------------------
         # Compilation phase
@@ -73,34 +70,45 @@ if __name__ == '__main__':
 
         makeOutFile = os.path.join(logdir, 'make.{0}.output'.format(mode))
 
-        with open(makeOutFile, 'w') as makeOut:
-            check_call([makenek, 'data', '-nocompile'], stdout=makeOut, stderr=STDOUT)
-            check_call(['make', '-f', 'makefile', 'clean'], stdout=makeOut, stderr=STDOUT)
-            check_call(['make', '-f', 'makefile'], stdout=makeOut, stderr=STDOUT)
-
         # -----------------------------------------------------------------------------------------
         # Run phases
         # -----------------------------------------------------------------------------------------
 
         for nx1 in [8, 16]:
-            for nelt in [2**n for n in range(12)]:
+
+            if nx1 == 8:
+              nmax = 14
+            else:
+              nmax = 11
+
+            nmax = 1
+
+            for nelt in [2**n for n in range(nmax+1)]:
 
                 # Construct the .rea file for these nx1, nelt, np settings
                 if mode == 'mpi':
-                    numProcs = 16
+                    numProcs = 20
                 else:
                     numProcs = 1
 
-                if numProcs > nelt:
-                    print('{0},\t{1},\t{2},\t{3},\t{4}'.format(mode, nx1, nelt, '', ''))
-                else:
+                if numProcs <= nelt:
+
+                    # Make the SIZE file
+                    with open('SIZE', 'w') as f:
+                        f.write(size_template.format(lx1=nx1, lelt=nelt/numProcs, lp=numProcs))
+
+                    with open(makeOutFile, 'w') as makeOut:
+                        check_call([makenek, 'data', '-nocompile'], stdout=makeOut, stderr=STDOUT)
+                        check_call(['make', '-f', 'makefile', 'clean'], stdout=makeOut, stderr=STDOUT)
+                        check_call(['make', '-f', 'makefile'], stdout=makeOut, stderr=STDOUT)
 
                     with open('data.rea', 'w') as f:
                         f.write(rea_template.format(nx1=nx1, nelt=nelt/numProcs))
 
                     times = []
                     flops = []
-                    numReps = 3
+                    #numReps = 3
+                    numReps = 1
 
                     for rep in range(1, numReps+1):
 
@@ -111,9 +119,14 @@ if __name__ == '__main__':
                                 'run.{0}.nx1_{1}.nelt_{2}.rep_{3}.error'.format(mode, nx1, nelt, rep))
 
                         # DO THE RUN!
-                        with open(runOutFile, 'w') as runOut, open(runErrFile, 'w') as runErr:
-                            check_call(['mpiexec', '-np', str(numProcs), '-bind-to', 'numa', './nekbone', 'data'], 
-                                    stdout=runOut, stderr=runErr)
+                        if mode == 'mpi':
+                          with open(runOutFile, 'w') as runOut, open(runErrFile, 'w') as runErr:
+                              call(['mpirun', '-np', str(numProcs), '--map-by', 'ppr:20:node', '-bind-to', 'numa', './nekbone', 'data'], 
+                                      stdout=runOut, stderr=runErr)
+                        else:
+                          with open(runOutFile, 'w') as runOut, open(runErrFile, 'w') as runErr:
+                              call(['mpirun', '-np', str(numProcs), './nekbone', 'data'], 
+                                      stdout=runOut, stderr=runErr)
 
                         # Grep the output
                         with open(runOutFile, 'r') as runOut:

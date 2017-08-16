@@ -30,14 +30,14 @@ CC="mpicc"
 #USR="foo.o"
 
 # linking flags
-USR_LFLAGS="-ta=nvidia:cc50,cc60"
+USR_LFLAGS=" -ta=nvidia:cc60,cuda8.0,fastmath -Mcuda=cc60,cuda8.0,fastmath"
 
 # generic compiler flags
-G="-acc -Minfo=accel -ta=nvidia:cc50,cc60"
+G=" -acc -Minfo=accel -ta=nvidia:cc60,cuda8.0,fastmath -Mcuda=cc60,cuda8.0,fastmath"
 
 # optimization flags
-#OPT_FLAGS_STD=""
-#OPT_FLAGS_MAG=""
+OPT_FLAGS_STD="-O3"
+OPT_FLAGS_MAG="-O3"
 
 
 #set PGI OpenACC 
