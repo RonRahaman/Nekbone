@@ -74,7 +74,8 @@ if __name__ == '__main__':
         # Run phases
         # -----------------------------------------------------------------------------------------
 
-        for nx1 in [8, 16]:
+        #for nx1 in [8, 16]:
+        for nx1 in [8,]:
 
             if nx1 == 8:
               nmax = 14
@@ -121,11 +122,11 @@ if __name__ == '__main__':
                         # DO THE RUN!
                         if mode == 'mpi':
                           with open(runOutFile, 'w') as runOut, open(runErrFile, 'w') as runErr:
-                              call(['mpirun', '-np', str(numProcs), '--map-by', 'ppr:20:node', '-bind-to', 'numa', './nekbone', 'data'], 
+                              call(['mpirun', '-np', str(numProcs), '-bind-to', 'numa', 'pgprof', './nekbone', 'data'], 
                                       stdout=runOut, stderr=runErr)
                         else:
                           with open(runOutFile, 'w') as runOut, open(runErrFile, 'w') as runErr:
-                              call(['mpirun', '-np', str(numProcs), './nekbone', 'data'], 
+                              call(['mpirun', '-np', str(numProcs), 'pgprof','--profile-from-start', 'off', './nekbone', 'data'], 
                                       stdout=runOut, stderr=runErr)
 
                         # Grep the output
