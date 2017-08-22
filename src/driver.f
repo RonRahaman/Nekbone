@@ -1,5 +1,11 @@
 c-----------------------------------------------------------------------
       program nekbone
+
+#if defined(_CUDA) && defined(_OPENACC)
+      use openacc
+      use cublas
+      type(cublasHandle) h
+#endif
       
       include 'SIZE'
       include 'TOTAL'
@@ -21,6 +27,10 @@ c-----------------------------------------------------------------------
       integer npx,npy,npz      ! processor decomp
       integer mx ,my ,mz       ! element decomp
 
+#if defined(_CUDA) && defined(_OPENACC)
+      istat = cublasCreate(h)
+      istat = cublasSetStream(h, acc_get_cuda_stream(acc_async_sync))
+#endif
 
       call iniproc(mpi_comm_world)    ! has nekmpi common block
       call init_delay

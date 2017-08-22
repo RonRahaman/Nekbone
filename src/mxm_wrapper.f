@@ -2,6 +2,12 @@
 c
 c     Compute matrix-matrix product C = A*B
 c     for contiguously packed matrices A,B, and C.
+
+#if defined(_CUDA) && defined(_OPENACC)
+      use openacc
+      use cublas
+      type(cublasHandle) h
+#endif
 c
       real a(n1,n2),b(n2,n3),c(n1,n3)
 c
@@ -15,6 +21,14 @@ c
       call dgemm('N','N',n1,n3,n2,1.0,a,n1,b,n2,0.0,c,n1)
       return
 #endif
+
+#if defined(_CUDA) && defined(_OPENACC)
+!$ACC DATA COPY(a,b,c)
+      call cublasDgemm('N','N',n1,n3,n2,1.0,a,n1,b,n2,0.0,c,n1)
+!$ACC END DATA
+      return
+#endif
+
  
 #ifdef BG
       call bg_aligned3(a,b,c,aligned)
