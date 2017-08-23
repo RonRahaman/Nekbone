@@ -4,6 +4,7 @@ c-----------------------------------------------------------------------
 #if defined(_CUDA) && defined(_OPENACC)
       use openacc
       use cublas
+      use cudafor
       type(cublasHandle) h
 #endif
       
@@ -67,11 +68,17 @@ c     SET UP and RUN NEKBONE
 
            call nekgsync()
 
+#if defined(_CUDA) && defined(_OPENACC)
+           call cudaProfilerStart()
+#endif
            call set_timer_flop_cnt(0)
 !$ACC DATA COPY(x,f,g,c,r,w,p,z)
            call cg(x,f,g,c,r,w,p,z,n,niter,flop_cg)
 !$ACC END DATA
            call set_timer_flop_cnt(1)
+#if defined(_CUDA) && defined(_OPENACC)
+           call cudaProfilerStop()
+#endif
 
            call gs_free(gsh)
            
