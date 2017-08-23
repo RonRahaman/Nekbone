@@ -61,12 +61,16 @@ c     SET UP and RUN NEKBONE
            call set_f(f,c,n)
 
            if(nid.eq.0) write(6,*)
+!$ACC DATA COPY(x,f,g,c,r,w,p,z)
            call cg(x,f,g,c,r,w,p,z,n,niter,flop_cg)
+!$ACC END DATA
 
            call nekgsync()
 
            call set_timer_flop_cnt(0)
+!$ACC DATA COPY(x,f,g,c,r,w,p,z)
            call cg(x,f,g,c,r,w,p,z,n,niter,flop_cg)
+!$ACC END DATA
            call set_timer_flop_cnt(1)
 
            call gs_free(gsh)

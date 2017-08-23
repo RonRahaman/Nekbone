@@ -22,7 +22,7 @@ c
       parameter (lt=lx1*ly1*lz1*lelt)
       real ur(lt),us(lt),ut(lt),wk(lt)
 
-      real x(n),f(n),r(n),w(n),p(n),z(n),g(2*ldim,lt),c(n)
+      real x(n),f(n),r(n),w(n),p(n),z(n),g(2*ndim,n),c(n)
 
       character*1 ans
 
@@ -36,7 +36,7 @@ c     set machine tolerances
 
       rtz1=1.0
 
-!$ACC DATA COPY(w,p,g,ur,us,ut,wk,dxm1,dxtm1,z,x,r,c,f)
+!$ACC DATA COPY(ur,us,ut,wk,dxm1,dxtm1)
 
 !$ACC KERNELS PRESENT(x,r,f)
       do i=1,n
