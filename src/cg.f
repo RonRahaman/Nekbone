@@ -107,11 +107,12 @@ c-----------------------------------------------------------------------
 
       integer e
 
-
+!$ACC DATA COPY(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1)
       do e=1,nelt                                ! ~
          call ax_e( w(1,e),u(1,e),gxyz(1,1,e)    ! w   = A  u
      $                             ,ur,us,ut,wk) !  L     L  L
       enddo                                      ! 
+!$ACC END DATA
 
       call dssum(w)         ! Gather-scatter operation  ! w   = QQ  w
                                                            !            L
@@ -153,6 +154,7 @@ c-------------------------------------------------------------------------
 
       call local_grad3(ur,us,ut,u,n,dxm1,dxtm1)
 
+!$ACC KERNELS PRESENT(g,ur,us,ut)
       do i=1,nxyz
          wr = g(1,i)*ur(i) + g(2,i)*us(i) + g(3,i)*ut(i)
          ws = g(2,i)*ur(i) + g(4,i)*us(i) + g(5,i)*ut(i)
@@ -161,6 +163,7 @@ c-------------------------------------------------------------------------
          us(i) = ws
          ut(i) = wt
       enddo
+!$ACC END KERNELS
 
       call local_grad3_t(w,ur,us,ut,n,dxm1,dxtm1,wk)
 
@@ -203,10 +206,28 @@ c     Output: ur,us,ut         Input:u,N,D,Dt
       do k=0,N
          call mxm(us(0,0,k),m1,D ,m1,w(0,0,k),m1)
       enddo
-      call add2(u,w,m3)
+      
+!$ACC KERNELS PRESENT(u,w)
+      do k=0,N
+      do j=0,N
+      do i=0,N
+         u(i,j,k) = u(i,j,k) + w(i,j,k)
+      enddo
+      enddo
+      enddo
+!$ACC END KERNELS
 
       call mxm(ut,m2,D ,m1,w,m1)
-      call add2(u,w,m3)
+
+!$ACC KERNELS PRESENT(u,w)
+      do k=0,N
+      do j=0,N
+      do i=0,N
+         u(i,j,k) = u(i,j,k) + w(i,j,k)
+      enddo
+      enddo
+      enddo
+!$ACC END KERNELS
 
       return
       end

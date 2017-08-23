@@ -23,8 +23,10 @@ c
 #endif
 
 #if defined(_CUDA) && defined(_OPENACC)
-!$ACC DATA COPY(a,b,c)
+!$ACC DATA PRESENT(a,b,c)
+!$ACC HOST_DATA USE_DEVICE(a,b,c)
       call cublasDgemm('N','N',n1,n3,n2,1.0,a,n1,b,n2,0.0,c,n1)
+!$ACC END HOST_DATA
 !$ACC END DATA
       return
 #endif
