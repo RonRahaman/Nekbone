@@ -54,18 +54,33 @@ c     call tester(z,r,n)
 
          beta = rtz1/rtz2
          if (iter.eq.1) beta=0.0
-         call add2s1(p,z,beta,n)                                         ! 2n
 
-!$ACC DATA COPY(w,p,g,ur,us,ut,wk,dxm1,dxtm1)
+!$ACC DATA COPY(w,p,g,ur,us,ut,wk,dxm1,dxtm1,z,x,r)
+
+!$ACC KERNELS PRESENT(p,z)
+         do i=1,n
+            p(i) = beta * p(i) + z(i)
+         enddo
+!$ACC END KERNELS
+!$ACC UPDATE HOST(p)
+
          call ax(w,p,g,ur,us,ut,wk,n)                                    ! flopa
-!$ACC END DATA
 
+!$ACC UPDATE HOST(w)
          pap=glsc3(w,c,p,n)                                              ! 3n
+!$ACC UPDATE DEVICE(w)
 
          alpha=rtz1/pap
          alphm=-alpha
-         call add2s2(x,p,alpha,n)                                        ! 2n
-         call add2s2(r,w,alphm,n)                                        ! 2n
+
+!$ACC KERNELS PRESENT(x,r)
+         do i=1,n
+            x(i) = x(i) + alpha * p(i)
+            r(i) = r(i) + alphm * w(i)
+         enddo
+!$ACC END KERNELS
+
+!$ACC END DATA
 
          rtr = glsc3(r,c,r,n)                                            ! 3n
          if (iter.eq.1) rlim2 = rtr*eps**2
