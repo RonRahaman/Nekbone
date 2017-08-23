@@ -36,8 +36,17 @@ c     set machine tolerances
 
       rtz1=1.0
 
-      call rzero(x,n)
-      call copy (r,f,n)
+!$ACC DATA COPY(w,p,g,ur,us,ut,wk,dxm1,dxtm1,z,x,r,c,f)
+
+!$ACC KERNELS PRESENT(x,r,f)
+      do i=1,n
+         x(i) = 0.0
+         r(i) = f(i)
+      enddo
+!$ACC END KERNELS
+
+!$ACC UPDATE HOST(x,r)
+
       call maskit (r,cmask,nx1,ny1,nz1) ! Zero out Dirichlet conditions
 
       rnorm = sqrt(glsc3(r,c,r,n))
@@ -47,7 +56,7 @@ c     set machine tolerances
       miter = niter
 c     call tester(z,r,n)  
 
-!$ACC DATA COPY(w,p,g,ur,us,ut,wk,dxm1,dxtm1,z,x,r,c)
+!$ACC UPDATE DEVICE(x,r,c)
 
       do iter=1,miter
 !$ACC UPDATE HOST(z,r,c)
