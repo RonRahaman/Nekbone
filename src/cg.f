@@ -46,16 +46,19 @@ c     set machine tolerances
 
       miter = niter
 c     call tester(z,r,n)  
+
+!$ACC DATA COPY(w,p,g,ur,us,ut,wk,dxm1,dxtm1,z,x,r,c)
+
       do iter=1,miter
+!$ACC UPDATE HOST(z,r,c)
          call solveM(z,r,n)    ! preconditioner here
 
          rtz2=rtz1                                                       ! OPS
          rtz1=glsc3(r,c,z,n)   ! parallel weighted inner product r^T C z ! 3n
+!$ACC UPDATE DEVICE(z,r,c)
 
          beta = rtz1/rtz2
          if (iter.eq.1) beta=0.0
-
-!$ACC DATA COPY(w,p,g,ur,us,ut,wk,dxm1,dxtm1,z,x,r)
 
 !$ACC KERNELS PRESENT(p,z)
          do i=1,n
@@ -80,9 +83,10 @@ c     call tester(z,r,n)
          enddo
 !$ACC END KERNELS
 
-!$ACC END DATA
-
+!$ACC UPDATE HOST(r,c)
          rtr = glsc3(r,c,r,n)                                            ! 3n
+!$ACC UPDATE DEVICE(r,c)
+
          if (iter.eq.1) rlim2 = rtr*eps**2
          if (iter.eq.1) rtr0  = rtr
          rnorm = sqrt(rtr)
@@ -94,6 +98,8 @@ c        if (rtr.le.rlim2) goto 1001
       enddo
 
  1001 continue
+
+!$ACC END DATA
 
       if (nid.eq.0) write(6,6) iter,rnorm,alpha,beta,pap
 
