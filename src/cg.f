@@ -1,6 +1,7 @@
 c-----------------------------------------------------------------------
       subroutine cg(x,f,g,c,r,w,p,z,n,niter,flop_cg)
       include 'SIZE'
+      include 'DXYZ'
 
 c     Solve Ax=f where A is SPD and is invoked by ax()
 c
@@ -21,7 +22,7 @@ c
       parameter (lt=lx1*ly1*lz1*lelt)
       real ur(lt),us(lt),ut(lt),wk(lt)
 
-      real x(n),f(n),r(n),w(n),p(n),z(n),g(1),c(n)
+      real x(n),f(n),r(n),w(n),p(n),z(n),g(2*ldim,lt),c(n)
 
       character*1 ans
 
@@ -55,7 +56,10 @@ c     call tester(z,r,n)
          if (iter.eq.1) beta=0.0
          call add2s1(p,z,beta,n)                                         ! 2n
 
+!$ACC DATA COPY(w,p,g,ur,us,ut,wk,dxm1,dxtm1)
          call ax(w,p,g,ur,us,ut,wk,n)                                    ! flopa
+!$ACC END DATA
+
          pap=glsc3(w,c,p,n)                                              ! 3n
 
          alpha=rtz1/pap
@@ -107,17 +111,22 @@ c-----------------------------------------------------------------------
 
       integer e
 
-!$ACC DATA COPY(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1)
       do e=1,nelt                                ! ~
          call ax_e( w(1,e),u(1,e),gxyz(1,1,e)    ! w   = A  u
      $                             ,ur,us,ut,wk) !  L     L  L
       enddo                                      ! 
-!$ACC END DATA
 
+!$ACC UPDATE HOST(w)
       call dssum(w)         ! Gather-scatter operation  ! w   = QQ  w
-                                                           !            L
-      call add2s2(w,u,.1,n)   !2n
+
+      do e=1,nelt
+      do ijk=1,nx1*ny1*nz1
+         w(ijk,e) = w(ijk,e) + 0.1 * u(ijk,e)
+      enddo
+      enddo
+
       call maskit(w,cmask,nx1,ny1,nz1)  ! Zero out Dirichlet conditions
+!$ACC UPDATE DEVICE(w)
 
       nxyz=nx1*ny1*nz1
       flop_a = flop_a + (19*nxyz+12*nx1*nxyz)*nelt
