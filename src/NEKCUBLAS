@@ -1,0 +1,4 @@
+      type(cublasHandle) handle 
+      integer(kind=cuda_stream_kind) streams(lelt)
+
+      common /nekcublas/ handle, streams

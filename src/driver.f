@@ -5,13 +5,16 @@ c-----------------------------------------------------------------------
       use openacc
       use cublas
       use cudafor
-      type(cublasHandle) h
 #endif
       
       include 'SIZE'
       include 'TOTAL'
       include 'SEMHAT'
       include 'mpif.h'
+
+#ifdef _CUDA
+      include 'NEKCUBLAS'
+#endif
 
       common /mymask/cmask(-1:lx1*ly1*lz1*lelt)
       parameter (lxyz = lx1*ly1*lz1)
@@ -28,9 +31,10 @@ c-----------------------------------------------------------------------
       integer npx,npy,npz      ! processor decomp
       integer mx ,my ,mz       ! element decomp
 
+      integer e
+
 #if defined(_CUDA) && defined(_OPENACC)
-      istat = cublasCreate(h)
-      istat = cublasSetStream(h, acc_get_cuda_stream(acc_async_sync))
+      istat = cublasCreate(handle)
 #endif
 
       call iniproc(mpi_comm_world)    ! has nekmpi common block
@@ -101,6 +105,10 @@ c     SET UP and RUN NEKBONE
 
 c     TEST BANDWIDTH BISECTION CAPACITY
 c     call xfer(np,cr_h)
+
+#if defined(_CUDA) && defined(_OPENACC)
+      istat = cublasDestroy(handle)
+#endif
 
       call exitt0
 

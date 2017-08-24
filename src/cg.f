@@ -143,7 +143,7 @@ c-----------------------------------------------------------------------
 
       do e=1,nelt                                ! ~
          call ax_e( w(1,e),u(1,e),gxyz(1,1,e)    ! w   = A  u
-     $                             ,ur,us,ut,wk) !  L     L  L
+     $                             ,ur,us,ut,wk,e) !  L     L  L
       enddo                                      ! 
 
 !$ACC UPDATE HOST(w)
@@ -179,25 +179,33 @@ c-------------------------------------------------------------------------
       return
       end
 c-------------------------------------------------------------------------
-      subroutine ax_e(w,u,g,ur,us,ut,wk) ! Local matrix-vector product
+      subroutine ax_e(w,u,g,ur,us,ut,wk,e) ! Local matrix-vector product
+#ifdef _CUDA
+      use openacc
+      use cublas
+      use cudafor
+#endif
       include 'SIZE'
+#ifdef _CUDA
+      include 'NEKCUBLAS'
+#endif
       include 'TOTAL'
 
       parameter (lxyz=lx1*ly1*lz1)
       real ur(lxyz),us(lxyz),ut(lxyz),wk(lxyz)
       real w(nx1*ny1*nz1),u(nx1*ny1*nz1),g(2*ldim,nx1*ny1*nz1)
-
+      integer e
 
       nxyz = nx1*ny1*nz1
       n    = nx1-1
 
 #ifdef _CUDA
-      call local_grad3_cuda(ur,us,ut,u,n,dxm1,dxtm1)
-#else
-      call local_grad3(ur,us,ut,u,n,dxm1,dxtm1)
+      istat = cublasSetStream(handle, acc_get_cuda_stream(e))
 #endif
 
-!$ACC KERNELS PRESENT(g,ur,us,ut)
+       call local_grad3(ur,us,ut,u,n,dxm1,dxtm1)
+
+!$ACC KERNELS PRESENT(g,ur,us,ut) ASYNC(e)
       do i=1,nxyz
          wr = g(1,i)*ur(i) + g(2,i)*us(i) + g(3,i)*ut(i)
          ws = g(2,i)*ur(i) + g(4,i)*us(i) + g(5,i)*ut(i)
@@ -228,36 +236,6 @@ c     Output: ur,us,ut         Input:u,n,D,Dt
          call mxm(u(0,0,k),m1,Dt,m1,us(0,0,k),m1)
       enddo
       call mxm(u,m2,Dt,m1,ut,m1)
-
-      return
-      end
-c-----------------------------------------------------------------------
-      subroutine local_grad3_cuda(ur,us,ut,u,n,D,Dt)
-c     Output: ur,us,ut         Input:u,n,D,Dt
-      use cublas
-      real ur(0:n,0:n,0:n),us(0:n,0:n,0:n),ut(0:n,0:n,0:n)
-      real u (0:n,0:n,0:n)
-      real D (0:n,0:n),Dt(0:n,0:n)
-      integer e
-
-      m1 = n+1
-      m2 = m1*m1
-
-!$ACC DATA PRESENT(ur,us,ut,u,D,Dt)
-!$ACC HOST_DATA USE_DEVICE(ur,us,ut,u,D,Dt)
-
-      !call mxm(D ,m1,u,m1,ur,m2)
-      call cublasDgemm('N','N',m1,m2,m1,1.0,D,m1,u,m1,0.0,ur,m1)
-      do k=0,n
-         !call mxm(u(0,0,k),m1,Dt,m1,us(0,0,k),m1)
-         call cublasDgemm('N','N',m1,m1,m1,1.0,u(0,0,k),m1,
-     $      Dt,m1,0.0,us(0,0,k),m1)
-      enddo
-      !call mxm(u,m2,Dt,m1,ut,m1)
-      call cublasDgemm('N','N',m2,m1,m1,1.0,u,m2,Dt,m1,0.0,ut,m2)
-
-!$ACC END HOST_DATA
-!$ACC END DATA
 
       return
       end
