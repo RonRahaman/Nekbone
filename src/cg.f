@@ -191,7 +191,11 @@ c-------------------------------------------------------------------------
       nxyz = nx1*ny1*nz1
       n    = nx1-1
 
+#ifdef _CUDA
+      call local_grad3_cuda(ur,us,ut,u,n,dxm1,dxtm1)
+#else
       call local_grad3(ur,us,ut,u,n,dxm1,dxtm1)
+#endif
 
 !$ACC KERNELS PRESENT(g,ur,us,ut)
       do i=1,nxyz
@@ -224,6 +228,36 @@ c     Output: ur,us,ut         Input:u,n,D,Dt
          call mxm(u(0,0,k),m1,Dt,m1,us(0,0,k),m1)
       enddo
       call mxm(u,m2,Dt,m1,ut,m1)
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine local_grad3_cuda(ur,us,ut,u,n,D,Dt)
+c     Output: ur,us,ut         Input:u,n,D,Dt
+      use cublas
+      real ur(0:n,0:n,0:n),us(0:n,0:n,0:n),ut(0:n,0:n,0:n)
+      real u (0:n,0:n,0:n)
+      real D (0:n,0:n),Dt(0:n,0:n)
+      integer e
+
+      m1 = n+1
+      m2 = m1*m1
+
+!$ACC DATA PRESENT(ur,us,ut,u,D,Dt)
+!$ACC HOST_DATA USE_DEVICE(ur,us,ut,u,D,Dt)
+
+      !call mxm(D ,m1,u,m1,ur,m2)
+      call cublasDgemm('N','N',m1,m2,m1,1.0,D,m1,u,m1,0.0,ur,m1)
+      do k=0,n
+         !call mxm(u(0,0,k),m1,Dt,m1,us(0,0,k),m1)
+         call cublasDgemm('N','N',m1,m1,m1,1.0,u(0,0,k),m1,
+     $      Dt,m1,0.0,us(0,0,k),m1)
+      enddo
+      !call mxm(u,m2,Dt,m1,ut,m1)
+      call cublasDgemm('N','N',m2,m1,m1,1.0,u,m2,Dt,m1,0.0,ut,m2)
+
+!$ACC END HOST_DATA
+!$ACC END DATA
 
       return
       end
