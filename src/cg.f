@@ -165,7 +165,6 @@ c-----------------------------------------------------------------------
       !ax_e_sec = ax_e_sec + diff_sec / 1000.0
 
       ax_e_sec = ax_e_sec + dnekclock() - tstart
-      write (*,*) ax_e_sec
 #endif
 
 
@@ -215,27 +214,47 @@ c-------------------------------------------------------------------------
       include 'TOTAL'
 
       parameter (lxyz=lx1*ly1*lz1)
-      real ur(lxyz),us(lxyz),ut(lxyz),wk(lxyz)
-      real w(nx1*ny1*nz1),u(nx1*ny1*nz1),g(2*ldim,nx1*ny1*nz1)
+      parameter (n=lx1-1)
+      real ur(0:n,0:n,0:n),us(0:n,0:n,0:n),ut(0:n,0:n,0:n)
+      real wk(0:n,0:n,0:n)
+      real w(0:n,0:n,0:n),u(0:n,0:n,0:n),g(1:2*ldim,0:n,0:n,0:n)
       integer e
 
       nxyz = nx1*ny1*nz1
-      n    = nx1-1
+      !n    = nx1-1
+      m1 = n+1
+      m2 = m1*m1
 
 #ifdef _CUDA
       istat = cublasSetStream(handle, acc_get_cuda_stream(e))
 #endif
 
-       call local_grad3(ur,us,ut,u,n,dxm1,dxtm1)
+      call local_grad3(ur,us,ut,u,n,dxm1,dxtm1)
+cccccccccccccccccccc
+c     subroutine local_grad3(ur,us,ut,u,n,D,Dt)
+
+c     call mxm(dxm1,m1,u,m1,ur,m2)
+c     do k=1,nx1
+c     !  call mxm(u(1+(k-1)*nx1*ny1),m1,dxtm1,m1,us(1+(k-1)*nx1*ny1),m1)
+c     enddo
+c     call mxm(u,m21,dxtm1,m1,ut,m1)
+cccccccccccccccccc
 
 !$ACC KERNELS PRESENT(g,ur,us,ut) ASYNC(e)
-      do i=1,nxyz
-         wr = g(1,i)*ur(i) + g(2,i)*us(i) + g(3,i)*ut(i)
-         ws = g(2,i)*ur(i) + g(4,i)*us(i) + g(5,i)*ut(i)
-         wt = g(3,i)*ur(i) + g(5,i)*us(i) + g(6,i)*ut(i)
-         ur(i) = wr
-         us(i) = ws
-         ut(i) = wt
+      do k=0,n
+      do j=0,n
+      do i=0,n
+         wr = g(1,i,j,k)*ur(i,j,k) + g(2,i,j,k)*us(i,j,k) + 
+     $      g(3,i)*ut(i,j,k)
+         ws = g(2,i,j,k)*ur(i,j,k) + g(4,i,j,k)*us(i,j,k) + 
+     $      g(5,i,j,k)*ut(i,j,k)
+         wt = g(3,i,j,k)*ur(i,j,k) + g(5,i,j,k)*us(i,j,k) + 
+     $      g(6,i,j,k)*ut(i,j,k)
+         ur(i,j,k) = wr
+         us(i,j,k) = ws
+         ut(i,j,k) = wt
+      enddo
+      enddo
       enddo
 !$ACC END KERNELS
 
