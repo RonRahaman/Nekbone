@@ -154,10 +154,7 @@ c-----------------------------------------------------------------------
       call cudaProfilerStart()
       !istat = cudaEventRecord(ax_e_start, 0)
 #endif
-      do e=1,nelt                                ! ~
-         call ax_e( w(1,e),u(1,e),gxyz(1,1,e)    ! w   = A  u
-     $                             ,ur,us,ut,wk,e) !  L     L  L
-      enddo                                      ! 
+      call ax_lelt(w,u,gxyz,ur,us,ut,wk)
 #ifdef _CUDA
       call cudaProfilerStop()
       !istat = cudaEventRecord(ax_e_stop, 0)
@@ -201,7 +198,7 @@ c-------------------------------------------------------------------------
       return
       end
 c-------------------------------------------------------------------------
-      subroutine ax_e(w,u,g,ur,us,ut,wk,e) ! Local matrix-vector product
+      subroutine ax_lelt(w,u,g,ur,us,ut,wk) ! Local matrix-vector product
 #ifdef _CUDA
       use openacc
       use cublas
@@ -219,68 +216,72 @@ c-------------------------------------------------------------------------
       parameter (m2 = m1*m1)
       real ur(0:n,0:n,0:n),us(0:n,0:n,0:n),ut(0:n,0:n,0:n)
       real wk(0:n,0:n,0:n)
-      real w(0:n,0:n,0:n),u(0:n,0:n,0:n),g(1:2*ldim,0:n,0:n,0:n)
+      real w(0:n,0:n,0:n,1:lelt),u(0:n,0:n,0:n,1:lelt)
+      real g(1:2*ldim,0:n,0:n,0:n,1:lelt)
       integer e
 
+      do e=1,nelt
+
 #ifdef _CUDA
-      istat = cublasSetStream(handle, acc_get_cuda_stream(e))
+         istat = cublasSetStream(handle, acc_get_cuda_stream(e))
 #endif
 
-      call mxm(dxm1,m1,u,m1,ur,m2)
-      do k=0,n
-         call mxm(u(0,0,k),m1,dxtm1,m1,us(0,0,k),m1)
-      enddo
-      call mxm(u,m2,dxtm1,m1,ut,m1)
+         call mxm(dxm1,m1,u(0,0,0,e),m1,ur,m2)
+         do k=0,n
+            call mxm(u(0,0,k,e),m1,dxtm1,m1,us(0,0,k),m1)
+         enddo
+         call mxm(u(0,0,0,e),m2,dxtm1,m1,ut,m1)
 
 !$ACC KERNELS PRESENT(g,ur,us,ut) ASYNC(e)
-      do k=0,n
-      do j=0,n
-      do i=0,n
-         wr = g(1,i,j,k)*ur(i,j,k) + g(2,i,j,k)*us(i,j,k) + 
-     $      g(3,i)*ut(i,j,k)
-         ws = g(2,i,j,k)*ur(i,j,k) + g(4,i,j,k)*us(i,j,k) + 
-     $      g(5,i,j,k)*ut(i,j,k)
-         wt = g(3,i,j,k)*ur(i,j,k) + g(5,i,j,k)*us(i,j,k) + 
-     $      g(6,i,j,k)*ut(i,j,k)
-         ur(i,j,k) = wr
-         us(i,j,k) = ws
-         ut(i,j,k) = wt
-      enddo
-      enddo
-      enddo
+         do k=0,n
+         do j=0,n
+         do i=0,n
+            wr = g(1,i,j,k,e)*ur(i,j,k) + 
+     $           g(2,i,j,k,e)*us(i,j,k) + 
+     $           g(3,i,j,k,e)*ut(i,j,k)
+            ws = g(2,i,j,k,e)*ur(i,j,k) + 
+     $           g(4,i,j,k,e)*us(i,j,k) + 
+     $           g(5,i,j,k,e)*ut(i,j,k)
+            wt = g(3,i,j,k,e)*ur(i,j,k) + 
+     $           g(5,i,j,k,e)*us(i,j,k) + 
+     $           g(6,i,j,k,e)*ut(i,j,k)
+            ur(i,j,k) = wr
+            us(i,j,k) = ws
+            ut(i,j,k) = wt
+         enddo
+         enddo
+         enddo
 !$ACC END KERNELS
 
-c     subroutine local_grad3_t(u,ur,us,ut,N,D,   Dt,   w)
-c     call       local_grad3_t(w,ur,us,ut,n,dxm1,dxtm1,wk)
+         call mxm(dxtm1,m1,ur,m1,w(0,0,0,e),m2)
 
-      call mxm(dxtm1,m1,ur,m1,w,m2)
-
-      do k=0,N
-         call mxm(us(0,0,k),m1,dxm1,m1,wk(0,0,k),m1)
-      enddo
+         do k=0,N
+            call mxm(us(0,0,k),m1,dxm1,m1,wk(0,0,k),m1)
+         enddo
 
 !$ACC KERNELS PRESENT(w,wk)
-      do k=0,N
-      do j=0,N
-      do i=0,N
-         w(i,j,k) = w(i,j,k) + wk(i,j,k)
-      enddo
-      enddo
-      enddo
+         do k=0,N
+         do j=0,N
+         do i=0,N
+            w(i,j,k,e) = w(i,j,k,e) + wk(i,j,k)
+         enddo
+         enddo
+         enddo
 !$ACC END KERNELS
 
-      call mxm(ut,m2,dxm1,m1,wk,m1)
+         call mxm(ut,m2,dxm1,m1,wk,m1)
 
 !$ACC KERNELS PRESENT(w,wk)
-      do k=0,N
-      do j=0,N
-      do i=0,N
-         w(i,j,k) = w(i,j,k) + wk(i,j,k)
-      enddo
-      enddo
-      enddo
+         do k=0,N
+         do j=0,N
+         do i=0,N
+            w(i,j,k,e) = w(i,j,k,e) + wk(i,j,k)
+         enddo
+         enddo
+         enddo
 !$ACC END KERNELS
 
+      enddo
 
       return
       end
