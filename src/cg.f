@@ -215,30 +215,22 @@ c-------------------------------------------------------------------------
 
       parameter (lxyz=lx1*ly1*lz1)
       parameter (n=lx1-1)
+      parameter (m1=n+1)
+      parameter (m2 = m1*m1)
       real ur(0:n,0:n,0:n),us(0:n,0:n,0:n),ut(0:n,0:n,0:n)
       real wk(0:n,0:n,0:n)
       real w(0:n,0:n,0:n),u(0:n,0:n,0:n),g(1:2*ldim,0:n,0:n,0:n)
       integer e
 
-      nxyz = nx1*ny1*nz1
-      !n    = nx1-1
-      m1 = n+1
-      m2 = m1*m1
-
 #ifdef _CUDA
       istat = cublasSetStream(handle, acc_get_cuda_stream(e))
 #endif
 
-      call local_grad3(ur,us,ut,u,n,dxm1,dxtm1)
-cccccccccccccccccccc
-c     subroutine local_grad3(ur,us,ut,u,n,D,Dt)
-
-c     call mxm(dxm1,m1,u,m1,ur,m2)
-c     do k=1,nx1
-c     !  call mxm(u(1+(k-1)*nx1*ny1),m1,dxtm1,m1,us(1+(k-1)*nx1*ny1),m1)
-c     enddo
-c     call mxm(u,m21,dxtm1,m1,ut,m1)
-cccccccccccccccccc
+      call mxm(dxm1,m1,u,m1,ur,m2)
+      do k=0,n
+         call mxm(u(0,0,k),m1,dxtm1,m1,us(0,0,k),m1)
+      enddo
+      call mxm(u,m2,dxtm1,m1,ut,m1)
 
 !$ACC KERNELS PRESENT(g,ur,us,ut) ASYNC(e)
       do k=0,n
