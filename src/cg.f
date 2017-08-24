@@ -250,7 +250,37 @@ c-------------------------------------------------------------------------
       enddo
 !$ACC END KERNELS
 
-      call local_grad3_t(w,ur,us,ut,n,dxm1,dxtm1,wk)
+c     subroutine local_grad3_t(u,ur,us,ut,N,D,   Dt,   w)
+c     call       local_grad3_t(w,ur,us,ut,n,dxm1,dxtm1,wk)
+
+      call mxm(dxtm1,m1,ur,m1,w,m2)
+
+      do k=0,N
+         call mxm(us(0,0,k),m1,dxm1,m1,wk(0,0,k),m1)
+      enddo
+
+!$ACC KERNELS PRESENT(w,wk)
+      do k=0,N
+      do j=0,N
+      do i=0,N
+         w(i,j,k) = w(i,j,k) + wk(i,j,k)
+      enddo
+      enddo
+      enddo
+!$ACC END KERNELS
+
+      call mxm(ut,m2,dxm1,m1,wk,m1)
+
+!$ACC KERNELS PRESENT(w,wk)
+      do k=0,N
+      do j=0,N
+      do i=0,N
+         w(i,j,k) = w(i,j,k) + wk(i,j,k)
+      enddo
+      enddo
+      enddo
+!$ACC END KERNELS
+
 
       return
       end
