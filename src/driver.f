@@ -34,7 +34,10 @@ c-----------------------------------------------------------------------
       integer e
 
 #if defined(_CUDA) && defined(_OPENACC)
+      ax_e_sec = 0.0
       istat = cublasCreate(handle)
+!      istat = cublasSetStream(handle, 
+!     $   acc_get_cuda_stream(acc_async_sync))
 #endif
 
       call iniproc(mpi_comm_world)    ! has nekmpi common block
@@ -72,16 +75,15 @@ c     SET UP and RUN NEKBONE
 
            call nekgsync()
 
-#if defined(_CUDA) && defined(_OPENACC)
-           call cudaProfilerStart()
-#endif
            call set_timer_flop_cnt(0)
 !$ACC DATA COPY(x,f,g,c,r,w,p,z)
            call cg(x,f,g,c,r,w,p,z,n,niter,flop_cg)
 !$ACC END DATA
            call set_timer_flop_cnt(1)
-#if defined(_CUDA) && defined(_OPENACC)
-           call cudaProfilerStop()
+
+#ifdef _CUDA
+           write(6,4) ax_e_sec
+    4      format('ax_e time = ', e12.4)
 #endif
 
            call gs_free(gsh)

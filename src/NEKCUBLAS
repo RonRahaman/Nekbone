@@ -1,4 +1,4 @@
       type(cublasHandle) handle 
+      type(cudaEvent) ax_e_start, ax_e_stop
       integer(kind=cuda_stream_kind) streams(lelt)
-
-      common /nekcublas/ handle, streams
+      common /nekcublas/ handle, streams, ax_e_start, ax_e_stop

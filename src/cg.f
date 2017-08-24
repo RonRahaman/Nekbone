@@ -128,8 +128,14 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine ax(w,u,gxyz,ur,us,ut,wk,n) ! Matrix-vector product: w=A*u
-
+#ifdef _CUDA
+      use cudafor
+      use cublas
+#endif
       include 'SIZE'
+#ifdef _CUDA
+      include 'NEKCUBLAS'
+#endif
       include 'TOTAL'
 
       real w(nx1*ny1*nz1,nelt),u(nx1*ny1*nz1,nelt)
@@ -140,11 +146,28 @@ c-----------------------------------------------------------------------
       common /mymask/cmask(-1:lx1*ly1*lz1*lelt)
 
       integer e
+      real(4) diff_sec
+      real tstart, tstop
 
+      tstart = dnekclock()
+#ifdef _CUDA
+      call cudaProfilerStart()
+      !istat = cudaEventRecord(ax_e_start, 0)
+#endif
       do e=1,nelt                                ! ~
          call ax_e( w(1,e),u(1,e),gxyz(1,1,e)    ! w   = A  u
      $                             ,ur,us,ut,wk,e) !  L     L  L
       enddo                                      ! 
+#ifdef _CUDA
+      call cudaProfilerStop()
+      !istat = cudaEventRecord(ax_e_stop, 0)
+      !istat = cudaEventElapsedTime(diff_sec, ax_e_start, ax_e_stop)
+      !ax_e_sec = ax_e_sec + diff_sec / 1000.0
+
+      ax_e_sec = ax_e_sec + dnekclock() - tstart
+      write (*,*) ax_e_sec
+#endif
+
 
 !$ACC UPDATE HOST(w)
       call dssum(w)         ! Gather-scatter operation  ! w   = QQ  w

@@ -8,8 +8,8 @@ C
       common /cflops/ flop_a,flop_cg,mflops
       real mflops
 
-      common /timer/ etimes, ttime, ttotal
-      real etimes,ttime, ttotal
+      common /timer/ etimes, ttime, ttotal, ax_e_sec
+      real etimes,ttime, ttotal, ax_e_sec
  
       common /lmgrid/ ifmgrid
       logical ifmgrid
