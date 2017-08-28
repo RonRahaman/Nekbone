@@ -99,8 +99,9 @@ c     call tester(z,r,n)
          if (iter.eq.1) rlim2 = rtr*eps**2
          if (iter.eq.1) rtr0  = rtr
          rnorm = sqrt(rtr)
-         if (nid.eq.0.and.mod(iter,100).eq.0) 
-     $      write(6,6) iter,rnorm,alpha,beta,pap
+c        if (nid.eq.0.and.mod(iter,100).eq.0) 
+c    $      write(6,6) iter,rnorm,alpha,beta,pap
+         write(6,6) iter,rnorm,alpha,beta,pap
     6    format('cg:',i4,1p4e12.4)
 c        if (rtr.le.rlim2) goto 1001
 
@@ -312,6 +313,103 @@ c-------------------------------------------------------------------------
 
       return
       end
+
+c-------------------------------------------------------------------------
+
+#ifdef _CUDA
+      subroutine ax_lelt_devicecublas(w,u,g,ur,us,ut,wk)
+c     Though this compiles and runs, the solution diverges
+      use openacc_cublas
+      include 'SIZE'
+      include 'TOTAL'
+
+      parameter (lxyz=lx1*ly1*lz1)
+      parameter (n=lx1-1)
+      parameter (m1=n+1)
+      parameter (m2 = m1*m1)
+      real ur(0:n,0:n,0:n),us(0:n,0:n,0:n),ut(0:n,0:n,0:n)
+      real wk(0:n,0:n,0:n)
+      real w(0:n,0:n,0:n,1:lelt),u(0:n,0:n,0:n,1:lelt)
+      real g(1:2*ldim,0:n,0:n,0:n,1:lelt)
+      integer e
+      type(cublasHandle) handle 
+
+!$ACC PARALLEL PRESENT(dxm1,dxtm1,u,ur,us,ut,wk,w,g) CREATE(handle)
+      istat = cublasCreate(handle)
+!$ACC LOOP SEQ
+      do e=1,nelt
+         istat = cublasDgemm(handle,CUBLAS_OP_N,CUBLAS_OP_N,
+     $      m1,m2,m1,1.0,dxm1,m1,u(0,0,0,e),m1,0.0,ur,m1)
+!$ACC LOOP SEQ
+         do k=0,n
+            istat = cublasDgemm(handle,CUBLAS_OP_N,CUBLAS_OP_N,
+     $         m1,m1,m1,1.0,u(0,0,k,e),m1,dxtm1,m1,0.0,us(0,0,k),m1)
+         enddo
+         istat = cublasDgemm(handle,CUBLAS_OP_N,CUBLAS_OP_N,
+     $      m2,m1,m1,1.0,u(0,0,0,e),m2,dxtm1,m1,0.0,ut,m2)
+
+!$ACC LOOP SEQ
+         do k=0,n
+!$ACC LOOP SEQ
+         do j=0,n
+!$ACC LOOP SEQ
+         do i=0,n
+            wr = g(1,i,j,k,e)*ur(i,j,k) + 
+     $           g(2,i,j,k,e)*us(i,j,k) + 
+     $           g(3,i,j,k,e)*ut(i,j,k)
+            ws = g(2,i,j,k,e)*ur(i,j,k) + 
+     $           g(4,i,j,k,e)*us(i,j,k) + 
+     $           g(5,i,j,k,e)*ut(i,j,k)
+            wt = g(3,i,j,k,e)*ur(i,j,k) + 
+     $           g(5,i,j,k,e)*us(i,j,k) + 
+     $           g(6,i,j,k,e)*ut(i,j,k)
+            ur(i,j,k) = wr
+            us(i,j,k) = ws
+            ut(i,j,k) = wt
+         enddo
+         enddo
+         enddo
+
+         istat = cublasDgemm(handle,CUBLAS_OP_N,CUBLAS_OP_N,
+     $      m1,m2,m1,1.0,dxtm1,m1,ur,m1,0.0,w(0,0,0,e),m1)
+
+!$ACC LOOP SEQ
+         do k=0,N
+            istat = cublasDgemm(handle,CUBLAS_OP_N,CUBLAS_OP_N,
+     $         m1,m1,m1,1.0,us(0,0,k),m1,dxm1,m1,0.0,wk(0,0,k),m1)
+         enddo
+
+!$ACC LOOP SEQ
+         do k=0,N
+!$ACC LOOP SEQ
+         do j=0,N
+!$ACC LOOP SEQ
+         do i=0,N
+            w(i,j,k,e) = w(i,j,k,e) + wk(i,j,k)
+         enddo
+         enddo
+         enddo
+
+         istat = cublasDgemm(handle,CUBLAS_OP_N,CUBLAS_OP_N,
+     $      m2,m1,m1,1.0,ut,m2,dxm1,m1,0.0,wk,m2)
+
+!$ACC LOOP SEQ
+         do k=0,N
+!$ACC LOOP SEQ
+         do j=0,N
+!$ACC LOOP SEQ
+         do i=0,N
+            w(i,j,k,e) = w(i,j,k,e) + wk(i,j,k)
+         enddo
+         enddo
+         enddo
+      enddo
+      istat = cublasDestroy(handle)
+!$ACC END PARALLEL
+
+      return
+      end
+#endif
 c-------------------------------------------------------------------------
       subroutine local_grad3(ur,us,ut,u,n,D,Dt)
 c     Output: ur,us,ut         Input:u,n,D,Dt
