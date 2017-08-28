@@ -372,45 +372,35 @@ c-----------------------------------------------------------------------
 c-----------------------------------------------------------------------
       subroutine ax_acc(w,u,gxyz,ur,us,ut,wk,n) ! Matrix-vector product: w=A*u
 
-#ifdef _CUDA
+      use openacc
+      use cublas
       use cudafor
-#endif
 
       include 'SIZE'
+      include 'NEKCUBLAS'
       include 'TOTAL'
-
-#ifdef _CUDA
-      interface
-      attributes(global) subroutine ax_cuf2(w,u,ur,us,ut,
-     &                gxyz,dxm1,dxtm1)
-
-      real, intent(out) :: w(nx1,ny1,nz1,nelt)
-      real, intent(in)  :: u(nx1,ny1,nz1,nelt)
-      real ur  (nx1,ny1,nz1,lelt)
-      real us  (nx1,ny1,nz1,lelt)
-      real ut  (nx1,ny1,nz1,lelt)
-
-      real gxyz(nx1,ny1,nz1,2*ldim,lelt)
-
-      real, intent(in) :: dxm1(nx1,nx1)
-      real, intent(in) :: dxtm1(nx1,nx1)
-      end subroutine
-      end interface
-#endif
 
       common /mymask/cmask(-1:lx1*ly1*lz1*lelt)
 
-      real w(nx1,ny1,nz1,nelt)
-      real u(nx1,ny1,nz1,nelt)
-      real gxyz(nx1,ny1,nz1,2*ldim,lelt)
+      integer n,m1,m2
+      parameter (n=lx1-1)
+      parameter (m1=n+1)
+      parameter (m2=m1*m1)
 
-      real ur(nx1,ny1,nz1,lelt)
-      real us(nx1,ny1,nz1,lelt)
-      real ut(nx1,ny1,nz1,lelt)
-      real wk(nx1,ny1,nz1,lelt)
+      real w(0:n,0:n,0:n,1:lelt)
+      real u(0:n,0:n,0:n,1:lelt)
+      real gxyz(0:n,0:n,0:n,1:2*ldim,1:lelt)
+
+      real ur(0:n,0:n,0:n)
+      real us(0:n,0:n,0:n)
+      real ut(0:n,0:n,0:n)
+      real wk(0:n,0:n,0:n)
+
+      integer e, stream, nstreams
+      parameter(nstreams=8)
 
       real wr,ws,wt,tmp
-      integer i,j,k,l,e,n
+      integer i,j,k,l,e
 
       integer lt
       
@@ -418,92 +408,178 @@ c-----------------------------------------------------------------------
 
       lt = nx1*ny1*nz1*nelt
 
-!$ACC DATA PRESENT(w,u(:,:,:,:),gxyz,ur,us,ut,wk,dxm1,dxtm1)
+c **** NEW ***********************************************************
 
-#ifdef _CUDA
-
-!$ACC HOST_DATA USE_DEVICE(w,u(:,:,:,:),ur,us,ut,gxyz,dxm1,dxtm1)
-       if (nx1.le.10) then
-         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1)>>>(w,u,
-     $                ur,us,ut,gxyz,dxm1,dxtm1)
-       else if (nx1.eq.12) then
-         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1/2)>>>(w,u,
-     $                ur,us,ut,gxyz,dxm1,dxtm1)
-       else
-         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1/4)>>>(w,u,
-     $         ur,us,ut,gxyz,dxm1,dxtm1) 
-       endif
-!$ACC END HOST_DATA
-
-       cuda_err = cudaGetLastError()
-       if (cuda_err /= cudaSuccess) then
-         write(6, 815) cuda_err, cudaGetErrorString(cuda_err)
-         call exitt
-       endif
-
-       istat = cudaDeviceSynchronize()
-       
-       cuda_err = cudaGetLastError()
-       if (cuda_err /= cudaSuccess) then
-         write(6, 815) cuda_err, cudaGetErrorString(cuda_err)
-         call exitt
-       endif
-
-  815    format('CUDA ERROR', I3, ': ', A)
-
-#else
-c ifndef _CUDA
-            
-!$ACC PARALLEL LOOP COLLAPSE(4) GANG WORKER VECTOR PRIVATE(wr,ws,wt)
-!DIR NOBLOCKING
-      do e = 1,nelt
-         do k=1,nz1
-         do j=1,ny1
-         do i=1,nx1
-            wr = 0
-            ws = 0
-            wt = 0
-!$ACC LOOP SEQ
-            do l=1,nx1    ! serial loop, no reduction needed
-               wr = wr + dxm1(i,l)*u(l,j,k,e)
-               ws = ws + dxm1(j,l)*u(i,l,k,e)
-               wt = wt + dxm1(k,l)*u(i,j,l,e)
-            enddo
-            ur(i,j,k,e) = gxyz(i,j,k,1,e)*wr
-     $                  + gxyz(i,j,k,2,e)*ws
-     $                  + gxyz(i,j,k,3,e)*wt
-            us(i,j,k,e) = gxyz(i,j,k,2,e)*wr
-     $                  + gxyz(i,j,k,4,e)*ws
-     $                  + gxyz(i,j,k,5,e)*wt
-            ut(i,j,k,e) = gxyz(i,j,k,3,e)*wr
-     $                  + gxyz(i,j,k,5,e)*ws
-     $                  + gxyz(i,j,k,6,e)*wt
-         enddo
-         enddo
-         enddo
-      enddo
-!$ACC END PARALLEL LOOP
-
-!$ACC PARALLEL LOOP COLLAPSE(4) GANG WORKER VECTOR 
       do e=1,nelt
-         do k=1,nz1
-         do j=1,ny1
-         do i=1,nx1
-            w(i,j,k,e) = 0.0
-!$ACC LOOP SEQ
-            do l=1,nx1    ! serial loop, no reduction needed
-               w(i,j,k,e) = w(i,j,k,e) + dxtm1(i,l)*ur(l,j,k,e)
-     $                                 + dxtm1(j,l)*us(i,l,k,e)
-     $                                 + dxtm1(k,l)*ut(i,j,l,e)
-            enddo
-         enddo
-         enddo
-         enddo
-      enddo
-!$ACC END PARALLEL LOOP
 
-#endif
-c endif _CUDA
+         stream = mod(e,nstreams)
+
+         istat = cublasSetStream(handle, acc_get_cuda_stream(stream))
+
+!$ACC DATA PRESENT(dxm1,dxtm1,u,ur,us,ut)
+!$ACC HOST_DATA USE_DEVICE(dxm1,u,ur,us,ut)
+         call cublasDgemm('N','N',m1,m2,m1,1.0,
+     $      dxm1,m1,u(0,0,0,e),m1,0.0,ur,m1)
+         do k=0,n
+            call cublasDgemm('N','N',m1,m1,m1,1.0,u(0,0,k,e),m1,
+     $         dxtm1,m1,0.0,us(0,0,k),m1)
+         enddo
+         call cublasDgemm('N','N',m2,m1,m1,1.0,u(0,0,0,e),m2,
+     $      dxtm1,m1,0.0,ut,m2)
+!$ACC END HOST_DATA
+!$ACC END DATA
+
+!$ACC KERNELS PRESENT(gxyz,ur,us,ut) ASYNC(stream)
+         do k=0,n
+         do j=0,n
+         do i=0,n
+            wr = gxyz(i,j,k,1,e)*ur(i,j,k) + 
+     $           gxyz(i,j,k,2,e)*us(i,j,k) + 
+     $           gxyz(i,j,k,3,e)*ut(i,j,k)
+            ws = gxyz(i,j,k,2,e)*ur(i,j,k) + 
+     $           gxyz(i,j,k,4,e)*us(i,j,k) + 
+     $           gxyz(i,j,k,5,e)*ut(i,j,k)
+            wt = gxyz(i,j,k,3,e)*ur(i,j,k) + 
+     $           gxyz(i,j,k,5,e)*us(i,j,k) + 
+     $           gxyz(i,j,k,6,e)*ut(i,j,k)
+            ur(i,j,k) = wr
+            us(i,j,k) = ws
+            ut(i,j,k) = wt
+         enddo
+         enddo
+         enddo
+!$ACC END KERNELS
+
+!$ACC DATA PRESENT(dxm1,dxtm1,ur,us,w,wk)
+!$ACC HOST_DATA USE_DEVICE(dxm1,dxtm1,ur,us,w,wk)
+         call cublasDgemm('N','N',m1,m2,m1,1.0,dxtm1,m1,
+     $      ur,m1,0.0,w(0,0,0,e),m1)
+
+         do k=0,N
+            call cublasDgemm('N','N',m1,m1,m1,1.0,us(0,0,k),
+     $         m1,dxm1,m1,0.0,wk(0,0,k),m1)
+         enddo
+!$ACC END HOST_DATA
+!$ACC END DATA
+
+!$ACC KERNELS PRESENT(w,wk) ASYNC(stream)
+         do k=0,N
+         do j=0,N
+         do i=0,N
+            w(i,j,k,e) = w(i,j,k,e) + wk(i,j,k)
+         enddo
+         enddo
+         enddo
+!$ACC END KERNELS
+
+!$ACC DATA PRESENT(dxm1,ut,wk)
+!$ACC HOST_DATA USE_DEVICE(dxm1,ut,wk)
+         call cublasDgemm('N','N',m2,m1,m1,1.0,ut,m2,
+     $      dxm1,m1,0.0,wk,m2)
+!$ACC END HOST_DATA
+!$ACC END DATA
+
+!$ACC KERNELS PRESENT(w,wk) ASYNC(stream)
+         do k=0,N
+         do j=0,N
+         do i=0,N
+            w(i,j,k,e) = w(i,j,k,e) + wk(i,j,k)
+         enddo
+         enddo
+         enddo
+!$ACC END KERNELS
+
+      enddo
+
+c **** old ***********************************************************
+
+
+c!$ACC DATA PRESENT(w,u(:,:,:,:),gxyz,ur,us,ut,wk,dxm1,dxtm1)
+c
+c#ifdef _CUDA
+c
+c!$ACC HOST_DATA USE_DEVICE(w,u(:,:,:,:),ur,us,ut,gxyz,dxm1,dxtm1)
+c       if (nx1.le.10) then
+c         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1)>>>(w,u,
+c     $                ur,us,ut,gxyz,dxm1,dxtm1)
+c       else if (nx1.eq.12) then
+c         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1/2)>>>(w,u,
+c     $                ur,us,ut,gxyz,dxm1,dxtm1)
+c       else
+c         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1/4)>>>(w,u,
+c     $         ur,us,ut,gxyz,dxm1,dxtm1) 
+c       endif
+c!$ACC END HOST_DATA
+c
+c       cuda_err = cudaGetLastError()
+c       if (cuda_err /= cudaSuccess) then
+c         write(6, 815) cuda_err, cudaGetErrorString(cuda_err)
+c         call exitt
+c       endif
+c
+c       istat = cudaDeviceSynchronize()
+c       
+c       cuda_err = cudaGetLastError()
+c       if (cuda_err /= cudaSuccess) then
+c         write(6, 815) cuda_err, cudaGetErrorString(cuda_err)
+c         call exitt
+c       endif
+c
+c  815    format('CUDA ERROR', I3, ': ', A)
+c
+c#else
+cc ifndef _CUDA
+c            
+c!$ACC PARALLEL LOOP COLLAPSE(4) GANG WORKER VECTOR PRIVATE(wr,ws,wt)
+c!DIR NOBLOCKING
+c      do e = 1,nelt
+c         do k=1,nz1
+c         do j=1,ny1
+c         do i=1,nx1
+c            wr = 0
+c            ws = 0
+c            wt = 0
+c!$ACC LOOP SEQ
+c            do l=1,nx1    ! serial loop, no reduction needed
+c               wr = wr + dxm1(i,l)*u(l,j,k,e)
+c               ws = ws + dxm1(j,l)*u(i,l,k,e)
+c               wt = wt + dxm1(k,l)*u(i,j,l,e)
+c            enddo
+c            ur(i,j,k,e) = gxyz(i,j,k,1,e)*wr
+c     $                  + gxyz(i,j,k,2,e)*ws
+c     $                  + gxyz(i,j,k,3,e)*wt
+c            us(i,j,k,e) = gxyz(i,j,k,2,e)*wr
+c     $                  + gxyz(i,j,k,4,e)*ws
+c     $                  + gxyz(i,j,k,5,e)*wt
+c            ut(i,j,k,e) = gxyz(i,j,k,3,e)*wr
+c     $                  + gxyz(i,j,k,5,e)*ws
+c     $                  + gxyz(i,j,k,6,e)*wt
+c         enddo
+c         enddo
+c         enddo
+c      enddo
+c!$ACC END PARALLEL LOOP
+c
+c!$ACC PARALLEL LOOP COLLAPSE(4) GANG WORKER VECTOR 
+c      do e=1,nelt
+c         do k=1,nz1
+c         do j=1,ny1
+c         do i=1,nx1
+c            w(i,j,k,e) = 0.0
+c!$ACC LOOP SEQ
+c            do l=1,nx1    ! serial loop, no reduction needed
+c               w(i,j,k,e) = w(i,j,k,e) + dxtm1(i,l)*ur(l,j,k,e)
+c     $                                 + dxtm1(j,l)*us(i,l,k,e)
+c     $                                 + dxtm1(k,l)*ut(i,j,l,e)
+c            enddo
+c         enddo
+c         enddo
+c         enddo
+c      enddo
+c!$ACC END PARALLEL LOOP
+c
+c#endif
+cc endif _CUDA
 
 #ifdef GPUDIRECT
       call dssum(w)         ! Gather-scatter operation  ! w   = QQ  w
@@ -511,10 +587,10 @@ c endif _CUDA
       call dssum_acc(w)         ! Gather-scatter operation  ! w   = QQ  w
 #endif
 
-      call add2s2_acc(w,u,.1,n)   !2n
+      call add2s2_acc(w,u,.1,nx1*ny1*nz1*nelt)   !2n
       call maskit_acc(w,cmask,nx1,ny1,nz1)  ! Zero out Dirichlet conditions
 
-!$ACC END DATA
+c!$ACC END DATA
 
       nxyz=nx1*ny1*nz1
       flop_a = flop_a + (19*nxyz+12*nx1*nxyz)*nelt

@@ -1,10 +1,16 @@
 c-----------------------------------------------------------------------
       program nekbone
 
+      use openacc
+      use cublas
+      use cudafor
+
       include 'SIZE'
       include 'TOTAL'
       include 'SEMHAT'
       include 'mpif.h'
+
+      include 'NEKCUBLAS'
 
       common /mymask/cmask(-1:lx1*ly1*lz1*lelt)
       parameter (lxyz = lx1*ly1*lz1)
@@ -34,6 +40,8 @@ c-----------------------------------------------------------------------
       common /nsmpi_acc/ ug(lt)
       real ug
 #endif 
+
+      istat = cublasCreate(handle)
 
       call iniproc(mpi_comm_world)    ! has nekmpi common block
       call init_delay
@@ -141,6 +149,8 @@ c     SET UP and RUN NEKBONE
 
 c     TEST BANDWIDTH BISECTION CAPACITY
 c     call xfer(np,cr_h)
+
+      istat = cublasDestroy(handle)
 
       call exitt0
 
