@@ -219,15 +219,17 @@ c-------------------------------------------------------------------------
       real wk(0:n,0:n,0:n)
       real w(0:n,0:n,0:n,1:lelt),u(0:n,0:n,0:n,1:lelt)
       real g(1:2*ldim,0:n,0:n,0:n,1:lelt)
-      integer e
+      integer e, stream, nstreams
+      parameter(nstreams=8)
 
       do e=1,nelt
 
+         stream = mod(e,nstreams)
+
 #ifdef _CUDA
-         istat = cublasSetStream(handle, acc_get_cuda_stream(e))
+         istat = cublasSetStream(handle, acc_get_cuda_stream(stream))
 #endif
 
-         !call       mxm(dxm1,m1,u(0,0,0,e),m1,ur,m2)
 !$ACC DATA PRESENT(dxm1,dxtm1,u,ur,us,ut)
 !$ACC HOST_DATA USE_DEVICE(dxm1,u,ur,us,ut)
          call cublasDgemm('N','N',m1,m2,m1,1.0,
@@ -241,7 +243,7 @@ c-------------------------------------------------------------------------
 !$ACC END HOST_DATA
 !$ACC END DATA
 
-!$ACC KERNELS PRESENT(g,ur,us,ut) ASYNC(e)
+!$ACC KERNELS PRESENT(g,ur,us,ut) ASYNC(stream)
          do k=0,n
          do j=0,n
          do i=0,n
@@ -264,23 +266,17 @@ c-------------------------------------------------------------------------
 
 !$ACC DATA PRESENT(dxm1,dxtm1,ur,us,w,wk)
 !$ACC HOST_DATA USE_DEVICE(dxm1,dxtm1,ur,us,w,wk)
-         !all cublasDgemm('N','N',n1,n3,n2,1.0,a,n1,b,n2,0.0,c,n1)
-         ! ne mxm(a,    n1,b, n2,c,         n3)
-         !all mxm(dxtm1,m1,ur,m1,w(0,0,0,e),m2)
          call cublasDgemm('N','N',m1,m2,m1,1.0,dxtm1,m1,
      $      ur,m1,0.0,w(0,0,0,e),m1)
 
          do k=0,N
-         !all cublasDgemm('N','N',n1,n3,n2,1.0,a,n1,b,n2,0.0,c,n1)
-            ! ne mxm(a,        n1,b,   n2,c,        n3)
-            !all mxm(us(0,0,k),m1,dxm1,m1,wk(0,0,k),m1)
             call cublasDgemm('N','N',m1,m1,m1,1.0,us(0,0,k),
      $         m1,dxm1,m1,0.0,wk(0,0,k),m1)
          enddo
 !$ACC END HOST_DATA
 !$ACC END DATA
 
-!$ACC KERNELS PRESENT(w,wk)
+!$ACC KERNELS PRESENT(w,wk) ASYNC(stream)
          do k=0,N
          do j=0,N
          do i=0,N
@@ -292,14 +288,12 @@ c-------------------------------------------------------------------------
 
 !$ACC DATA PRESENT(dxm1,ut,wk)
 !$ACC HOST_DATA USE_DEVICE(dxm1,ut,wk)
-         ! ne mxm(a, n1,b,   n2,c, n3)
-         !all mxm(ut,m2,dxm1,m1,wk,m1)
          call cublasDgemm('N','N',m2,m1,m1,1.0,ut,m2,
      $      dxm1,m1,0.0,wk,m2)
 !$ACC END HOST_DATA
 !$ACC END DATA
 
-!$ACC KERNELS PRESENT(w,wk)
+!$ACC KERNELS PRESENT(w,wk) ASYNC(stream)
          do k=0,N
          do j=0,N
          do i=0,N
