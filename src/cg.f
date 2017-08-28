@@ -140,7 +140,7 @@ c-----------------------------------------------------------------------
       include 'TOTAL'
 
       real w(nx1*ny1*nz1,nelt),u(nx1*ny1*nz1,nelt)
-      real gxyz(2*ldim,nx1*ny1*nz1,nelt)
+      real gxyz(nx1*ny1*nz1,2*ldim,nelt)
 
       parameter (lt=lx1*ly1*lz1*lelt)
       real ur(lt),us(lt),ut(lt),wk(lt)
@@ -218,7 +218,7 @@ c-------------------------------------------------------------------------
       real ur(0:n,0:n,0:n),us(0:n,0:n,0:n),ut(0:n,0:n,0:n)
       real wk(0:n,0:n,0:n)
       real w(0:n,0:n,0:n,1:lelt),u(0:n,0:n,0:n,1:lelt)
-      real g(1:2*ldim,0:n,0:n,0:n,1:lelt)
+      real g(0:n,0:n,0:n,1:2*ldim,1:lelt)
       integer e, stream, nstreams
       parameter(nstreams=8)
 
@@ -247,15 +247,15 @@ c-------------------------------------------------------------------------
          do k=0,n
          do j=0,n
          do i=0,n
-            wr = g(1,i,j,k,e)*ur(i,j,k) + 
-     $           g(2,i,j,k,e)*us(i,j,k) + 
-     $           g(3,i,j,k,e)*ut(i,j,k)
-            ws = g(2,i,j,k,e)*ur(i,j,k) + 
-     $           g(4,i,j,k,e)*us(i,j,k) + 
-     $           g(5,i,j,k,e)*ut(i,j,k)
-            wt = g(3,i,j,k,e)*ur(i,j,k) + 
-     $           g(5,i,j,k,e)*us(i,j,k) + 
-     $           g(6,i,j,k,e)*ut(i,j,k)
+            wr = g(i,j,k,1,e)*ur(i,j,k) + 
+     $           g(i,j,k,2,e)*us(i,j,k) + 
+     $           g(i,j,k,3,e)*ut(i,j,k)
+            ws = g(i,j,k,2,e)*ur(i,j,k) + 
+     $           g(i,j,k,4,e)*us(i,j,k) + 
+     $           g(i,j,k,5,e)*ut(i,j,k)
+            wt = g(i,j,k,3,e)*ur(i,j,k) + 
+     $           g(i,j,k,5,e)*us(i,j,k) + 
+     $           g(i,j,k,6,e)*ut(i,j,k)
             ur(i,j,k) = wr
             us(i,j,k) = ws
             ut(i,j,k) = wt
