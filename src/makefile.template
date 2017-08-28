@@ -28,7 +28,7 @@ PPS_C = $(patsubst %,-D%,$(PPS))
 
 #NEW #########################################################################
 BONE = cg.o driver.o math.o mxm_wrapper.o prox_dssum.o\
-prox_setup.o semhat.o speclib.o 
+prox_setup.o semhat.o speclib.o ax_cuda.o
 
 ifeq ($(IFNEKCOMM),true)
 BONE = driver_comm.o math.o mxm_wrapper.o \
@@ -165,3 +165,4 @@ $(OBJDIR)/$(JO)gs_local.o        :$(J)/gs_local.c;        $(CC) -c $(cFL2) $(JL)
 
 # OPENACC #########################################################################################
 $(OBJDIR)/ax_acc.o  :$S/ax_acc.f;   $(F77) -c $(FL3) $< -o $@
+$(OBJDIR)/ax_cuda.o :$S/ax_cuda.f;  $(F77) -c $(FL3) $< -o $@

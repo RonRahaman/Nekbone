@@ -139,6 +139,23 @@ c-----------------------------------------------------------------------
 #endif
       include 'TOTAL'
 
+      interface
+      attributes(global) subroutine ax_cuf_naive(w,u,ur,us,ut,
+     &                gxyz,dxm1,dxtm1)
+
+      real, intent(out) :: w(nx1,ny1,nz1,nelt)
+      real, intent(in)  :: u(nx1,ny1,nz1,nelt)
+      real ur  (nx1,ny1,nz1,lelt)
+      real us  (nx1,ny1,nz1,lelt)
+      real ut  (nx1,ny1,nz1,lelt)
+
+      real gxyz(nx1,ny1,nz1,2*ldim,lelt)
+
+      real, intent(in) :: dxm1(nx1,nx1)
+      real, intent(in) :: dxtm1(nx1,nx1)
+      end subroutine
+      end interface
+
       real w(nx1*ny1*nz1,nelt),u(nx1*ny1*nz1,nelt)
       real gxyz(nx1*ny1*nz1,2*ldim,nelt)
 
@@ -155,7 +172,13 @@ c-----------------------------------------------------------------------
       call cudaProfilerStart()
       !istat = cudaEventRecord(ax_e_start, 0)
 #endif
-      call ax_lelt(w,u,gxyz,ur,us,ut,wk)
+      !call ax_lelt_devicecublas(w,u,gxyz,ur,us,ut,wk)
+!$ACC DATA PRESENT(w,u,gxyz,ur,us,ut,dxm1,dxtm1)
+!$ACC HOST_DATA USE_DEVICE(w,u,gxyz,ur,us,ut,dxm1,dxtm1)
+      call ax_cuf_naive<<<lelt,dim3(lx1,ly1,lz1)>>>(w,u,gxyz,ur,us,ut,
+     $   dxm1,dxtm1) 
+!$ACC END HOST_DATA
+!$ACC END DATA
 #ifdef _CUDA
       call cudaProfilerStop()
       !istat = cudaEventRecord(ax_e_stop, 0)
@@ -324,7 +347,7 @@ c     Though this compiles and runs, the solution diverges
       real ur(0:n,0:n,0:n),us(0:n,0:n,0:n),ut(0:n,0:n,0:n)
       real wk(0:n,0:n,0:n)
       real w(0:n,0:n,0:n,1:lelt),u(0:n,0:n,0:n,1:lelt)
-      real g(1:2*ldim,0:n,0:n,0:n,1:lelt)
+      real g(0:n,0:n,0:n,1:2*ldim,1:lelt)
       integer e
       type(cublasHandle) handle 
 
@@ -348,15 +371,15 @@ c     Though this compiles and runs, the solution diverges
          do j=0,n
 !$ACC LOOP SEQ
          do i=0,n
-            wr = g(1,i,j,k,e)*ur(i,j,k) + 
-     $           g(2,i,j,k,e)*us(i,j,k) + 
-     $           g(3,i,j,k,e)*ut(i,j,k)
-            ws = g(2,i,j,k,e)*ur(i,j,k) + 
-     $           g(4,i,j,k,e)*us(i,j,k) + 
-     $           g(5,i,j,k,e)*ut(i,j,k)
-            wt = g(3,i,j,k,e)*ur(i,j,k) + 
-     $           g(5,i,j,k,e)*us(i,j,k) + 
-     $           g(6,i,j,k,e)*ut(i,j,k)
+            wr = g(i,j,k,1,e)*ur(i,j,k) + 
+     $           g(i,j,k,2,e)*us(i,j,k) + 
+     $           g(i,j,k,3,e)*ut(i,j,k)
+            ws = g(i,j,k,2,e)*ur(i,j,k) + 
+     $           g(i,j,k,4,e)*us(i,j,k) + 
+     $           g(i,j,k,5,e)*ut(i,j,k)
+            wt = g(i,j,k,3,e)*ur(i,j,k) + 
+     $           g(i,j,k,5,e)*us(i,j,k) + 
+     $           g(i,j,k,6,e)*ut(i,j,k)
             ur(i,j,k) = wr
             us(i,j,k) = ws
             ut(i,j,k) = wt
