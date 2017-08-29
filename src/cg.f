@@ -377,24 +377,24 @@ c-----------------------------------------------------------------------
       use cudafor
 
       include 'SIZE'
+      include 'DXYZ'
       include 'NEKCUBLAS'
-      include 'TOTAL'
 
       common /mymask/cmask(-1:lx1*ly1*lz1*lelt)
 
-      integer n,m1,m2
-      parameter (n=lx1-1)
-      parameter (m1=n+1)
+      integer m0,m1,m2
+      parameter (m0=lx1-1)
+      parameter (m1=m0+1)
       parameter (m2=m1*m1)
 
-      real w(0:n,0:n,0:n,1:lelt)
-      real u(0:n,0:n,0:n,1:lelt)
-      real gxyz(0:n,0:n,0:n,1:2*ldim,1:lelt)
+      real w(0:m0,0:m0,0:m0,1:lelt)
+      real u(0:m0,0:m0,0:m0,1:lelt)
+      real gxyz(0:m0,0:m0,0:m0,1:2*ldim,1:lelt)
 
-      real ur(0:n,0:n,0:n)
-      real us(0:n,0:n,0:n)
-      real ut(0:n,0:n,0:n)
-      real wk(0:n,0:n,0:n)
+      real ur(0:m0,0:m0,0:m0)
+      real us(0:m0,0:m0,0:m0)
+      real ut(0:m0,0:m0,0:m0)
+      real wk(0:m0,0:m0,0:m0)
 
       integer e, stream, nstreams
       parameter(nstreams=8)
@@ -417,10 +417,10 @@ c **** NEW ***********************************************************
          istat = cublasSetStream(handle, acc_get_cuda_stream(stream))
 
 !$ACC DATA PRESENT(dxm1,dxtm1,u,ur,us,ut)
-!$ACC HOST_DATA USE_DEVICE(dxm1,u,ur,us,ut)
+!$ACC HOST_DATA USE_DEVICE(dxm1,dxtm1,u,ur,us,ut)
          call cublasDgemm('N','N',m1,m2,m1,1.0,
      $      dxm1,m1,u(0,0,0,e),m1,0.0,ur,m1)
-         do k=0,n
+         do k=0,m0
             call cublasDgemm('N','N',m1,m1,m1,1.0,u(0,0,k,e),m1,
      $         dxtm1,m1,0.0,us(0,0,k),m1)
          enddo
@@ -430,9 +430,9 @@ c **** NEW ***********************************************************
 !$ACC END DATA
 
 !$ACC KERNELS PRESENT(gxyz,ur,us,ut) ASYNC(stream)
-         do k=0,n
-         do j=0,n
-         do i=0,n
+         do k=0,m0
+         do j=0,m0
+         do i=0,m0
             wr = gxyz(i,j,k,1,e)*ur(i,j,k) + 
      $           gxyz(i,j,k,2,e)*us(i,j,k) + 
      $           gxyz(i,j,k,3,e)*ut(i,j,k)
@@ -454,8 +454,7 @@ c **** NEW ***********************************************************
 !$ACC HOST_DATA USE_DEVICE(dxm1,dxtm1,ur,us,w,wk)
          call cublasDgemm('N','N',m1,m2,m1,1.0,dxtm1,m1,
      $      ur,m1,0.0,w(0,0,0,e),m1)
-
-         do k=0,N
+         do k=0,m0
             call cublasDgemm('N','N',m1,m1,m1,1.0,us(0,0,k),
      $         m1,dxm1,m1,0.0,wk(0,0,k),m1)
          enddo
@@ -463,9 +462,9 @@ c **** NEW ***********************************************************
 !$ACC END DATA
 
 !$ACC KERNELS PRESENT(w,wk) ASYNC(stream)
-         do k=0,N
-         do j=0,N
-         do i=0,N
+         do k=0,m0
+         do j=0,m0
+         do i=0,m0
             w(i,j,k,e) = w(i,j,k,e) + wk(i,j,k)
          enddo
          enddo
@@ -480,9 +479,9 @@ c **** NEW ***********************************************************
 !$ACC END DATA
 
 !$ACC KERNELS PRESENT(w,wk) ASYNC(stream)
-         do k=0,N
-         do j=0,N
-         do i=0,N
+         do k=0,m0
+         do j=0,m0
+         do i=0,m0
             w(i,j,k,e) = w(i,j,k,e) + wk(i,j,k)
          enddo
          enddo
