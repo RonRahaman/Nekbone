@@ -172,13 +172,13 @@ c-----------------------------------------------------------------------
       call cudaProfilerStart()
       !istat = cudaEventRecord(ax_e_start, 0)
 #endif
-      !call ax_lelt_devicecublas(w,u,gxyz,ur,us,ut,wk)
-!$ACC DATA PRESENT(w,u,gxyz,ur,us,ut,dxm1,dxtm1)
-!$ACC HOST_DATA USE_DEVICE(w,u,gxyz,ur,us,ut,dxm1,dxtm1)
-      call ax_cuf_naive<<<lelt,dim3(lx1,ly1,lz1)>>>(w,u,gxyz,ur,us,ut,
-     $   dxm1,dxtm1) 
-!$ACC END HOST_DATA
-!$ACC END DATA
+      call ax_lelt(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1)
+c !$ACC DATA PRESENT(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1)
+c !$ACC HOST_DATA USE_DEVICE(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1)
+c      call ax_cuf_naive<<<lelt,dim3(lx1,ly1,lz1)>>>(w,u,gxyz,ur,us,ut,
+c     $   dxm1,dxtm1) 
+c !$ACC END HOST_DATA
+c !$ACC END DATA
 #ifdef _CUDA
       call cudaProfilerStop()
       !istat = cudaEventRecord(ax_e_stop, 0)
@@ -222,7 +222,7 @@ c-------------------------------------------------------------------------
       return
       end
 c-------------------------------------------------------------------------
-      subroutine ax_lelt(w,u,g,ur,us,ut,wk) ! Local matrix-vector product
+      subroutine ax_lelt(w,u,g,ur,us,ut,wk,dxm1,dxtm1) ! Local matrix-vector product
 #ifdef _CUDA
       use openacc
       use cublas
@@ -232,7 +232,6 @@ c-------------------------------------------------------------------------
 #ifdef _CUDA
       include 'NEKCUBLAS'
 #endif
-      include 'TOTAL'
 
       parameter (lxyz=lx1*ly1*lz1)
       parameter (n=lx1-1)
@@ -242,6 +241,7 @@ c-------------------------------------------------------------------------
       real wk(0:n,0:n,0:n)
       real w(0:n,0:n,0:n,1:lelt),u(0:n,0:n,0:n,1:lelt)
       real g(0:n,0:n,0:n,1:2*ldim,1:lelt)
+      real dxm1(0:n,0:n), dxtm1(0:n,0:n)
       integer e, stream, nstreams
       parameter(nstreams=8)
 
@@ -254,7 +254,7 @@ c-------------------------------------------------------------------------
 #endif
 
 !$ACC DATA PRESENT(dxm1,dxtm1,u,ur,us,ut)
-!$ACC HOST_DATA USE_DEVICE(dxm1,u,ur,us,ut)
+!$ACC HOST_DATA USE_DEVICE(dxm1,dxtm1,u,ur,us,ut)
          call cublasDgemm('N','N',m1,m2,m1,1.0,
      $      dxm1,m1,u(0,0,0,e),m1,0.0,ur,m1)
          do k=0,n
