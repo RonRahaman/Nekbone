@@ -245,7 +245,11 @@ c-------------------------------------------------------------------------
       type(c_devptr)
      &   devptr_dxm1_e(lelt),
      &   devptr_u_e(lelt),
-     &   devptr_ur_e(lelt)
+     &   devptr_ur_e(lelt),
+     &   devptr_u_ke(lelt*lx1),
+     &   devptr_dxtm1_ke(lelt*lx1),
+     &   devptr_us_ke(lelt*lx1)
+
 
 !$ACC UPDATE DEVICE(dxm1,dxtm1,u,g,w)
 
@@ -253,6 +257,9 @@ c-------------------------------------------------------------------------
 !$ACC&   devptr_dxm1_e,
 !$ACC&   devptr_u_e,
 !$ACC&   devptr_ur_e,
+!$ACC&   devptr_u_ke,
+!$ACC&   devptr_dxtm1_ke,
+!$ACC&   devptr_us_ke,
 !$ACC&   ur_e,
 !$ACC&   us_e,
 !$ACC&   ut_e,
@@ -266,7 +273,19 @@ c-------------------------------------------------------------------------
       enddo
 !$ACC END HOST_DATA
 
-!$ACC UPDATE DEVICE(devptr_dxm1_e,devptr_u_e,devptr_ur_e)
+!$ACC HOST_DATA USE_DEVICE(u,dxtm1,us_e)
+      do e=1,lelt
+      do k=1,n
+         i = k + (e-1) * n
+         devptr_u_ke(i) = c_devloc(u(1,1,k,e))
+         devptr_dxtm1_ke(i) = c_devloc(dxtm1(1,1))
+         devptr_us_ke(i) = c_devloc(us_e(1,1,k,e))
+      enddo
+      enddo
+!$ACC END HOST_DATA
+
+!$ACC UPDATE DEVICE(devptr_dxm1_e,devptr_u_e,devptr_ur_e,
+!$ACC&   devptr_u_ke,devptr_dxtm1_ke,devptr_us_ke)
 
 !$ACC HOST_DATA USE_DEVICE(devptr_dxm1_e,devptr_u_e,devptr_ur_e)
          istat = cublasDgemmBatched(
@@ -281,17 +300,18 @@ c-------------------------------------------------------------------------
      $      nelt)
 !$ACC END HOST_DATA
 
-      do e=1,nelt
-      do k=1,n
-!$ACC HOST_DATA USE_DEVICE(u,dxtm1,us_e)
-         call cublasDgemm(
-     $      'N','N', n, n, n,
-     $      1.0, u(1,1,k,e), n,
-     $      dxtm1, n,
-     $      0.0, us_e(1,1,k,e), n)
+!$ACC HOST_DATA USE_DEVICE(devptr_u_ke,devptr_dxtm1_ke,devptr_us_ke)
+         istat = cublasDgemmBatched(
+     $      handle,
+     $      'N','N', 
+     $      n, n, n,
+     $      1.0, 
+     $      devptr_u_ke, n,
+     $      devptr_dxtm1_ke, n,
+     $      0.0, 
+     $      devptr_us_ke, n,
+     $      nelt*n)
 !$ACC END HOST_DATA
-      enddo
-      enddo
 
       do e=1,nelt
 !$ACC HOST_DATA USE_DEVICE(u,dxtm1,ut_e)
