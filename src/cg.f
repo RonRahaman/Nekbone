@@ -248,7 +248,9 @@ c-------------------------------------------------------------------------
      &   devptr_ur_e(lelt),
      &   devptr_u_ke(lelt*lx1),
      &   devptr_dxtm1_ke(lelt*lx1),
-     &   devptr_us_ke(lelt*lx1)
+     &   devptr_us_ke(lelt*lx1),
+     &   devptr_dxtm1_e(lelt),
+     &   devptr_ut_e(lelt)
 
 
 !$ACC UPDATE DEVICE(dxm1,dxtm1,u,g,w)
@@ -260,16 +262,20 @@ c-------------------------------------------------------------------------
 !$ACC&   devptr_u_ke,
 !$ACC&   devptr_dxtm1_ke,
 !$ACC&   devptr_us_ke,
+!$ACC&   devptr_dxtm1_e,
+!$ACC&   devptr_ut_e,
 !$ACC&   ur_e,
 !$ACC&   us_e,
 !$ACC&   ut_e,
 !$ACC&   wk_e)
 
-!$ACC HOST_DATA USE_DEVICE(dxm1,u,ur_e)
+!$ACC HOST_DATA USE_DEVICE(dxm1,u,ur_e,dxtm1,ut_e)
       do e=1,lelt
          devptr_dxm1_e(e)  = c_devloc(dxm1(1,1))
          devptr_u_e(e)     = c_devloc(u(1,1,1,e))
          devptr_ur_e(e)    = c_devloc(ur_e(1,1,1,e))
+         devptr_dxtm1_e(e) = c_devloc(dxtm1(1,1))
+         devptr_ut_e(e)    = c_devloc(ut_e(1,1,1,e))
       enddo
 !$ACC END HOST_DATA
 
@@ -285,7 +291,8 @@ c-------------------------------------------------------------------------
 !$ACC END HOST_DATA
 
 !$ACC UPDATE DEVICE(devptr_dxm1_e,devptr_u_e,devptr_ur_e,
-!$ACC&   devptr_u_ke,devptr_dxtm1_ke,devptr_us_ke)
+!$ACC&   devptr_u_ke,devptr_dxtm1_ke,devptr_us_ke,
+!$ACC&   devptr_dxtm1_e,devptr_ut_e)
 
 !$ACC HOST_DATA USE_DEVICE(devptr_dxm1_e,devptr_u_e,devptr_ur_e)
          istat = cublasDgemmBatched(
@@ -313,15 +320,18 @@ c-------------------------------------------------------------------------
      $      nelt*n)
 !$ACC END HOST_DATA
 
-      do e=1,nelt
-!$ACC HOST_DATA USE_DEVICE(u,dxtm1,ut_e)
-         call cublasDgemm(
-     $      'N', 'N', n**2, n, n,
-     $      1.0, u(1,1,1,e), n**2,
-     $      dxtm1, n,
-     $      0.0, ut_e(1,1,1,e), n**2)
+!$ACC HOST_DATA USE_DEVICE(devptr_u_e,devptr_dxtm1_e,devptr_ut_e)
+         istat =  cublasDgemmBatched(
+     $      handle,
+     $      'N', 'N', 
+     $      n**2, n, n,
+     $      1.0, 
+     $      devptr_u_e, n**2,
+     $      devptr_dxtm1_e, n,
+     $      0.0, 
+     $      devptr_ut_e, n**2,
+     $      nelt)
 !$ACC END HOST_DATA
-      enddo
 
 !$ACC KERNELS PRESENT(g,ur_e,us_e,ut_e)
       do e=1,nelt
