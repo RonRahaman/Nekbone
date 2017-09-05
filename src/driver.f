@@ -36,8 +36,8 @@ c-----------------------------------------------------------------------
 #if defined(_CUDA) && defined(_OPENACC)
       ax_e_sec = 0.0
       istat = cublasCreate(handle)
-!      istat = cublasSetStream(handle, 
-!     $   acc_get_cuda_stream(acc_async_sync))
+      istat = cublasSetStream(handle, 
+     $   acc_get_cuda_stream(acc_async_sync))
 #endif
 
       call iniproc(mpi_comm_world)    ! has nekmpi common block

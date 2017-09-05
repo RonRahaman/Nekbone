@@ -245,88 +245,104 @@ c-------------------------------------------------------------------------
       integer e, stream, nstreams
       parameter(nstreams=8)
 
+      real ur_e(0:n,0:n,0:n,1:lelt)
+      real us_e(0:n,0:n,0:n,1:lelt)
+      real ut_e(0:n,0:n,0:n,1:lelt)
+      real wk_e(0:n,0:n,0:n,1:lelt)
+
+!$ACC UPDATE DEVICE(dxm1,dxtm1,u,g,w)
+!$ACC DATA CREATE(ur_e,us_e,ut_e,wk_e)
+
       do e=1,nelt
 
-         stream = mod(e,nstreams)
-
-#ifdef _CUDA
-         istat = cublasSetStream(handle, acc_get_cuda_stream(stream))
-#endif
-
-!$ACC DATA PRESENT(dxm1,dxtm1,u,ur,us,ut)
-!$ACC HOST_DATA USE_DEVICE(dxm1,dxtm1,u,ur,us,ut)
-         call cublasDgemm('N','N',m1,m2,m1,1.0,
-     $      dxm1,m1,u(0,0,0,e),m1,0.0,ur,m1)
+!$ACC HOST_DATA USE_DEVICE(dxm1,dxtm1,u,ur_e,us_e,ut_e)
+         call cublasDgemm(
+     $      'N', 'N', m1, m2, m1,
+     $      1.0, dxm1, m1, 
+     $      u(0,0,0,e), m1,
+     $      0.0, ur_e(0,0,0,e), m1)
          do k=0,n
-            call cublasDgemm('N','N',m1,m1,m1,1.0,u(0,0,k,e),m1,
-     $         dxtm1,m1,0.0,us(0,0,k),m1)
+            call cublasDgemm(
+     $         'N','N', m1, m1, m1,
+     $         1.0, u(0,0,k,e), m1,
+     $         dxtm1, m1,
+     $         0.0, us_e(0,0,k,e), m1)
          enddo
-         call cublasDgemm('N','N',m2,m1,m1,1.0,u(0,0,0,e),m2,
-     $      dxtm1,m1,0.0,ut,m2)
+         call cublasDgemm(
+     $      'N', 'N', m2, m1, m1,
+     $      1.0, u(0,0,0,e), m2,
+     $      dxtm1, m1,
+     $      0.0, ut_e(0,0,0,e), m2)
 !$ACC END HOST_DATA
-!$ACC END DATA
 
-!$ACC KERNELS PRESENT(g,ur,us,ut) ASYNC(stream)
+!$ACC KERNELS PRESENT(g,ur_e,us_e,ut_e)
          do k=0,n
          do j=0,n
          do i=0,n
-            wr = g(i,j,k,1,e)*ur(i,j,k) + 
-     $           g(i,j,k,2,e)*us(i,j,k) + 
-     $           g(i,j,k,3,e)*ut(i,j,k)
-            ws = g(i,j,k,2,e)*ur(i,j,k) + 
-     $           g(i,j,k,4,e)*us(i,j,k) + 
-     $           g(i,j,k,5,e)*ut(i,j,k)
-            wt = g(i,j,k,3,e)*ur(i,j,k) + 
-     $           g(i,j,k,5,e)*us(i,j,k) + 
-     $           g(i,j,k,6,e)*ut(i,j,k)
-            ur(i,j,k) = wr
-            us(i,j,k) = ws
-            ut(i,j,k) = wt
+            wr = g(i,j,k,1,e)*ur_e(i,j,k,e) + 
+     $           g(i,j,k,2,e)*us_e(i,j,k,e) + 
+     $           g(i,j,k,3,e)*ut_e(i,j,k,e)
+            ws = g(i,j,k,2,e)*ur_e(i,j,k,e) + 
+     $           g(i,j,k,4,e)*us_e(i,j,k,e) + 
+     $           g(i,j,k,5,e)*ut_e(i,j,k,e)
+            wt = g(i,j,k,3,e)*ur_e(i,j,k,e) + 
+     $           g(i,j,k,5,e)*us_e(i,j,k,e) + 
+     $           g(i,j,k,6,e)*ut_e(i,j,k,e)
+            ur_e(i,j,k,e) = wr
+            us_e(i,j,k,e) = ws
+            ut_e(i,j,k,e) = wt
          enddo
          enddo
          enddo
 !$ACC END KERNELS
 
-!$ACC DATA PRESENT(dxm1,dxtm1,ur,us,w,wk)
-!$ACC HOST_DATA USE_DEVICE(dxm1,dxtm1,ur,us,w,wk)
-         call cublasDgemm('N','N',m1,m2,m1,1.0,dxtm1,m1,
-     $      ur,m1,0.0,w(0,0,0,e),m1)
+!$ACC HOST_DATA USE_DEVICE(dxm1,dxtm1,ur_e,us_e,w,wk_e)
+         call cublasDgemm(
+     $      'N', 'N', m1, m2, m1,
+     $      1.0, dxtm1, m1,
+     $      ur_e(0,0,0,e), m1,
+     $      0.0, w(0,0,0,e), m1)
 
          do k=0,N
-            call cublasDgemm('N','N',m1,m1,m1,1.0,us(0,0,k),
-     $         m1,dxm1,m1,0.0,wk(0,0,k),m1)
+            call cublasDgemm(
+     $         'N', 'N', m1, m1, m1,
+     $         1.0, us_e(0,0,k,e), m1,
+     $         dxm1, m1,
+     $         0.0, wk_e(0,0,k,e), m1)
          enddo
 !$ACC END HOST_DATA
-!$ACC END DATA
 
-!$ACC KERNELS PRESENT(w,wk) ASYNC(stream)
+!$ACC KERNELS PRESENT(w,wk_e)
          do k=0,N
          do j=0,N
          do i=0,N
-            w(i,j,k,e) = w(i,j,k,e) + wk(i,j,k)
+            w(i,j,k,e) = w(i,j,k,e) + wk_e(i,j,k,e)
          enddo
          enddo
          enddo
 !$ACC END KERNELS
 
-!$ACC DATA PRESENT(dxm1,ut,wk)
-!$ACC HOST_DATA USE_DEVICE(dxm1,ut,wk)
-         call cublasDgemm('N','N',m2,m1,m1,1.0,ut,m2,
-     $      dxm1,m1,0.0,wk,m2)
+!$ACC HOST_DATA USE_DEVICE(dxm1,ut_e,wk_e)
+         call cublasDgemm(
+     $      'N', 'N', m2, m1, m1,
+     $      1.0, ut_e(0,0,0,e), m2,
+     $      dxm1, m1,
+     $      0.0, wk_e(0,0,0,e), m2)
 !$ACC END HOST_DATA
-!$ACC END DATA
 
-!$ACC KERNELS PRESENT(w,wk) ASYNC(stream)
+!$ACC KERNELS PRESENT(w,wk_e)
          do k=0,N
          do j=0,N
          do i=0,N
-            w(i,j,k,e) = w(i,j,k,e) + wk(i,j,k)
+            w(i,j,k,e) = w(i,j,k,e) + wk_e(i,j,k,e)
          enddo
          enddo
          enddo
 !$ACC END KERNELS
 
       enddo
+!$ACC END DATA
+!$ACC UPDATE HOST(dxm1,dxtm1,u,g,w)
 
       return
       end
