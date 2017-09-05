@@ -239,8 +239,7 @@ c-------------------------------------------------------------------------
       real w(n,n,n,lelt), u(n,n,n,lelt)
       real g(n,n,n,2*ldim,lelt)
       real dxm1(n,n), dxtm1(n,n)
-      integer e, stream, nstreams
-      parameter(nstreams=8)
+      integer e
 
       real ur_e(n,n,n,lelt)
       real us_e(n,n,n,lelt)
@@ -251,93 +250,116 @@ c-------------------------------------------------------------------------
 !$ACC DATA CREATE(ur_e,us_e,ut_e,wk_e)
 
       do e=1,nelt
-
-!$ACC HOST_DATA USE_DEVICE(dxm1,dxtm1,u,ur_e,us_e,ut_e)
+!$ACC HOST_DATA USE_DEVICE(dxm1,u,ur_e)
          call cublasDgemm(
      $      'N', 'N', n, n**2, n,
      $      1.0, dxm1, n, 
      $      u(1,1,1,e), n,
      $      0.0, ur_e(1,1,1,e), n)
-         do k=1,n
-            call cublasDgemm(
-     $         'N','N', n, n, n,
-     $         1.0, u(1,1,k,e), n,
-     $         dxtm1, n,
-     $         0.0, us_e(1,1,k,e), n)
-         enddo
+!$ACC END HOST_DATA
+      enddo
+
+      do e=1,nelt
+      do k=1,n
+!$ACC HOST_DATA USE_DEVICE(u,dxtm1,us_e)
+         call cublasDgemm(
+     $      'N','N', n, n, n,
+     $      1.0, u(1,1,k,e), n,
+     $      dxtm1, n,
+     $      0.0, us_e(1,1,k,e), n)
+!$ACC END HOST_DATA
+      enddo
+      enddo
+
+      do e=1,nelt
+!$ACC HOST_DATA USE_DEVICE(u,dxtm1,ut_e)
          call cublasDgemm(
      $      'N', 'N', n**2, n, n,
      $      1.0, u(1,1,1,e), n**2,
      $      dxtm1, n,
      $      0.0, ut_e(1,1,1,e), n**2)
 !$ACC END HOST_DATA
+      enddo
 
 !$ACC KERNELS PRESENT(g,ur_e,us_e,ut_e)
-         do k=1,n
-         do j=1,n
-         do i=1,n
-            wr = g(i,j,k,1,e) * ur_e(i,j,k,e) + 
-     $           g(i,j,k,2,e) * us_e(i,j,k,e) + 
-     $           g(i,j,k,3,e) * ut_e(i,j,k,e)
-            ws = g(i,j,k,2,e) * ur_e(i,j,k,e) + 
-     $           g(i,j,k,4,e) * us_e(i,j,k,e) + 
-     $           g(i,j,k,5,e) * ut_e(i,j,k,e)
-            wt = g(i,j,k,3,e) * ur_e(i,j,k,e) + 
-     $           g(i,j,k,5,e) * us_e(i,j,k,e) + 
-     $           g(i,j,k,6,e) * ut_e(i,j,k,e)
-            ur_e(i,j,k,e) = wr
-            us_e(i,j,k,e) = ws
-            ut_e(i,j,k,e) = wt
-         enddo
-         enddo
-         enddo
+      do e=1,nelt
+      do k=1,n
+      do j=1,n
+      do i=1,n
+         wr = g(i,j,k,1,e) * ur_e(i,j,k,e) + 
+     $        g(i,j,k,2,e) * us_e(i,j,k,e) + 
+     $        g(i,j,k,3,e) * ut_e(i,j,k,e)
+         ws = g(i,j,k,2,e) * ur_e(i,j,k,e) + 
+     $        g(i,j,k,4,e) * us_e(i,j,k,e) + 
+     $        g(i,j,k,5,e) * ut_e(i,j,k,e)
+         wt = g(i,j,k,3,e) * ur_e(i,j,k,e) + 
+     $        g(i,j,k,5,e) * us_e(i,j,k,e) + 
+     $        g(i,j,k,6,e) * ut_e(i,j,k,e)
+         ur_e(i,j,k,e) = wr
+         us_e(i,j,k,e) = ws
+         ut_e(i,j,k,e) = wt
+      enddo
+      enddo
+      enddo
+      enddo
 !$ACC END KERNELS
 
-!$ACC HOST_DATA USE_DEVICE(dxm1,dxtm1,ur_e,us_e,w,wk_e)
+      do e=1,nelt
+!$ACC HOST_DATA USE_DEVICE(dxtm1,ur_e,w)
          call cublasDgemm(
      $      'N', 'N', n, n**2, n,
      $      1.0, dxtm1, n,
      $      ur_e(1,1,1,e), n,
      $      0.0, w(1,1,1,e), n)
-
-         do k=1,n
-            call cublasDgemm(
-     $         'N', 'N', n, n, n,
-     $         1.0, us_e(1,1,k,e), n,
-     $         dxm1, n,
-     $         0.0, wk_e(1,1,k,e), n)
-         enddo
 !$ACC END HOST_DATA
+      enddo
+
+      do e=1,nelt
+      do k=1,n
+!$ACC HOST_DATA USE_DEVICE(us_e,dxm1,wk_e)
+         call cublasDgemm(
+     $      'N', 'N', n, n, n,
+     $      1.0, us_e(1,1,k,e), n,
+     $      dxm1, n,
+     $      0.0, wk_e(1,1,k,e), n)
+!$ACC END HOST_DATA
+      enddo
+      enddo
 
 !$ACC KERNELS PRESENT(w,wk_e)
-         do k=1,n
-         do j=1,n
-         do i=1,n
-            w(i,j,k,e) = w(i,j,k,e) + wk_e(i,j,k,e)
-         enddo
-         enddo
-         enddo
+      do e=1,nelt
+      do k=1,n
+      do j=1,n
+      do i=1,n
+         w(i,j,k,e) = w(i,j,k,e) + wk_e(i,j,k,e)
+      enddo
+      enddo
+      enddo
+      enddo
 !$ACC END KERNELS
 
-!$ACC HOST_DATA USE_DEVICE(dxm1,ut_e,wk_e)
+      do e=1,nelt
+!$ACC HOST_DATA USE_DEVICE(ut_e,dxm1,wk_e)
          call cublasDgemm(
      $      'N', 'N', n**2, n, n,
      $      1.0, ut_e(1,1,1,e), n**2,
      $      dxm1, n,
      $      0.0, wk_e(1,1,1,e), n**2)
 !$ACC END HOST_DATA
+      enddo
 
 !$ACC KERNELS PRESENT(w,wk_e)
-         do k=1,n
-         do j=1,n
-         do i=1,n
-            w(i,j,k,e) = w(i,j,k,e) + wk_e(i,j,k,e)
-         enddo
-         enddo
-         enddo
+      do e=1,nelt
+      do k=1,n
+      do j=1,n
+      do i=1,n
+         w(i,j,k,e) = w(i,j,k,e) + wk_e(i,j,k,e)
+      enddo
+      enddo
+      enddo
+      enddo
 !$ACC END KERNELS
 
-      enddo
 !$ACC END DATA
 !$ACC UPDATE HOST(dxm1,dxtm1,u,g,w)
 
