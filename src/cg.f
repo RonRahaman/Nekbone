@@ -178,38 +178,32 @@ c-----------------------------------------------------------------------
       include 'SIZE'
       include 'NEKCUBLAS'
 
-      real w     (lx1,ly1,lz1,lelt)
-      real u     (lx1,ly1,lz1,lelt)
-      real ur    (lx1,ly1,lz1,lelt)
-      real us    (lx1,ly1,lz1,lelt)
-      real ut    (lx1,ly1,lz1,lelt)
-      real wk    (lx1,ly1,lz1,lelt)
-      real dxm1  (lx1,lx1)
-      real dxtm1 (lx1,lx1)
+      real, dimension(lx1,ly1,lz1,lelt), intent(in) :: w,u,ur,us,ut,wk
+      real, dimension(lx1,lx1), intent(in) :: dxm1,dxtm1
 
-      integer e
+      integer :: e
 
 !$ACC DATA PRESENT(
-!$ACC&      devptr_dxm1_e,
-!$ACC&      devptr_dxm1_ke,
-!$ACC&      devptr_dxtm1_e,
-!$ACC&      devptr_dxtm1_ke,
-!$ACC&      devptr_u_e,
-!$ACC&      devptr_u_ke,
-!$ACC&      devptr_ur_e,
-!$ACC&      devptr_us_ke,
-!$ACC&      devptr_ut_e,
-!$ACC&      devptr_w_e,
-!$ACC&      devptr_wk_e,
-!$ACC&      devptr_wk_ke,
-!$ACC&      dxm1,
-!$ACC&      dxtm1,
-!$ACC&      u,
-!$ACC&      ur,
-!$ACC&      us,
-!$ACC&      ut,
-!$ACC&      w,
-!$ACC&      wk)
+!$ACC&   devptr_dxm1_e,
+!$ACC&   devptr_dxm1_ke,
+!$ACC&   devptr_dxtm1_e,
+!$ACC&   devptr_dxtm1_ke,
+!$ACC&   devptr_u_e,
+!$ACC&   devptr_u_ke,
+!$ACC&   devptr_ur_e,
+!$ACC&   devptr_us_ke,
+!$ACC&   devptr_ut_e,
+!$ACC&   devptr_w_e,
+!$ACC&   devptr_wk_e,
+!$ACC&   devptr_wk_ke,
+!$ACC&   dxm1,
+!$ACC&   dxtm1,
+!$ACC&   u,
+!$ACC&   ur,
+!$ACC&   us,
+!$ACC&   ut,
+!$ACC&   w,
+!$ACC&   wk)
 
 !$ACC HOST_DATA USE_DEVICE(dxm1, dxtm1, u, ur, ut, w, wk)
       do e=1,lelt
