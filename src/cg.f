@@ -356,17 +356,15 @@ c-------------------------------------------------------------------------
       include 'SIZE'
       include 'NEKCUBLAS'
 
-      parameter(n=lx1)
-      real w(n,n,n,lelt) 
-      real u(n,n,n,lelt)
-      real g(n,n,n,2*ldim,lelt)
-      real ur(n,n,n,lelt) 
-      real us(n,n,n,lelt) 
-      real ut(n,n,n,lelt)
-      real wk(n,n,n,lelt)
-      real dxm1(n,n)
-      real dxtm1(n,n)
-      integer e
+      integer, parameter :: n = lx1
+      real, dimension(n,n,n,lelt), intent(inout) :: w
+      real, dimension(n,n,n,lelt), intent(in) :: u
+      real, dimension(n,n,n,2*ldim,lelt), intent(in) :: g
+      real, dimension(n,n,n,lelt), intent(inout) :: ur, us, ut, wk
+      real, dimension(n,n), intent(in) :: dxm1, dxtm1
+
+      integer :: e, istat
+      real :: wr, ws, wt
 
 !$ACC DATA PRESENT(
 !$ACC&   devptr_dxm1_e,
