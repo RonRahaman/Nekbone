@@ -68,11 +68,9 @@ c     set machine tolerances
       enddo
 !$ACC END KERNELS
 
-!$ACC UPDATE HOST(x,r)
-
+!$ACC UPDATE HOST(r)
       call maskit (r,cmask,nx1,ny1,nz1) ! Zero out Dirichlet conditions
-
-!$ACC UPDATE DEVICE(x,r,c)
+!$ACC UPDATE DEVICE(r)
 
       rnorm = sqrt(glsc3(r,c,r,n))
       iter = 0
