@@ -1,7 +1,11 @@
 c-----------------------------------------------------------------------
       subroutine cg(x,f,g,c,r,w,p,z,n,niter,flop_cg)
+      use openacc
+      use cublas
+      use cudafor
       include 'SIZE'
       include 'DXYZ'
+      include 'NEKCUBLAS'
 
 c     Solve Ax=f where A is SPD and is invoked by ax()
 c
@@ -36,7 +40,26 @@ c     set machine tolerances
 
       rtz1=1.0
 
-!$ACC DATA COPY(ur,us,ut,wk,dxm1,dxtm1)
+!$ACC ENTER DATA CREATE(
+!$ACC&   devptr_dxm1_e,
+!$ACC&   devptr_dxm1_ke,
+!$ACC&   devptr_dxtm1_e,
+!$ACC&   devptr_dxtm1_ke,
+!$ACC&   devptr_u_e,
+!$ACC&   devptr_u_ke,
+!$ACC&   devptr_ur_e,
+!$ACC&   devptr_us_ke,
+!$ACC&   devptr_ut_e,
+!$ACC&   devptr_w_e,
+!$ACC&   devptr_wk_e,
+!$ACC&   devptr_wk_ke)
+!$ACC& COPYIN(
+!$ACC&   dxm1,
+!$ACC&   dxtm1,
+!$ACC&   ur,
+!$ACC&   us,
+!$ACC&   ut,
+!$ACC&   wk)
 
 !$ACC KERNELS PRESENT(x,r,f)
       do i=1,n
@@ -57,6 +80,8 @@ c     set machine tolerances
 c     call tester(z,r,n)  
 
 !$ACC UPDATE DEVICE(x,r,c)
+
+      call set_devptrs(w,p,ur,us,ut,wk,dxm1,dxtm1)
 
       do iter=1,miter
 !$ACC UPDATE HOST(z,r,c)
@@ -109,7 +134,26 @@ c        if (rtr.le.rlim2) goto 1001
 
  1001 continue
 
-!$ACC END DATA
+!$ACC EXIT DATA DELETE(
+!$ACC&   devptr_dxm1_e,
+!$ACC&   devptr_dxm1_ke,
+!$ACC&   devptr_dxtm1_e,
+!$ACC&   devptr_dxtm1_ke,
+!$ACC&   devptr_u_e,
+!$ACC&   devptr_u_ke,
+!$ACC&   devptr_ur_e,
+!$ACC&   devptr_us_ke,
+!$ACC&   devptr_ut_e,
+!$ACC&   devptr_w_e,
+!$ACC&   devptr_wk_e,
+!$ACC&   devptr_wk_ke)
+!$ACC& COPYOUT(
+!$ACC&   dxm1,
+!$ACC&   dxtm1,
+!$ACC&   ur,
+!$ACC&   us,
+!$ACC&   ut,
+!$ACC&   wk)
 
       if (nid.eq.0) write(6,6) iter,rnorm,alpha,beta,pap
 
@@ -124,6 +168,89 @@ c-----------------------------------------------------------------------
 
       nn = n
       call h1mg_solve(z,r,nn)
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine set_devptrs(w,u,ur,us,ut,wk,dxm1,dxtm1)
+      use cublas
+      use cudafor
+      include 'SIZE'
+      include 'NEKCUBLAS'
+
+      real w     (lx1,ly1,lz1,lelt)
+      real u     (lx1,ly1,lz1,lelt)
+      real ur    (lx1,ly1,lz1,lelt)
+      real us    (lx1,ly1,lz1,lelt)
+      real ut    (lx1,ly1,lz1,lelt)
+      real wk    (lx1,ly1,lz1,lelt)
+      real dxm1  (lx1,lx1)
+      real dxtm1 (lx1,lx1)
+
+      integer e
+
+!$ACC DATA PRESENT(
+!$ACC&      devptr_dxm1_e,
+!$ACC&      devptr_dxm1_ke,
+!$ACC&      devptr_dxtm1_e,
+!$ACC&      devptr_dxtm1_ke,
+!$ACC&      devptr_u_e,
+!$ACC&      devptr_u_ke,
+!$ACC&      devptr_ur_e,
+!$ACC&      devptr_us_ke,
+!$ACC&      devptr_ut_e,
+!$ACC&      devptr_w_e,
+!$ACC&      devptr_wk_e,
+!$ACC&      devptr_wk_ke,
+!$ACC&      dxm1,
+!$ACC&      dxtm1,
+!$ACC&      u,
+!$ACC&      ur,
+!$ACC&      us,
+!$ACC&      ut,
+!$ACC&      w,
+!$ACC&      wk)
+
+!$ACC HOST_DATA USE_DEVICE(dxm1, dxtm1, u, ur, ut, w, wk)
+      do e=1,lelt
+         devptr_dxm1_e(e)  = c_devloc(dxm1(1,1))
+         devptr_dxtm1_e(e) = c_devloc(dxtm1(1,1))
+         devptr_u_e(e)     = c_devloc(u(1,1,1,e))
+         devptr_ur_e(e)    = c_devloc(ur(1,1,1,e))
+         devptr_ut_e(e)    = c_devloc(ut(1,1,1,e))
+         devptr_w_e(e)     = c_devloc(w(1,1,1,e))
+         devptr_wk_e(e)    = c_devloc(wk(1,1,1,e))
+      enddo
+!$ACC END HOST_DATA
+
+!$ACC HOST_DATA USE_DEVICE(dxm1, dxtm1, u, us, wk)
+      do e=1,lelt
+      do k=1,lx1
+         i = k + (e-1) * lx1
+         devptr_dxm1_ke(i) = c_devloc(dxm1(1,1))
+         devptr_dxtm1_ke(i) = c_devloc(dxtm1(1,1))
+         devptr_u_ke(i) = c_devloc(u(1,1,k,e))
+         devptr_us_ke(i) = c_devloc(us(1,1,k,e))
+         devptr_wk_ke(i) = c_devloc(wk(1,1,k,e))
+      enddo
+      enddo
+!$ACC END HOST_DATA
+
+!$ACC UPDATE DEVICE(
+!$ACC&   devptr_dxm1_e,
+!$ACC&   devptr_dxm1_ke,
+!$ACC&   devptr_dxtm1_e,
+!$ACC&   devptr_dxtm1_ke,
+!$ACC&   devptr_u_e,
+!$ACC&   devptr_u_ke,
+!$ACC&   devptr_ur_e,
+!$ACC&   devptr_us_ke,
+!$ACC&   devptr_ut_e,
+!$ACC&   devptr_w_e,
+!$ACC&   devptr_wk_e,
+!$ACC&   devptr_wk_ke)
+
+!$ACC END DATA
 
       return
       end
@@ -230,67 +357,41 @@ c-------------------------------------------------------------------------
       include 'NEKCUBLAS'
 
       parameter(n=lx1)
-      real ur(n,n,n,lelt), us(n,n,n,lelt), ut(n,n,n,lelt)
-      real wk(n,n,n,lelt)
-      real w(n,n,n,lelt), u(n,n,n,lelt)
+      real w(n,n,n,lelt) 
+      real u(n,n,n,lelt)
       real g(n,n,n,2*ldim,lelt)
-      real dxm1(n,n), dxtm1(n,n)
+      real ur(n,n,n,lelt) 
+      real us(n,n,n,lelt) 
+      real ut(n,n,n,lelt)
+      real wk(n,n,n,lelt)
+      real dxm1(n,n)
+      real dxtm1(n,n)
       integer e
 
+!$ACC DATA PRESENT(
+!$ACC&   devptr_dxm1_e,
+!$ACC&   devptr_dxm1_ke,
+!$ACC&   devptr_dxtm1_e,
+!$ACC&   devptr_dxtm1_ke,
+!$ACC&   devptr_u_e,
+!$ACC&   devptr_u_ke,
+!$ACC&   devptr_ur_e,
+!$ACC&   devptr_us_ke,
+!$ACC&   devptr_ut_e,
+!$ACC&   devptr_w_e,
+!$ACC&   devptr_wk_e,
+!$ACC&   devptr_wk_ke,
+!$ACC&   dxm1,
+!$ACC&   dxtm1,
+!$ACC&   g,
+!$ACC&   u,
+!$ACC&   ur,
+!$ACC&   us,
+!$ACC&   ut,
+!$ACC&   w,
+!$ACC&   wk)
+
 !$ACC UPDATE DEVICE(dxm1,dxtm1,u,g,w)
-
-!$ACC DATA CREATE(
-!$ACC&   devptr_dxm1_e,
-!$ACC&   devptr_dxm1_ke,
-!$ACC&   devptr_dxtm1_e,
-!$ACC&   devptr_dxtm1_ke,
-!$ACC&   devptr_u_e,
-!$ACC&   devptr_u_ke,
-!$ACC&   devptr_ur_e,
-!$ACC&   devptr_us_ke,
-!$ACC&   devptr_ut_e,
-!$ACC&   devptr_w_e,
-!$ACC&   devptr_wk_e,
-!$ACC&   devptr_wk_ke)
-
-!$ACC HOST_DATA USE_DEVICE(dxm1, dxtm1, u, ur, ut, w, wk)
-      do e=1,lelt
-         devptr_dxm1_e(e)  = c_devloc(dxm1(1,1))
-         devptr_dxtm1_e(e) = c_devloc(dxtm1(1,1))
-         devptr_u_e(e)     = c_devloc(u(1,1,1,e))
-         devptr_ur_e(e)    = c_devloc(ur(1,1,1,e))
-         devptr_ut_e(e)    = c_devloc(ut(1,1,1,e))
-         devptr_w_e(e)     = c_devloc(w(1,1,1,e))
-         devptr_wk_e(e)    = c_devloc(wk(1,1,1,e))
-      enddo
-!$ACC END HOST_DATA
-
-!$ACC HOST_DATA USE_DEVICE(dxm1, dxtm1, u, us, wk)
-      do e=1,lelt
-      do k=1,n
-         i = k + (e-1) * n
-         devptr_dxm1_ke(i) = c_devloc(dxm1(1,1))
-         devptr_dxtm1_ke(i) = c_devloc(dxtm1(1,1))
-         devptr_u_ke(i) = c_devloc(u(1,1,k,e))
-         devptr_us_ke(i) = c_devloc(us(1,1,k,e))
-         devptr_wk_ke(i) = c_devloc(wk(1,1,k,e))
-      enddo
-      enddo
-!$ACC END HOST_DATA
-
-!$ACC UPDATE DEVICE(
-!$ACC&   devptr_dxm1_e,
-!$ACC&   devptr_dxm1_ke,
-!$ACC&   devptr_dxtm1_e,
-!$ACC&   devptr_dxtm1_ke,
-!$ACC&   devptr_u_e,
-!$ACC&   devptr_u_ke,
-!$ACC&   devptr_ur_e,
-!$ACC&   devptr_us_ke,
-!$ACC&   devptr_ut_e,
-!$ACC&   devptr_w_e,
-!$ACC&   devptr_wk_e,
-!$ACC&   devptr_wk_ke)
 
 !$ACC HOST_DATA USE_DEVICE(devptr_dxm1_e,devptr_u_e,devptr_ur_e)
       istat = cublasDgemmBatched(
@@ -331,7 +432,7 @@ c-------------------------------------------------------------------------
      $   nelt)
 !$ACC END HOST_DATA
 
-!$ACC KERNELS PRESENT(g,ur,us,ut)
+!$ACC KERNELS
       do e=1,nelt
       do k=1,n
       do j=1,n
@@ -380,7 +481,7 @@ c-------------------------------------------------------------------------
      $   nelt*n)
 !$ACC END HOST_DATA
 
-!$ACC KERNELS PRESENT(w,wk)
+!$ACC KERNELS
       do e=1,nelt
       do k=1,n
       do j=1,n
@@ -405,7 +506,7 @@ c-------------------------------------------------------------------------
      $   nelt)
 !$ACC END HOST_DATA
 
-!$ACC KERNELS PRESENT(w,wk)
+!$ACC KERNELS
       do e=1,nelt
       do k=1,n
       do j=1,n
@@ -417,8 +518,9 @@ c-------------------------------------------------------------------------
       enddo
 !$ACC END KERNELS
 
-!$ACC END DATA
 !$ACC UPDATE HOST(dxm1,dxtm1,g,u,w)
+
+!$ACC END DATA
 
       return
       end
