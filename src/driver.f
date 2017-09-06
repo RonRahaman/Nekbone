@@ -77,7 +77,9 @@ c     SET UP and RUN NEKBONE
 
            call set_timer_flop_cnt(0)
 !$ACC DATA COPY(x,f,g,c,r,w,p,z)
+           call cudaProfilerStart()
            call cg(x,f,g,c,r,w,p,z,n,niter,flop_cg)
+           call cudaProfilerStop()
 !$ACC END DATA
            call set_timer_flop_cnt(1)
 

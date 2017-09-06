@@ -288,26 +288,18 @@ c-----------------------------------------------------------------------
       real(4) diff_sec
       real tstart, tstop
 
-      tstart = dnekclock()
-#ifdef _CUDA
-      call cudaProfilerStart()
-      !istat = cudaEventRecord(ax_e_start, 0)
-#endif
       call ax_lelt_batch(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1)
+
 c !$ACC DATA PRESENT(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1)
 c !$ACC HOST_DATA USE_DEVICE(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1)
 c      call ax_cuf_naive<<<lelt,dim3(lx1,ly1,lz1)>>>(w,u,gxyz,ur,us,ut,
 c     $   dxm1,dxtm1) 
 c !$ACC END HOST_DATA
 c !$ACC END DATA
-#ifdef _CUDA
-      call cudaProfilerStop()
       !istat = cudaEventRecord(ax_e_stop, 0)
       !istat = cudaEventElapsedTime(diff_sec, ax_e_start, ax_e_stop)
       !ax_e_sec = ax_e_sec + diff_sec / 1000.0
-
       ax_e_sec = ax_e_sec + dnekclock() - tstart
-#endif
 
 
 !$ACC UPDATE HOST(w)
