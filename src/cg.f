@@ -230,17 +230,12 @@ c-------------------------------------------------------------------------
       include 'NEKCUBLAS'
 
       parameter(n=lx1)
-      real ur(n,n,n), us(n,n,n), ut(n,n,n)
-      real wk(n,n,n)
+      real ur(n,n,n,lelt), us(n,n,n,lelt), ut(n,n,n,lelt)
+      real wk(n,n,n,lelt)
       real w(n,n,n,lelt), u(n,n,n,lelt)
       real g(n,n,n,2*ldim,lelt)
       real dxm1(n,n), dxtm1(n,n)
       integer e
-
-      real ur_e(n,n,n,lelt)
-      real us_e(n,n,n,lelt)
-      real ut_e(n,n,n,lelt)
-      real wk_e(n,n,n,lelt)
 
       type(c_devptr)
      &   devptr_dxm1_e(lelt),
@@ -256,7 +251,6 @@ c-------------------------------------------------------------------------
      &   devptr_wk_e(lelt),
      &   devptr_wk_ke(lelt*lx1)
 
-
 !$ACC UPDATE DEVICE(dxm1,dxtm1,u,g,w)
 
 !$ACC DATA CREATE(
@@ -271,33 +265,29 @@ c-------------------------------------------------------------------------
 !$ACC&   devptr_ut_e,
 !$ACC&   devptr_w_e,
 !$ACC&   devptr_wk_e,
-!$ACC&   devptr_wk_ke,
-!$ACC&   ur_e,
-!$ACC&   us_e,
-!$ACC&   ut_e,
-!$ACC&   wk_e)
+!$ACC&   devptr_wk_ke)
 
-!$ACC HOST_DATA USE_DEVICE(dxm1, dxtm1, u, ur_e, ut_e, w)
+!$ACC HOST_DATA USE_DEVICE(dxm1, dxtm1, u, ur, ut, w, wk)
       do e=1,lelt
          devptr_dxm1_e(e)  = c_devloc(dxm1(1,1))
          devptr_dxtm1_e(e) = c_devloc(dxtm1(1,1))
          devptr_u_e(e)     = c_devloc(u(1,1,1,e))
-         devptr_ur_e(e)    = c_devloc(ur_e(1,1,1,e))
-         devptr_ut_e(e)    = c_devloc(ut_e(1,1,1,e))
+         devptr_ur_e(e)    = c_devloc(ur(1,1,1,e))
+         devptr_ut_e(e)    = c_devloc(ut(1,1,1,e))
          devptr_w_e(e)     = c_devloc(w(1,1,1,e))
-         devptr_wk_e(e)    = c_devloc(wk_e(1,1,1,e))
+         devptr_wk_e(e)    = c_devloc(wk(1,1,1,e))
       enddo
 !$ACC END HOST_DATA
 
-!$ACC HOST_DATA USE_DEVICE(dxm1, dxtm1, u, us_e, wk_e)
+!$ACC HOST_DATA USE_DEVICE(dxm1, dxtm1, u, us, wk)
       do e=1,lelt
       do k=1,n
          i = k + (e-1) * n
          devptr_dxm1_ke(i) = c_devloc(dxm1(1,1))
          devptr_dxtm1_ke(i) = c_devloc(dxtm1(1,1))
          devptr_u_ke(i) = c_devloc(u(1,1,k,e))
-         devptr_us_ke(i) = c_devloc(us_e(1,1,k,e))
-         devptr_wk_ke(i) = c_devloc(wk_e(1,1,k,e))
+         devptr_us_ke(i) = c_devloc(us(1,1,k,e))
+         devptr_wk_ke(i) = c_devloc(wk(1,1,k,e))
       enddo
       enddo
 !$ACC END HOST_DATA
@@ -355,23 +345,23 @@ c-------------------------------------------------------------------------
      $   nelt)
 !$ACC END HOST_DATA
 
-!$ACC KERNELS PRESENT(g,ur_e,us_e,ut_e)
+!$ACC KERNELS PRESENT(g,ur,us,ut)
       do e=1,nelt
       do k=1,n
       do j=1,n
       do i=1,n
-         wr = g(i,j,k,1,e) * ur_e(i,j,k,e) + 
-     $        g(i,j,k,2,e) * us_e(i,j,k,e) + 
-     $        g(i,j,k,3,e) * ut_e(i,j,k,e)
-         ws = g(i,j,k,2,e) * ur_e(i,j,k,e) + 
-     $        g(i,j,k,4,e) * us_e(i,j,k,e) + 
-     $        g(i,j,k,5,e) * ut_e(i,j,k,e)
-         wt = g(i,j,k,3,e) * ur_e(i,j,k,e) + 
-     $        g(i,j,k,5,e) * us_e(i,j,k,e) + 
-     $        g(i,j,k,6,e) * ut_e(i,j,k,e)
-         ur_e(i,j,k,e) = wr
-         us_e(i,j,k,e) = ws
-         ut_e(i,j,k,e) = wt
+         wr = g(i,j,k,1,e) * ur(i,j,k,e) + 
+     $        g(i,j,k,2,e) * us(i,j,k,e) + 
+     $        g(i,j,k,3,e) * ut(i,j,k,e)
+         ws = g(i,j,k,2,e) * ur(i,j,k,e) + 
+     $        g(i,j,k,4,e) * us(i,j,k,e) + 
+     $        g(i,j,k,5,e) * ut(i,j,k,e)
+         wt = g(i,j,k,3,e) * ur(i,j,k,e) + 
+     $        g(i,j,k,5,e) * us(i,j,k,e) + 
+     $        g(i,j,k,6,e) * ut(i,j,k,e)
+         ur(i,j,k,e) = wr
+         us(i,j,k,e) = ws
+         ut(i,j,k,e) = wt
       enddo
       enddo
       enddo
@@ -404,12 +394,12 @@ c-------------------------------------------------------------------------
      $   nelt*n)
 !$ACC END HOST_DATA
 
-!$ACC KERNELS PRESENT(w,wk_e)
+!$ACC KERNELS PRESENT(w,wk)
       do e=1,nelt
       do k=1,n
       do j=1,n
       do i=1,n
-         w(i,j,k,e) = w(i,j,k,e) + wk_e(i,j,k,e)
+         w(i,j,k,e) = w(i,j,k,e) + wk(i,j,k,e)
       enddo
       enddo
       enddo
@@ -429,12 +419,12 @@ c-------------------------------------------------------------------------
      $   nelt)
 !$ACC END HOST_DATA
 
-!$ACC KERNELS PRESENT(w,wk_e)
+!$ACC KERNELS PRESENT(w,wk)
       do e=1,nelt
       do k=1,n
       do j=1,n
       do i=1,n
-         w(i,j,k,e) = w(i,j,k,e) + wk_e(i,j,k,e)
+         w(i,j,k,e) = w(i,j,k,e) + wk(i,j,k,e)
       enddo
       enddo
       enddo
