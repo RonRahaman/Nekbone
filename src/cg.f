@@ -237,20 +237,6 @@ c-------------------------------------------------------------------------
       real dxm1(n,n), dxtm1(n,n)
       integer e
 
-      type(c_devptr)
-     &   devptr_dxm1_e(lelt),
-     &   devptr_dxm1_ke(lelt*lx1),
-     &   devptr_dxtm1_e(lelt),
-     &   devptr_dxtm1_ke(lelt*lx1),
-     &   devptr_u_e(lelt),
-     &   devptr_u_ke(lelt*lx1),
-     &   devptr_ur_e(lelt),
-     &   devptr_us_ke(lelt*lx1),
-     &   devptr_ut_e(lelt),
-     &   devptr_w_e(lelt),
-     &   devptr_wk_e(lelt),
-     &   devptr_wk_ke(lelt*lx1)
-
 !$ACC UPDATE DEVICE(dxm1,dxtm1,u,g,w)
 
 !$ACC DATA CREATE(

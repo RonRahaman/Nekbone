@@ -1,4 +1,34 @@
       type(cublasHandle) handle 
       type(cudaEvent) ax_e_start, ax_e_stop
       integer(kind=cuda_stream_kind) streams(lelt)
-      common /nekcublas/ handle, streams, ax_e_start, ax_e_stop
+      type(c_devptr)
+     &   devptr_dxm1_e(lelt),
+     &   devptr_dxm1_ke(lelt*lx1),
+     &   devptr_dxtm1_e(lelt),
+     &   devptr_dxtm1_ke(lelt*lx1),
+     &   devptr_u_e(lelt),
+     &   devptr_u_ke(lelt*lx1),
+     &   devptr_ur_e(lelt),
+     &   devptr_us_ke(lelt*lx1),
+     &   devptr_ut_e(lelt),
+     &   devptr_w_e(lelt),
+     &   devptr_wk_e(lelt),
+     &   devptr_wk_ke(lelt*lx1)
+
+      common /nekcublas/ 
+     &   handle, 
+     &   streams, 
+     &   ax_e_start, 
+     &   ax_e_stop
+     &   devptr_dxm1_e,
+     &   devptr_dxm1_ke,
+     &   devptr_dxtm1_e,
+     &   devptr_dxtm1_ke,
+     &   devptr_u_e,
+     &   devptr_u_ke,
+     &   devptr_ur_e,
+     &   devptr_us_ke,
+     &   devptr_ut_e,
+     &   devptr_w_e,
+     &   devptr_wk_e,
+     &   devptr_wk_ke

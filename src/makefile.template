@@ -123,14 +123,14 @@ clean:
 
 $(NOBJS_Fbon) : SIZE
 # CORE      ############################################################################
-$(OBJDIR)/cg.o          :$S/cg.f;                       $(F77) -c $(FL4) $< -o $@
+$(OBJDIR)/cg.o          :$S/cg.f  $S/NEKCUBLAS;         $(F77) -c $(FL4) $< -o $@
 $(OBJDIR)/prox_dssum.o  :$S/prox_dssum.f;               $(F77) -c $(FL2) $< -o $@
 $(OBJDIR)/prox_setup.o  :$S/prox_setup.f;               $(F77) -c $(FL4) $< -o $@
 $(OBJDIR)/hsmg.o        :$S/hsmg.f;                     $(F77) -c $(FL2) $< -o $@
 $(OBJDIR)/hsmg_dum.o    :$S/hsmg_dum.f;                 $(F77) -c $(FL2) $< -o $@
 $(OBJDIR)/ssygv.o       :$S/ssygv.f;                    $(F77) -c $(FL2i4) $< -o $@
 $(OBJDIR)/dsygv.o       :$S/dsygv.f;                    $(F77) -c $(FL2i4) $< -o $@
-$(OBJDIR)/driver.o      :$S/driver.f;                   $(F77) -c $(FL2) $< -o $@
+$(OBJDIR)/driver.o      :$S/driver.f  $S/NEKCUBLAS;     $(F77) -c $(FL2) $< -o $@
 $(OBJDIR)/driver_comm.o	:$S/driver_comm.f;		$(F77) -c $(FL2) $< -o $@
 $(OBJDIR)/math.o	:$S/math.f;			$(F77) -c $(FL4) $< -o $@
 $(OBJDIR)/semhat.o	:$S/semhat.f;			$(F77) -c $(FL4) $< -o $@
