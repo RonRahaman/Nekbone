@@ -604,13 +604,15 @@ C----------------------------------------------------------------------------
 C
 C     Perform inner-product in double precision
 C
-      real a(1),b(1),mult(1)
-      real tmp,work(1)
+      real a(n),b(n),mult(n)
+      real tmp,work(n)
  
       tmp = 0.0
-      do 10 i=1,n
+!$ACC KERNELS PRESENT(a,b,mult)
+      do i=1,n
          tmp = tmp + a(i)*b(i)*mult(i)
- 10   continue
+      enddo
+!$ACC END KERNELS
       call gop(tmp,work,'+  ',1)
       glsc3 = tmp
       return

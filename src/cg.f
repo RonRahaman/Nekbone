@@ -72,6 +72,8 @@ c     set machine tolerances
 
       call maskit (r,cmask,nx1,ny1,nz1) ! Zero out Dirichlet conditions
 
+!$ACC UPDATE DEVICE(x,r,c)
+
       rnorm = sqrt(glsc3(r,c,r,n))
       iter = 0
       if (nid.eq.0)  write(6,6) iter,rnorm
@@ -79,17 +81,15 @@ c     set machine tolerances
       miter = niter
 c     call tester(z,r,n)  
 
-!$ACC UPDATE DEVICE(x,r,c)
-
       call set_devptrs(w,p,ur,us,ut,wk,dxm1,dxtm1)
 
       do iter=1,miter
 !$ACC UPDATE HOST(z,r,c)
          call solveM(z,r,n)    ! preconditioner here
+!$ACC UPDATE DEVICE(z,r,c)
 
          rtz2=rtz1                                                       ! OPS
          rtz1=glsc3(r,c,z,n)   ! parallel weighted inner product r^T C z ! 3n
-!$ACC UPDATE DEVICE(z,r,c)
 
          beta = rtz1/rtz2
          if (iter.eq.1) beta=0.0
@@ -103,9 +103,7 @@ c     call tester(z,r,n)
 
          call ax(w,p,g,ur,us,ut,wk,n)                                    ! flopa
 
-!$ACC UPDATE HOST(w)
          pap=glsc3(w,c,p,n)                                              ! 3n
-!$ACC UPDATE DEVICE(w)
 
          alpha=rtz1/pap
          alphm=-alpha
@@ -117,9 +115,7 @@ c     call tester(z,r,n)
          enddo
 !$ACC END KERNELS
 
-!$ACC UPDATE HOST(r,c)
          rtr = glsc3(r,c,r,n)                                            ! 3n
-!$ACC UPDATE DEVICE(r,c)
 
          if (iter.eq.1) rlim2 = rtr*eps**2
          if (iter.eq.1) rtr0  = rtr
