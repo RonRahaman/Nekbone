@@ -244,108 +244,115 @@ c-------------------------------------------------------------------------
 
       type(c_devptr)
      &   devptr_dxm1_e(lelt),
-     &   devptr_u_e(lelt),
-     &   devptr_ur_e(lelt),
-     &   devptr_u_ke(lelt*lx1),
-     &   devptr_dxtm1_ke(lelt*lx1),
-     &   devptr_us_ke(lelt*lx1),
+     &   devptr_dxm1_ke(lelt*lx1),
      &   devptr_dxtm1_e(lelt),
+     &   devptr_dxtm1_ke(lelt*lx1),
+     &   devptr_u_e(lelt),
+     &   devptr_u_ke(lelt*lx1),
+     &   devptr_ur_e(lelt),
+     &   devptr_us_ke(lelt*lx1),
      &   devptr_ut_e(lelt),
      &   devptr_w_e(lelt),
-     &   devptr_dxm1_ke(lelt*lx1),
-     &   devptr_wk_ke(lelt*lx1),
-     &   devptr_wk_e(lelt)
+     &   devptr_wk_e(lelt),
+     &   devptr_wk_ke(lelt*lx1)
 
 
 !$ACC UPDATE DEVICE(dxm1,dxtm1,u,g,w)
 
 !$ACC DATA CREATE(
 !$ACC&   devptr_dxm1_e,
-!$ACC&   devptr_u_e,
-!$ACC&   devptr_ur_e,
-!$ACC&   devptr_u_ke,
-!$ACC&   devptr_dxtm1_ke,
-!$ACC&   devptr_us_ke,
+!$ACC&   devptr_dxm1_ke,
 !$ACC&   devptr_dxtm1_e,
+!$ACC&   devptr_dxtm1_ke,
+!$ACC&   devptr_u_e,
+!$ACC&   devptr_u_ke,
+!$ACC&   devptr_ur_e,
+!$ACC&   devptr_us_ke,
 !$ACC&   devptr_ut_e,
 !$ACC&   devptr_w_e,
-!$ACC&   devptr_dxm1_ke,
-!$ACC&   devptr_wk_ke,
 !$ACC&   devptr_wk_e,
+!$ACC&   devptr_wk_ke,
 !$ACC&   ur_e,
 !$ACC&   us_e,
 !$ACC&   ut_e,
 !$ACC&   wk_e)
 
-!$ACC HOST_DATA USE_DEVICE(dxm1,u,ur_e,dxtm1,ut_e,w)
+!$ACC HOST_DATA USE_DEVICE(dxm1, dxtm1, u, ur_e, ut_e, w)
       do e=1,lelt
          devptr_dxm1_e(e)  = c_devloc(dxm1(1,1))
+         devptr_dxtm1_e(e) = c_devloc(dxtm1(1,1))
          devptr_u_e(e)     = c_devloc(u(1,1,1,e))
          devptr_ur_e(e)    = c_devloc(ur_e(1,1,1,e))
-         devptr_dxtm1_e(e) = c_devloc(dxtm1(1,1))
          devptr_ut_e(e)    = c_devloc(ut_e(1,1,1,e))
          devptr_w_e(e)     = c_devloc(w(1,1,1,e))
          devptr_wk_e(e)    = c_devloc(wk_e(1,1,1,e))
       enddo
 !$ACC END HOST_DATA
 
-!$ACC HOST_DATA USE_DEVICE(u,dxtm1,us_e,dxm1,wk_e)
+!$ACC HOST_DATA USE_DEVICE(dxm1, dxtm1, u, us_e, wk_e)
       do e=1,lelt
       do k=1,n
          i = k + (e-1) * n
-         devptr_u_ke(i) = c_devloc(u(1,1,k,e))
-         devptr_dxtm1_ke(i) = c_devloc(dxtm1(1,1))
-         devptr_us_ke(i) = c_devloc(us_e(1,1,k,e))
          devptr_dxm1_ke(i) = c_devloc(dxm1(1,1))
+         devptr_dxtm1_ke(i) = c_devloc(dxtm1(1,1))
+         devptr_u_ke(i) = c_devloc(u(1,1,k,e))
+         devptr_us_ke(i) = c_devloc(us_e(1,1,k,e))
          devptr_wk_ke(i) = c_devloc(wk_e(1,1,k,e))
       enddo
       enddo
 !$ACC END HOST_DATA
 
-!$ACC UPDATE DEVICE(devptr_dxm1_e,devptr_u_e,devptr_ur_e,
-!$ACC&   devptr_u_ke,devptr_dxtm1_ke,devptr_us_ke,
-!$ACC&   devptr_dxtm1_e,devptr_ut_e,
+!$ACC UPDATE DEVICE(
+!$ACC&   devptr_dxm1_e,
+!$ACC&   devptr_dxm1_ke,
+!$ACC&   devptr_dxtm1_e,
+!$ACC&   devptr_dxtm1_ke,
+!$ACC&   devptr_u_e,
+!$ACC&   devptr_u_ke,
+!$ACC&   devptr_ur_e,
+!$ACC&   devptr_us_ke,
+!$ACC&   devptr_ut_e,
 !$ACC&   devptr_w_e,
-!$ACC&   devptr_dxm1_ke,devptr_wk_ke,
-!$ACC&   devptr_wk_e)
+!$ACC&   devptr_wk_e,
+!$ACC&   devptr_wk_ke)
 
 !$ACC HOST_DATA USE_DEVICE(devptr_dxm1_e,devptr_u_e,devptr_ur_e)
-         istat = cublasDgemmBatched(
-     $      handle,
-     $      'N', 'N', 
-     $      n, n**2, n,
-     $      1.0, 
-     $      devptr_dxm1_e, n, 
-     $      devptr_u_e, n,
-     $      0.0, 
-     $      devptr_ur_e, n,
-     $      nelt)
+      istat = cublasDgemmBatched(
+     $   handle,
+     $   'N', 'N', 
+     $   n, n**2, n,
+     $   1.0, 
+     $   devptr_dxm1_e, n, 
+     $   devptr_u_e, n,
+     $   0.0, 
+     $   devptr_ur_e, n,
+     $   nelt)
 !$ACC END HOST_DATA
 
 !$ACC HOST_DATA USE_DEVICE(devptr_u_ke,devptr_dxtm1_ke,devptr_us_ke)
-         istat = cublasDgemmBatched(
-     $      handle,
-     $      'N','N', 
-     $      n, n, n,
-     $      1.0, 
-     $      devptr_u_ke, n,
-     $      devptr_dxtm1_ke, n,
-     $      0.0, 
-     $      devptr_us_ke, n,
-     $      nelt*n)
+      istat = cublasDgemmBatched(
+     $   handle,
+     $   'N','N', 
+     $   n, n, n,
+     $   1.0, 
+     $   devptr_u_ke, n,
+     $   devptr_dxtm1_ke, n,
+     $   0.0, 
+     $   devptr_us_ke, n,
+     $   nelt*n)
 !$ACC END HOST_DATA
 
 !$ACC HOST_DATA USE_DEVICE(devptr_u_e,devptr_dxtm1_e,devptr_ut_e)
-         istat =  cublasDgemmBatched(
-     $      handle,
-     $      'N', 'N', 
-     $      n**2, n, n,
-     $      1.0, 
-     $      devptr_u_e, n**2,
-     $      devptr_dxtm1_e, n,
-     $      0.0, 
-     $      devptr_ut_e, n**2,
-     $      nelt)
+      istat =  cublasDgemmBatched(
+     $   handle,
+     $   'N', 'N', 
+     $   n**2, n, n,
+     $   1.0, 
+     $   devptr_u_e, n**2,
+     $   devptr_dxtm1_e, n,
+     $   0.0, 
+     $   devptr_ut_e, n**2,
+     $   nelt)
 !$ACC END HOST_DATA
 
 !$ACC KERNELS PRESENT(g,ur_e,us_e,ut_e)
@@ -372,29 +379,29 @@ c-------------------------------------------------------------------------
 !$ACC END KERNELS
 
 !$ACC HOST_DATA USE_DEVICE(devptr_dxtm1_e,devptr_ur_e,devptr_w_e)
-         istat = cublasDgemmBatched(
-     $      handle,
-     $      'N', 'N', 
-     $      n, n**2, n,
-     $      1.0, 
-     $      devptr_dxtm1_e, n,
-     $      devptr_ur_e, n,
-     $      0.0, 
-     $      devptr_w_e, n,
-     $      nelt)
+      istat = cublasDgemmBatched(
+     $   handle,
+     $   'N', 'N', 
+     $   n, n**2, n,
+     $   1.0, 
+     $   devptr_dxtm1_e, n,
+     $   devptr_ur_e, n,
+     $   0.0, 
+     $   devptr_w_e, n,
+     $   nelt)
 !$ACC END HOST_DATA
 
 !$ACC HOST_DATA USE_DEVICE(devptr_us_ke,devptr_dxm1_ke,devptr_wk_ke)
-         istat = cublasDgemmBatched(
-     $      handle,
-     $      'N', 'N', 
-     $      n, n, n,
-     $      1.0, 
-     $      devptr_us_ke, n,
-     $      devptr_dxm1_ke, n,
-     $      0.0, 
-     $      devptr_wk_ke, n,
-     $      nelt*n)
+      istat = cublasDgemmBatched(
+     $   handle,
+     $   'N', 'N', 
+     $   n, n, n,
+     $   1.0, 
+     $   devptr_us_ke, n,
+     $   devptr_dxm1_ke, n,
+     $   0.0, 
+     $   devptr_wk_ke, n,
+     $   nelt*n)
 !$ACC END HOST_DATA
 
 !$ACC KERNELS PRESENT(w,wk_e)
@@ -410,16 +417,16 @@ c-------------------------------------------------------------------------
 !$ACC END KERNELS
 
 !$ACC HOST_DATA USE_DEVICE(devptr_ut_e,devptr_dxm1_e,devptr_wk_e)
-         istat = cublasDgemmBatched(
-     $      handle,
-     $      'N', 'N', 
-     $      n**2, n, n,
-     $      1.0, 
-     $      devptr_ut_e, n**2,
-     $      devptr_dxm1_e, n,
-     $      0.0, 
-     $      devptr_wk_e, n**2,
-     $      nelt)
+      istat = cublasDgemmBatched(
+     $   handle,
+     $   'N', 'N', 
+     $   n**2, n, n,
+     $   1.0, 
+     $   devptr_ut_e, n**2,
+     $   devptr_dxm1_e, n,
+     $   0.0, 
+     $   devptr_wk_e, n**2,
+     $   nelt)
 !$ACC END HOST_DATA
 
 !$ACC KERNELS PRESENT(w,wk_e)
@@ -435,7 +442,7 @@ c-------------------------------------------------------------------------
 !$ACC END KERNELS
 
 !$ACC END DATA
-!$ACC UPDATE HOST(dxm1,dxtm1,u,g,w)
+!$ACC UPDATE HOST(dxm1,dxtm1,g,u,w)
 
       return
       end
