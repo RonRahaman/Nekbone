@@ -52,7 +52,7 @@ c     set machine tolerances
 !$ACC&   devptr_ut_e,
 !$ACC&   devptr_w_e,
 !$ACC&   devptr_wk_e,
-!$ACC&   devptr_wk_ke)
+!$ACC&   devptr_wk_ke),
 !$ACC& COPYIN(
 !$ACC&   dxm1,
 !$ACC&   dxtm1,
@@ -102,7 +102,6 @@ c        call solveM(z,r,n)
             p(i) = beta * p(i) + z(i)
          enddo
 !$ACC END KERNELS
-!$ACC UPDATE HOST(p)
 
          call ax(w,p,g,ur,us,ut,wk,n)                                    ! flopa
 
@@ -249,32 +248,11 @@ c-----------------------------------------------------------------------
       end
 c-----------------------------------------------------------------------
       subroutine ax(w,u,gxyz,ur,us,ut,wk,n) ! Matrix-vector product: w=A*u
-#ifdef _CUDA
       use cudafor
       use cublas
-#endif
       include 'SIZE'
-#ifdef _CUDA
       include 'NEKCUBLAS'
-#endif
       include 'TOTAL'
-
-      interface
-      attributes(global) subroutine ax_cuf_naive(w,u,ur,us,ut,
-     &                gxyz,dxm1,dxtm1)
-
-      real, intent(out) :: w(nx1,ny1,nz1,nelt)
-      real, intent(in)  :: u(nx1,ny1,nz1,nelt)
-      real ur  (nx1,ny1,nz1,lelt)
-      real us  (nx1,ny1,nz1,lelt)
-      real ut  (nx1,ny1,nz1,lelt)
-
-      real gxyz(nx1,ny1,nz1,2*ldim,lelt)
-
-      real, intent(in) :: dxm1(nx1,nx1)
-      real, intent(in) :: dxtm1(nx1,nx1)
-      end subroutine
-      end interface
 
       real w(nx1*ny1*nz1,nelt),u(nx1*ny1*nz1,nelt)
       real gxyz(nx1*ny1*nz1,2*ldim,nelt)
@@ -284,24 +262,10 @@ c-----------------------------------------------------------------------
       common /mymask/cmask(-1:lx1*ly1*lz1*lelt)
 
       integer e
-      real(4) diff_sec
-      real tstart, tstop
 
       call ax_lelt_batch(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1)
 
-c !$ACC DATA PRESENT(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1)
-c !$ACC HOST_DATA USE_DEVICE(w,u,gxyz,ur,us,ut,wk,dxm1,dxtm1)
-c      call ax_cuf_naive<<<lelt,dim3(lx1,ly1,lz1)>>>(w,u,gxyz,ur,us,ut,
-c     $   dxm1,dxtm1) 
-c !$ACC END HOST_DATA
-c !$ACC END DATA
-      !istat = cudaEventRecord(ax_e_stop, 0)
-      !istat = cudaEventElapsedTime(diff_sec, ax_e_start, ax_e_stop)
-      !ax_e_sec = ax_e_sec + diff_sec / 1000.0
-      ax_e_sec = ax_e_sec + dnekclock() - tstart
-
-
-!$ACC UPDATE HOST(w)
+!$ACC UPDATE HOST(w,u)
       call dssum(w)         ! Gather-scatter operation  ! w   = QQ  w
 
       do e=1,nelt
@@ -373,8 +337,6 @@ c-------------------------------------------------------------------------
 !$ACC&   ut,
 !$ACC&   w,
 !$ACC&   wk)
-
-!$ACC UPDATE DEVICE(dxm1,dxtm1,u,g,w)
 
 !$ACC HOST_DATA USE_DEVICE(devptr_dxm1_e,devptr_u_e,devptr_ur_e)
       istat = cublasDgemmBatched(
@@ -500,8 +462,6 @@ c-------------------------------------------------------------------------
       enddo
       enddo
 !$ACC END KERNELS
-
-!$ACC UPDATE HOST(dxm1,dxtm1,g,u,w)
 
 !$ACC END DATA
 
