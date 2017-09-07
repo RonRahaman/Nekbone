@@ -40,7 +40,11 @@ c     set machine tolerances
 
       rtz1=1.0
 
-!$ACC ENTER DATA CREATE(
+!$ACC DATA 
+!$ACC& COPY(
+!$ACC&   dxm1,
+!$ACC&   dxtm1),
+!$ACC& CREATE(
 !$ACC&   devptr_dxm1_e,
 !$ACC&   devptr_dxm1_ke,
 !$ACC&   devptr_dxtm1_e,
@@ -52,10 +56,7 @@ c     set machine tolerances
 !$ACC&   devptr_ut_e,
 !$ACC&   devptr_w_e,
 !$ACC&   devptr_wk_e,
-!$ACC&   devptr_wk_ke),
-!$ACC& COPYIN(
-!$ACC&   dxm1,
-!$ACC&   dxtm1,
+!$ACC&   devptr_wk_ke,
 !$ACC&   ur,
 !$ACC&   us,
 !$ACC&   ut,
@@ -132,26 +133,7 @@ c        if (rtr.le.rlim2) goto 1001
 
  1001 continue
 
-!$ACC EXIT DATA DELETE(
-!$ACC&   devptr_dxm1_e,
-!$ACC&   devptr_dxm1_ke,
-!$ACC&   devptr_dxtm1_e,
-!$ACC&   devptr_dxtm1_ke,
-!$ACC&   devptr_u_e,
-!$ACC&   devptr_u_ke,
-!$ACC&   devptr_ur_e,
-!$ACC&   devptr_us_ke,
-!$ACC&   devptr_ut_e,
-!$ACC&   devptr_w_e,
-!$ACC&   devptr_wk_e,
-!$ACC&   devptr_wk_ke)
-!$ACC& COPYOUT(
-!$ACC&   dxm1,
-!$ACC&   dxtm1,
-!$ACC&   ur,
-!$ACC&   us,
-!$ACC&   ut,
-!$ACC&   wk)
+!$ACC END DATA
 
       if (nid.eq.0) write(6,6) iter,rnorm,alpha,beta,pap
 
