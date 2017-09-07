@@ -77,14 +77,19 @@ c     set machine tolerances
       if (nid.eq.0)  write(6,6) iter,rnorm
 
       miter = niter
-c     call tester(z,r,n)  
 
       call set_devptrs(w,p,ur,us,ut,wk,dxm1,dxtm1)
 
       do iter=1,miter
-!$ACC UPDATE HOST(z,r,c)
-         call solveM(z,r,n)    ! preconditioner here
-!$ACC UPDATE DEVICE(z,r,c)
+
+c        ROR: 2017-09-06: The multigrid preconditioner is not
+c        implemented for GPU. This dummy preconditioner is just z = r.
+c        call solveM(z,r,n)
+!$ACC KERNELS PRESENT(z,r)
+         do i=1,n
+            z(i) = r(i)
+         enddo
+!$ACC END KERNELS
 
          rtz2=rtz1                                                       ! OPS
          rtz1=glsc3(r,c,z,n)   ! parallel weighted inner product r^T C z ! 3n
