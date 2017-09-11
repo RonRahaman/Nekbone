@@ -75,13 +75,19 @@ c     SET UP and RUN NEKBONE
 
            call nekgsync()
 
-           call set_timer_flop_cnt(0)
 !$ACC DATA COPY(x,f,g,c,r,w,p,z)
+
+           istat =  cudaDeviceSynchronize()
            call cudaProfilerStart()
+
+           call set_timer_flop_cnt(0)
            call cg(x,f,g,c,r,w,p,z,n,niter,flop_cg)
-           call cudaProfilerStop()
-!$ACC END DATA
            call set_timer_flop_cnt(1)
+
+           istat =  cudaDeviceSynchronize()
+           call cudaProfilerStop()
+
+!$ACC END DATA
 
 #ifdef _CUDA
            write(6,4) ax_e_sec
