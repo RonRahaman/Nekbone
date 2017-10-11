@@ -409,7 +409,7 @@ c-----------------------------------------------------------------------
       real ut(nx1,ny1,nz1,lelt)
       real wk(nx1,ny1,nz1,lelt)
 
-      real wr,ws,wt,tmp
+      real wr,ws,wt,tmp,wtemp
       integer i,j,k,l,e,n
 
       integer lt
@@ -454,17 +454,20 @@ c-----------------------------------------------------------------------
 #else
 c ifndef _CUDA
             
-!$ACC PARALLEL LOOP COLLAPSE(4) GANG WORKER VECTOR PRIVATE(wr,ws,wt)
-!DIR NOBLOCKING
+!$acc parallel vector_length(nx1**2)
+
+!$acc loop gang
       do e = 1,nelt
+         !$acc loop seq
          do k=1,nz1
+!$acc loop vector collapse(2) private(wr,ws,wt)
          do j=1,ny1
          do i=1,nx1
             wr = 0
             ws = 0
             wt = 0
-!$ACC LOOP SEQ
-            do l=1,nx1    ! serial loop, no reduction needed
+!$acc loop seq
+            do l=1,nx1
                wr = wr + dxm1(i,l)*u(l,j,k,e)
                ws = ws + dxm1(j,l)*u(i,l,k,e)
                wt = wt + dxm1(k,l)*u(i,j,l,e)
@@ -482,25 +485,28 @@ c ifndef _CUDA
          enddo
          enddo
       enddo
-!$ACC END PARALLEL LOOP
 
-!$ACC PARALLEL LOOP COLLAPSE(4) GANG WORKER VECTOR 
+!$acc loop gang
       do e=1,nelt
+!$acc loop seq
          do k=1,nz1
+!$acc loop vector collapse(2) private(wtemp)
          do j=1,ny1
          do i=1,nx1
-            w(i,j,k,e) = 0.0
-!$ACC LOOP SEQ
-            do l=1,nx1    ! serial loop, no reduction needed
-               w(i,j,k,e) = w(i,j,k,e) + dxtm1(i,l)*ur(l,j,k,e)
-     $                                 + dxtm1(j,l)*us(i,l,k,e)
-     $                                 + dxtm1(k,l)*ut(i,j,l,e)
+            wtemp = 0.0
+!$acc loop seq
+            do l=1,nx1
+               wtemp = wtemp + dxtm1(i,l)*ur(l,j,k,e)
+     $                       + dxtm1(j,l)*us(i,l,k,e)
+     $                       + dxtm1(k,l)*ut(i,j,l,e)
             enddo
+            w(i,j,k,e) = wtemp
          enddo
          enddo
          enddo
       enddo
-!$ACC END PARALLEL LOOP
+
+!$acc end parallel
 
 #endif
 c endif _CUDA
