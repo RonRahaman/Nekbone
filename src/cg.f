@@ -454,13 +454,12 @@ c-----------------------------------------------------------------------
 #else
 c ifndef _CUDA
             
-!$acc parallel vector_length(nx1**2)
+!$acc parallel vector_length(nx1**3)
 
 !$acc loop gang
       do e = 1,nelt
-         !$acc loop seq
+!$acc loop vector collapse(3) private(wr,ws,wt)
          do k=1,nz1
-!$acc loop vector collapse(2) private(wr,ws,wt)
          do j=1,ny1
          do i=1,nx1
             wr = 0
@@ -484,9 +483,8 @@ c ifndef _CUDA
          enddo
          enddo
          enddo
-!$acc loop seq
+!$acc loop vector collapse(3) private(wtemp)
          do k=1,nz1
-!$acc loop vector collapse(2) private(wtemp)
          do j=1,ny1
          do i=1,nx1
             wtemp = 0.0
