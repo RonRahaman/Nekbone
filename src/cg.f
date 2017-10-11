@@ -409,7 +409,7 @@ c-----------------------------------------------------------------------
       real ut(nx1,ny1,nz1,lelt)
       real wk(nx1,ny1,nz1,lelt)
 
-      real s_d(lx1,lx1)
+      real s_d(lx1+1,lx1)
 
       real wr,ws,wt,tmp,wtemp
       integer i,j,k,l,e,n
@@ -463,6 +463,8 @@ c ifndef _CUDA
 !$acc loop vector collapse(2)
          do j=1,ny1
          do i=1,nx1
+            ! To avoid bank conflicts, s_d is declared as:
+            !    real s_d(lx1+1,lx1)
             s_d(i,j) = dxm1(i,j)
          enddo
          enddo
