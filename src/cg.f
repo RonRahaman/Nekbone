@@ -457,8 +457,15 @@ c-----------------------------------------------------------------------
 c ifndef _CUDA
             
 !$acc parallel num_gangs(nelt) vector_length(nx1**2)
-!$acc loop gang
+!$acc loop gang private(s_d)
       do e = 1,nelt
+!$acc cache(s_d)
+!$acc loop vector collapse(2)
+         do j=1,ny1
+         do i=1,nx1
+            s_d(i,j) = dxm1(i,j)
+         enddo
+         enddo
 !$acc loop vector collapse(2)
          do j=1,ny1
          do i=1,nx1
@@ -468,9 +475,9 @@ c ifndef _CUDA
             ws = 0
             wt = 0
             do l=1,nx1
-               wr = wr + dxm1(i,l)*u(l,j,k,e)
-               ws = ws + dxm1(j,l)*u(i,l,k,e)
-               wt = wt + dxm1(k,l)*u(i,j,l,e)
+               wr = wr + s_d(i,l)*u(l,j,k,e)
+               ws = ws + s_d(j,l)*u(i,l,k,e)
+               wt = wt + s_d(k,l)*u(i,j,l,e)
             enddo
             ur(i,j,k,e) = gxyz(i,j,k,1,e)*wr
      $                  + gxyz(i,j,k,2,e)*ws
@@ -491,9 +498,9 @@ c ifndef _CUDA
          do k=1,nz1
             wtemp = 0.0
             do l=1,nx1
-               wtemp = wtemp + dxm1(l,i)*ur(l,j,k,e)
-     $                       + dxm1(l,j)*us(i,l,k,e)
-     $                       + dxm1(l,k)*ut(i,j,l,e)
+               wtemp = wtemp + s_d(l,i)*ur(l,j,k,e)
+     $                       + s_d(l,j)*us(i,l,k,e)
+     $                       + s_d(l,k)*ut(i,j,l,e)
             enddo
             w(i,j,k,e) = wtemp
          enddo
