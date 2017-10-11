@@ -409,6 +409,8 @@ c-----------------------------------------------------------------------
       real ut(nx1,ny1,nz1,lelt)
       real wk(nx1,ny1,nz1,lelt)
 
+      real s_d(lx1,lx1)
+
       real wr,ws,wt,tmp,wtemp
       integer i,j,k,l,e,n
 
@@ -454,18 +456,17 @@ c-----------------------------------------------------------------------
 #else
 c ifndef _CUDA
             
-!$acc parallel vector_length(nx1**3)
-
+!$acc parallel num_gangs(nelt) vector_length(nx1**2)
 !$acc loop gang
       do e = 1,nelt
-!$acc loop vector collapse(3) private(wr,ws,wt)
-         do k=1,nz1
+!$acc loop vector collapse(2)
          do j=1,ny1
          do i=1,nx1
+!$acc loop seq private(wr,ws,wt)
+         do k=1,nz1
             wr = 0
             ws = 0
             wt = 0
-!$acc loop seq
             do l=1,nx1
                wr = wr + dxm1(i,l)*u(l,j,k,e)
                ws = ws + dxm1(j,l)*u(i,l,k,e)
@@ -483,12 +484,12 @@ c ifndef _CUDA
          enddo
          enddo
          enddo
-!$acc loop vector collapse(3) private(wtemp)
-         do k=1,nz1
+!$acc loop vector collapse(2)
          do j=1,ny1
          do i=1,nx1
+!$acc loop seq private(wtemp)
+         do k=1,nz1
             wtemp = 0.0
-!$acc loop seq
             do l=1,nx1
                wtemp = wtemp + dxm1(l,i)*ur(l,j,k,e)
      $                       + dxm1(l,j)*us(i,l,k,e)
@@ -499,7 +500,6 @@ c ifndef _CUDA
          enddo
          enddo
       enddo
-
 !$acc end parallel
 
 #endif
