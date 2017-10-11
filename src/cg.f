@@ -496,9 +496,9 @@ c ifndef _CUDA
             wtemp = 0.0
 !$acc loop seq
             do l=1,nx1
-               wtemp = wtemp + dxtm1(i,l)*ur(l,j,k,e)
-     $                       + dxtm1(j,l)*us(i,l,k,e)
-     $                       + dxtm1(k,l)*ut(i,j,l,e)
+               wtemp = wtemp + dxm1(l,i)*ur(l,j,k,e)
+     $                       + dxm1(l,j)*us(i,l,k,e)
+     $                       + dxm1(l,k)*ut(i,j,l,e)
             enddo
             w(i,j,k,e) = wtemp
          enddo
