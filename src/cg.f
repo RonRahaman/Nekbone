@@ -484,10 +484,6 @@ c ifndef _CUDA
          enddo
          enddo
          enddo
-      enddo
-
-!$acc loop gang
-      do e=1,nelt
 !$acc loop seq
          do k=1,nz1
 !$acc loop vector collapse(2) private(wtemp)
