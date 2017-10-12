@@ -468,11 +468,11 @@ c ifndef _CUDA
             s_d(i,j) = dxm1(i,j)
          enddo
          enddo
-!$acc loop vector collapse(2)
+!$acc loop seq 
+         do k=1,nz1
+!$acc loop vector collapse(2) private(wr,ws,wt)
          do j=1,ny1
          do i=1,nx1
-!$acc loop seq private(wr,ws,wt)
-         do k=1,nz1
             wr = 0
             ws = 0
             wt = 0
