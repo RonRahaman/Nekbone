@@ -459,64 +459,64 @@ c ifndef _CUDA
             
 !$acc parallel num_gangs(nelt) vector_length(nx1**2)
 !$acc loop gang private(s_d,s_u)
-      do e = 1,nelt
+            do e = 1,nelt
 !$acc cache(s_d,s_u)
 !$acc loop vector collapse(2)
-         do j=1,ny1
-         do i=1,nx1
-            ! To avoid bank conflicts, s_d is declared as:
-            !    real s_d(lx1+1,lx1)
-            s_d(i,j) = dxm1(i,j)
-         enddo
-         enddo
+               do j=1,ny1
+                  do i=1,nx1
+                     ! To avoid bank conflicts, s_d is declared as:
+                     !    real s_d(lx1+1,lx1)
+                     s_d(i,j) = dxm1(i,j)
+                  enddo
+               enddo
 !$acc loop seq
-         do k=1,nz1
+               do k=1,nz1
 !$acc loop vector collapse(2)
-         do j=1,ny1
-         do i=1,nx1
-            s_u(i,j) = u(i,j,k,e)
-         enddo
-         enddo
+                  do j=1,ny1
+                     do i=1,nx1
+                        s_u(i,j) = u(i,j,k,e)
+                     enddo
+                  enddo
 !$acc loop vector collapse(2) private(wr,ws,wt)
-         do j=1,ny1
-         do i=1,nx1
-            wr = 0
-            ws = 0
-            wt = 0
+                  do j=1,ny1
+                     do i=1,nx1
+                        wr = 0
+                        ws = 0
+                        wt = 0
 !$acc loop seq
-            do l=1,nx1
-               wr = wr + s_d(i,l)*s_u(l,j)
-               ws = ws + s_d(j,l)*s_u(i,l)
-               wt = wt + s_d(k,l)*u(i,j,l,e)
-            enddo
-            ur(i,j,k,e) = gxyz(i,j,k,1,e)*wr
-     $                  + gxyz(i,j,k,2,e)*ws
-     $                  + gxyz(i,j,k,3,e)*wt
-            us(i,j,k,e) = gxyz(i,j,k,2,e)*wr
-     $                  + gxyz(i,j,k,4,e)*ws
-     $                  + gxyz(i,j,k,5,e)*wt
-            ut(i,j,k,e) = gxyz(i,j,k,3,e)*wr
-     $                  + gxyz(i,j,k,5,e)*ws
-     $                  + gxyz(i,j,k,6,e)*wt
-         enddo
-         enddo
-         enddo
+                        do l=1,nx1
+                           wr = wr + s_d(i,l)*s_u(l,j)
+                           ws = ws + s_d(j,l)*s_u(i,l)
+                           wt = wt + s_d(k,l)*u(i,j,l,e)
+                        enddo
+                        ur(i,j,k,e) = gxyz(i,j,k,1,e)*wr
+     $                              + gxyz(i,j,k,2,e)*ws
+     $                              + gxyz(i,j,k,3,e)*wt
+                        us(i,j,k,e) = gxyz(i,j,k,2,e)*wr
+     $                              + gxyz(i,j,k,4,e)*ws
+     $                              + gxyz(i,j,k,5,e)*wt
+                        ut(i,j,k,e) = gxyz(i,j,k,3,e)*wr
+     $                              + gxyz(i,j,k,5,e)*ws
+     $                              + gxyz(i,j,k,6,e)*wt
+                     enddo
+                  enddo
+               enddo
 !$acc loop vector collapse(2)
-         do j=1,ny1
-         do i=1,nx1
+               do j=1,ny1
+                  do i=1,nx1
 !$acc loop seq private(wtemp)
-         do k=1,nz1
-            wtemp = 0.0
-            do l=1,nx1
-               wtemp = wtemp + s_d(l,i)*ur(l,j,k,e)
-     $                       + s_d(l,j)*us(i,l,k,e)
-     $                       + s_d(l,k)*ut(i,j,l,e)
+                     do k=1,nz1
+                        wtemp = 0.0
+                        do l=1,nx1
+                           wtemp = wtemp + s_d(l,i)*ur(l,j,k,e)
+     $                                   + s_d(l,j)*us(i,l,k,e)
+     $                                   + s_d(l,k)*ut(i,j,l,e)
+                        enddo
+                        w(i,j,k,e) = wtemp
+                     enddo
+                  enddo
+               enddo
             enddo
-            w(i,j,k,e) = wtemp
-         enddo
-         enddo
-         enddo
-      enddo
 !$acc end parallel
 
 #endif
