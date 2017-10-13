@@ -410,6 +410,7 @@ c-----------------------------------------------------------------------
       real wk(nx1,ny1,nz1,lelt)
 
       real s_d(lx1+1,lx1)
+      real s_u(lx1+1,lx1)
 
       real wr,ws,wt,tmp,wtemp
       integer i,j,k,l,e,n
@@ -457,9 +458,9 @@ c-----------------------------------------------------------------------
 c ifndef _CUDA
             
 !$acc parallel num_gangs(nelt) vector_length(nx1**2)
-!$acc loop gang private(s_d)
+!$acc loop gang private(s_d,s_u)
       do e = 1,nelt
-!$acc cache(s_d)
+!$acc cache(s_d,s_u)
 !$acc loop vector collapse(2)
          do j=1,ny1
          do i=1,nx1
@@ -468,17 +469,24 @@ c ifndef _CUDA
             s_d(i,j) = dxm1(i,j)
          enddo
          enddo
-!$acc loop seq 
+!$acc loop seq
          do k=1,nz1
+!$acc loop vector collapse(2)
+         do j=1,ny1
+         do i=1,nx1
+            s_u(i,j) = u(i,j,k,e)
+         enddo
+         enddo
 !$acc loop vector collapse(2) private(wr,ws,wt)
          do j=1,ny1
          do i=1,nx1
             wr = 0
             ws = 0
             wt = 0
+!$acc loop seq
             do l=1,nx1
-               wr = wr + s_d(i,l)*u(l,j,k,e)
-               ws = ws + s_d(j,l)*u(i,l,k,e)
+               wr = wr + s_d(i,l)*s_u(l,j)
+               ws = ws + s_d(j,l)*s_u(i,l)
                wt = wt + s_d(k,l)*u(i,j,l,e)
             enddo
             ur(i,j,k,e) = gxyz(i,j,k,1,e)*wr
