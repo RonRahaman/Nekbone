@@ -467,16 +467,16 @@ c ifndef _CUDA
                      ! To avoid bank conflicts, s_d is declared as:
                      !    real s_d(lx1+1,lx1)
                      s_d(i,j) = dxm1(i,j)
-                  enddo
-               enddo
+                  enddo !i
+               enddo !j
 !$acc loop seq
                do k=1,nz1
 !$acc loop vector collapse(2)
                   do j=1,ny1
                      do i=1,nx1
                         s_u(i,j) = u(i,j,k,e)
-                     enddo
-                  enddo
+                     enddo !i
+                  enddo !j
 !$acc loop vector collapse(2) private(wr,ws,wt)
                   do j=1,ny1
                      do i=1,nx1
@@ -488,7 +488,7 @@ c ifndef _CUDA
                            wr = wr + s_d(i,l)*s_u(l,j)
                            ws = ws + s_d(j,l)*s_u(i,l)
                            wt = wt + s_d(k,l)*u(i,j,l,e)
-                        enddo
+                        enddo !l
                         ur(i,j,k,e) = gxyz(i,j,k,1,e)*wr
      $                              + gxyz(i,j,k,2,e)*ws
      $                              + gxyz(i,j,k,3,e)*wt
@@ -498,25 +498,25 @@ c ifndef _CUDA
                         ut(i,j,k,e) = gxyz(i,j,k,3,e)*wr
      $                              + gxyz(i,j,k,5,e)*ws
      $                              + gxyz(i,j,k,6,e)*wt
-                     enddo
-                  enddo
-               enddo
+                     enddo !i
+                  enddo !j
+               enddo !k
+!$acc loop seq
+               do k=1,nz1
 !$acc loop vector collapse(2)
-               do j=1,ny1
-                  do i=1,nx1
-!$acc loop seq private(wtemp)
-                     do k=1,nz1
-                        wtemp = 0.0
+                  do j=1,ny1
+                     do i=1,nx1
+                        w(i,j,k,e) = 0.0
                         do l=1,nx1
-                           wtemp = wtemp + s_d(l,i)*ur(l,j,k,e)
-     $                                   + s_d(l,j)*us(i,l,k,e)
-     $                                   + s_d(l,k)*ut(i,j,l,e)
-                        enddo
-                        w(i,j,k,e) = wtemp
-                     enddo
-                  enddo
-               enddo
-            enddo
+                           w(i,j,k,e) = w(i,j,k,e) 
+     $                                + s_d(l,i)*ur(l,j,k,e)
+     $                                + s_d(l,j)*us(i,l,k,e)
+     $                                + s_d(l,k)*ut(i,j,l,e)
+                        enddo !l
+                     enddo !i
+                  enddo !j
+               enddo !k
+            enddo !e
 !$acc end parallel
 
 #endif
