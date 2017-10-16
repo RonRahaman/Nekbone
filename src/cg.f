@@ -412,6 +412,7 @@ c-----------------------------------------------------------------------
       real s_d(lx1+1,lx1)
       real s_u_ur(lx1+1,lx1)
       real s_us(lx1+1,lx1)
+      real r_ut(lx1+1,lx1)
 
       real wr,ws,wt,tmp,wtemp
       integer i,j,k,l,e,n
@@ -470,12 +471,23 @@ c ifndef _CUDA
                      s_d(i,j) = dxm1(i,j)
                   enddo !i
                enddo !j
-!$acc loop seq
+!$acc loop seq private(r_ut)
                do k=1,nz1
+!$acc cache(r_ut)
 !$acc loop vector collapse(2)
                   do j=1,ny1
                      do i=1,nx1
                         s_u_ur(i,j) = u(i,j,k,e)
+                        r_ut(i,j)   = 0.0
+                     enddo !i
+                  enddo !j
+!$acc loop vector collapse(2)
+                  do j=1,ny1
+                     do i=1,nx1
+!$acc loop seq
+                        do l=1,nx1
+                           r_ut(i,j) = r_ut(i,j) + s_d(k,l)*u(i,j,l,e)
+                        enddo !l
                      enddo !i
                   enddo !j
 !$acc loop vector collapse(2) private(wr,ws,wt)
@@ -488,17 +500,16 @@ c ifndef _CUDA
                         do l=1,nx1
                            wr = wr + s_d(i,l)*s_u_ur(l,j)
                            ws = ws + s_d(j,l)*s_u_ur(i,l)
-                           wt = wt + s_d(k,l)*u(i,j,l,e)
                         enddo !l
                         s_u_ur(i,j) = gxyz(i,j,k,1,e)*wr
      $                              + gxyz(i,j,k,2,e)*ws
-     $                              + gxyz(i,j,k,3,e)*wt
+     $                              + gxyz(i,j,k,3,e)*r_ut(i,j)
                         s_us(i,j)   = gxyz(i,j,k,2,e)*wr
      $                              + gxyz(i,j,k,4,e)*ws
-     $                              + gxyz(i,j,k,5,e)*wt
+     $                              + gxyz(i,j,k,5,e)*r_ut(i,j)
                         ut(i,j,k,e) = gxyz(i,j,k,3,e)*wr
      $                              + gxyz(i,j,k,5,e)*ws
-     $                              + gxyz(i,j,k,6,e)*wt
+     $                              + gxyz(i,j,k,6,e)*r_ut(i,j)
                      enddo !i
                   enddo !j
 !$acc loop vector collapse(2) private(wtemp)
