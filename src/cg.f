@@ -500,9 +500,6 @@ c ifndef _CUDA
      $                              + gxyz(i,j,k,6,e)*wt
                      enddo !i
                   enddo !j
-               enddo !k
-!$acc loop seq
-               do k=1,nz1
 !$acc loop vector collapse(2) private(wtemp)
                   do j=1,ny1
                      do i=1,nx1
