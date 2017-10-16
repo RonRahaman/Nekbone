@@ -505,10 +505,11 @@ c ifndef _CUDA
                   do j=1,ny1
                      do i=1,nx1
                         wtemp = 0.0
+!$acc loop seq
                         do l=1,nx1
                            wtemp = wtemp 
-     $                                + s_d(l,i)*s_u_ur(l,j)
-     $                                + s_d(l,j)*s_us(i,l)
+     $                           + s_d(l,i)*s_u_ur(l,j)
+     $                           + s_d(l,j)*s_us(i,l)
                         enddo !l
                         w(i,j,k,e) = wtemp
                      enddo !i
@@ -519,11 +520,12 @@ c ifndef _CUDA
 !$acc loop vector collapse(2) private(wtemp)
                   do j=1,ny1
                      do i=1,nx1
+                        wtemp = w(i,j,k,e)
 !$acc loop seq
                         do l=1,nx1
-                           w(i,j,k,e) = w(i,j,k,e) 
-     $                                + s_d(l,k)*ut(i,j,l,e)
+                           wtemp = wtemp + s_d(l,k)*ut(i,j,l,e)
                         enddo !l
+                        w(i,j,k,e) = wtemp
                      enddo !i
                   enddo !j
                enddo !k
