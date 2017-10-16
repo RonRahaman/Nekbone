@@ -410,7 +410,8 @@ c-----------------------------------------------------------------------
       real wk(nx1,ny1,nz1,lelt)
 
       real s_d(lx1+1,lx1)
-      real s_u(lx1+1,lx1)
+      real s_u_ur(lx1+1,lx1)
+      real s_us(lx1+1,lx1)
 
       real wr,ws,wt,tmp,wtemp
       integer i,j,k,l,e,n
@@ -458,9 +459,9 @@ c-----------------------------------------------------------------------
 c ifndef _CUDA
             
 !$acc parallel num_gangs(nelt) vector_length(nx1**2)
-!$acc loop gang private(s_d,s_u)
+!$acc loop gang private(s_d,s_u_ur,s_us)
             do e = 1,nelt
-!$acc cache(s_d,s_u)
+!$acc cache(s_d,s_u_ur,s_us)
 !$acc loop vector collapse(2)
                do j=1,ny1
                   do i=1,nx1
@@ -474,7 +475,7 @@ c ifndef _CUDA
 !$acc loop vector collapse(2)
                   do j=1,ny1
                      do i=1,nx1
-                        s_u(i,j) = u(i,j,k,e)
+                        s_u_ur(i,j) = u(i,j,k,e)
                      enddo !i
                   enddo !j
 !$acc loop vector collapse(2) private(wr,ws,wt)
@@ -485,14 +486,14 @@ c ifndef _CUDA
                         wt = 0
 !$acc loop seq
                         do l=1,nx1
-                           wr = wr + s_d(i,l)*s_u(l,j)
-                           ws = ws + s_d(j,l)*s_u(i,l)
+                           wr = wr + s_d(i,l)*s_u_ur(l,j)
+                           ws = ws + s_d(j,l)*s_u_ur(i,l)
                            wt = wt + s_d(k,l)*u(i,j,l,e)
                         enddo !l
-                        ur(i,j,k,e) = gxyz(i,j,k,1,e)*wr
+                        s_u_ur(i,j) = gxyz(i,j,k,1,e)*wr
      $                              + gxyz(i,j,k,2,e)*ws
      $                              + gxyz(i,j,k,3,e)*wt
-                        us(i,j,k,e) = gxyz(i,j,k,2,e)*wr
+                        s_us(i,j)   = gxyz(i,j,k,2,e)*wr
      $                              + gxyz(i,j,k,4,e)*ws
      $                              + gxyz(i,j,k,5,e)*wt
                         ut(i,j,k,e) = gxyz(i,j,k,3,e)*wr
@@ -506,8 +507,8 @@ c ifndef _CUDA
                         wtemp = 0.0
                         do l=1,nx1
                            wtemp = wtemp 
-     $                                + s_d(l,i)*ur(l,j,k,e)
-     $                                + s_d(l,j)*us(i,l,k,e)
+     $                                + s_d(l,i)*s_u_ur(l,j)
+     $                                + s_d(l,j)*s_us(i,l)
                         enddo !l
                         w(i,j,k,e) = wtemp
                      enddo !i
