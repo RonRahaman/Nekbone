@@ -522,14 +522,14 @@ c ifndef _CUDA
 !$acc loop vector collapse(2) private(wtemp)
                   do j=1,ny1
                      do i=1,nx1
-                        wtemp = 0.0
-!$acc loop seq
-                        do l=1,nx1
-                           wtemp = wtemp 
-     $                           + s_d(l,i)*s_u_ur(l,j)
-     $                           + s_d(l,j)*s_us(i,l)
-                        enddo !l
-                        w(i,j,k,e) = wtemp
+      w(i,j,k,e) =            s_d(1,i)*s_u_ur(1,j)+s_d(1,j)*s_us(i,1)
+      w(i,j,k,e) = w(i,j,k,e)+s_d(2,i)*s_u_ur(2,j)+s_d(2,j)*s_us(i,2)
+      w(i,j,k,e) = w(i,j,k,e)+s_d(3,i)*s_u_ur(3,j)+s_d(3,j)*s_us(i,3)
+      w(i,j,k,e) = w(i,j,k,e)+s_d(4,i)*s_u_ur(4,j)+s_d(4,j)*s_us(i,4)
+      w(i,j,k,e) = w(i,j,k,e)+s_d(5,i)*s_u_ur(5,j)+s_d(5,j)*s_us(i,5)
+      w(i,j,k,e) = w(i,j,k,e)+s_d(6,i)*s_u_ur(6,j)+s_d(6,j)*s_us(i,6)
+      w(i,j,k,e) = w(i,j,k,e)+s_d(7,i)*s_u_ur(7,j)+s_d(7,j)*s_us(i,7)
+      w(i,j,k,e) = w(i,j,k,e)+s_d(8,i)*s_u_ur(8,j)+s_d(8,j)*s_us(i,8)
                      enddo !i
                   enddo !j
                enddo !k
