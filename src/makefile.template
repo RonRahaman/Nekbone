@@ -50,10 +50,6 @@ endif
 # MXM 
 MXM=mxm_std.o blas.o
 
-################################################################################
-# CUDA
-BONE += ax_cuda.o 
-
 # JL Routines ###################################################################
 JO  = jl_
 JL := -DPREFIX=jl_
@@ -164,9 +160,3 @@ $(OBJDIR)/$(JO)fcrystal.o        :$(J)/fcrystal.c;        $(CC) -c $(cFL2) $(JL)
 $(OBJDIR)/$(JO)sleep.o		:$(J)/sleep.c;		$(CC) -c $(cFL2) $(JL) $< -o $@
 $(OBJDIR)/$(JO)gs.o              :$(J)/gs.c;              $(CC) -c $(cFL2) $(JL) $< -o $@
 $(OBJDIR)/$(JO)gs_local.o        :$(J)/gs_local.c;        $(CC) -c $(cFL2) $(JL) $< -o $@
-
-# OPENACC #########################################################################################
-$(OBJDIR)/ax_acc.o  :$S/ax_acc.f;   $(F77) -c $(FL3) $< -o $@
-
-# CUDA ############################################################################################
-$(OBJDIR)/ax_cuda.o   :$S/ax_cuda.f;  $(F77) -c $(FL3) $< -o $@
