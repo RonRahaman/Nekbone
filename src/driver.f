@@ -1,6 +1,8 @@
 c-----------------------------------------------------------------------
       program nekbone
-
+#ifdef _CUDA
+      use cudafor
+#endif
       include 'SIZE'
       include 'TOTAL'
       include 'SEMHAT'
@@ -75,7 +77,6 @@ c     SET UP and RUN NEKBONE
            n     = nx1*ny1*nz1*nelt
 
            call set_f(f,c,n)
-!!!$ACC UPDATE HOST(f)
 
            if(nid.eq.0) write(6,*)
 
@@ -83,9 +84,15 @@ c     SET UP and RUN NEKBONE
 
            call nekgsync()
 
+#ifdef _CUDA
+           call cudaProfilerStart()
+#endif
            call set_timer_flop_cnt(0)
            call cg_acc(x,f,g,c,r,w,p,z,n,niter,flop_cg)
            call set_timer_flop_cnt(1)
+#ifdef _CUDA
+           call cudaProfilerStop()
+#endif
 
            call gs_free(gsh)
            
