@@ -366,37 +366,10 @@ c  1  format(7i7,a8)
       return
       end
 c-----------------------------------------------------------------------
-
-#ifdef _OPENACC
-
-c-----------------------------------------------------------------------
       subroutine ax_acc(w,u,gxyz,ur,us,ut,wk,n) ! Matrix-vector product: w=A*u
-
-#ifdef _CUDA
-      use cudafor
-#endif
 
       include 'SIZE'
       include 'TOTAL'
-
-#ifdef _CUDA
-      interface
-      attributes(global) subroutine ax_cuf2(w,u,ur,us,ut,
-     &                gxyz,dxm1,dxtm1)
-
-      real, intent(out) :: w(nx1,ny1,nz1,nelt)
-      real, intent(in)  :: u(nx1,ny1,nz1,nelt)
-      real ur  (nx1,ny1,nz1,lelt)
-      real us  (nx1,ny1,nz1,lelt)
-      real ut  (nx1,ny1,nz1,lelt)
-
-      real gxyz(nx1,ny1,nz1,2*ldim,lelt)
-
-      real, intent(in) :: dxm1(nx1,nx1)
-      real, intent(in) :: dxtm1(nx1,nx1)
-      end subroutine
-      end interface
-#endif
 
       common /mymask/cmask(-1:lx1*ly1*lz1*lelt)
 
@@ -417,44 +390,9 @@ c-----------------------------------------------------------------------
       integer cuda_err
 
       lt = nx1*ny1*nz1*nelt
-
-!$ACC DATA PRESENT(w,u(:,:,:,:),gxyz,ur,us,ut,wk,dxm1,dxtm1)
-
-#ifdef _CUDA
-
-!$ACC HOST_DATA USE_DEVICE(w,u(:,:,:,:),ur,us,ut,gxyz,dxm1,dxtm1)
-       if (nx1.le.10) then
-         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1)>>>(w,u,
-     $                ur,us,ut,gxyz,dxm1,dxtm1)
-       else if (nx1.eq.12) then
-         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1/2)>>>(w,u,
-     $                ur,us,ut,gxyz,dxm1,dxtm1)
-       else
-         call ax_cuf2<<<nelt,dim3(nx1,ny1,nz1/4)>>>(w,u,
-     $         ur,us,ut,gxyz,dxm1,dxtm1) 
-       endif
-!$ACC END HOST_DATA
-
-       cuda_err = cudaGetLastError()
-       if (cuda_err /= cudaSuccess) then
-         write(6, 815) cuda_err, cudaGetErrorString(cuda_err)
-         call exitt
-       endif
-
-       istat = cudaDeviceSynchronize()
-       
-       cuda_err = cudaGetLastError()
-       if (cuda_err /= cudaSuccess) then
-         write(6, 815) cuda_err, cudaGetErrorString(cuda_err)
-         call exitt
-       endif
-
-  815    format('CUDA ERROR', I3, ': ', A)
-
-#else
-c ifndef _CUDA
             
-!$ACC PARALLEL LOOP COLLAPSE(4) GANG WORKER VECTOR PRIVATE(wr,ws,wt)
+!$ACC PARALLEL 
+!$ACC LOOP COLLAPSE(4) GANG WORKER VECTOR PRIVATE(wr,ws,wt)
 !DIR NOBLOCKING
       do e = 1,nelt
          do k=1,nz1
@@ -482,9 +420,7 @@ c ifndef _CUDA
          enddo
          enddo
       enddo
-!$ACC END PARALLEL LOOP
-
-!$ACC PARALLEL LOOP COLLAPSE(4) GANG WORKER VECTOR 
+!$ACC LOOP COLLAPSE(4) GANG WORKER VECTOR 
       do e=1,nelt
          do k=1,nz1
          do j=1,ny1
@@ -500,10 +436,7 @@ c ifndef _CUDA
          enddo
          enddo
       enddo
-!$ACC END PARALLEL LOOP
-
-#endif
-c endif _CUDA
+!$ACC END PARALLEL
 
 #ifdef GPUDIRECT
       call dssum(w)         ! Gather-scatter operation  ! w   = QQ  w
@@ -513,8 +446,6 @@ c endif _CUDA
 
       call add2s2_acc(w,u,.1,n)   !2n
       call maskit_acc(w,cmask,nx1,ny1,nz1)  ! Zero out Dirichlet conditions
-
-!$ACC END DATA
 
       nxyz=nx1*ny1*nz1
       flop_a = flop_a + (19*nxyz+12*nx1*nxyz)*nelt
@@ -688,5 +619,3 @@ c-----------------------------------------------------------------------
       return
       end
 c-----------------------------------------------------------------------
-
-#endif
