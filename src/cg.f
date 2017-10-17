@@ -465,8 +465,6 @@ c ifndef _CUDA
 !$acc loop vector collapse(2)
                do j=1,ny1
                   do i=1,nx1
-                     ! To avoid bank conflicts, s_d is declared as:
-                     !    real s_d(lx1+1,lx1)
                      s_d(i,j) = dxm1(i,j)
                   enddo !i
                enddo !j
@@ -519,7 +517,7 @@ c ifndef _CUDA
      $                              + gxyz(i,j,k,6,e)*wt
                      enddo !i
                   enddo !j
-!$acc loop vector collapse(2) private(wtemp)
+!$acc loop vector collapse(2)
                   do j=1,ny1
                      do i=1,nx1
       w(i,j,k,e) =            s_d(1,i)*s_u_ur(1,j)+s_d(1,j)*s_us(i,1)
@@ -535,7 +533,7 @@ c ifndef _CUDA
                enddo !k
 !$acc loop seq
                do k=1,nz1
-!$acc loop vector collapse(2) private(wtemp)
+!$acc loop vector collapse(2)
                   do j=1,ny1
                      do i=1,nx1
                         w(i,j,k,e) = w(i,j,k,e) + s_d(1,k)*ut(i,j,1,e)
