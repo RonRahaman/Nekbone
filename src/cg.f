@@ -397,26 +397,26 @@ c-----------------------------------------------------------------------
 
       lt = nx1*ny1*nz1*nelt
             
-!$acc parallel num_gangs(nelt) vector_length(nx1**2)
+!$acc parallel num_gangs(lelt) 
 !$acc&         present(w,u,gxyz,ur,us,ut,dxm1)
 
 !$acc loop gang private(s_d,s_u_ur,s_us)
-            do e = 1,nelt
+            do e = 1,lelt
 !$acc cache(s_d,s_u_ur,s_us)
-!$acc loop vector collapse(2)
-               do j=1,ny1
-                  do i=1,nx1
+!$acc loop vector tile(lx1,ly1)
+               do j=1,ly1
+                  do i=1,lx1
                      ! To avoid bank conflicts, s_d is declared as:
                      !    real s_d(lx1+1,lx1)
                      s_d(i,j) = dxm1(i,j)
                   enddo !i
                enddo !j
 !$acc loop seq private(r_ut,r_gk)
-               do k=1,nz1
+               do k=1,lz1
 !$acc cache(r_ut,r_gk)
-!$acc loop vector collapse(2)
-                  do j=1,ny1
-                     do i=1,nx1
+!$acc loop vector tile(lx1,ly1)
+                  do j=1,ly1
+                     do i=1,lx1
                         s_u_ur(i,j) = u(i,j,k,e)
                         r_ut(i,j)   = 0.0
                         r_gk(1,i,j) = gxyz(i,j,k,1,e)
@@ -427,22 +427,22 @@ c-----------------------------------------------------------------------
                         r_gk(6,i,j) = gxyz(i,j,k,6,e)
                      enddo !i
                   enddo !j
-!$acc loop vector collapse(2)
-                  do j=1,ny1
-                     do i=1,nx1
+!$acc loop vector tile(lx1,ly1)
+                  do j=1,ly1
+                     do i=1,lx1
 !$acc loop seq
-                        do l=1,nx1
+                        do l=1,lx1
                            r_ut(i,j) = r_ut(i,j) + s_d(k,l)*u(i,j,l,e)
                         enddo !l
                      enddo !i
                   enddo !j
-!$acc loop vector collapse(2) private(wr,ws)
-                  do j=1,ny1
-                     do i=1,nx1
+!$acc loop vector tile(lx1,ly1) private(wr,ws)
+                  do j=1,ly1
+                     do i=1,lx1
                         wr = 0
                         ws = 0
 !$acc loop seq
-                        do l=1,nx1
+                        do l=1,lx1
                            wr = wr + s_d(i,l)*s_u_ur(l,j)
                            ws = ws + s_d(j,l)*s_u_ur(i,l)
                         enddo !l
@@ -457,11 +457,11 @@ c-----------------------------------------------------------------------
      $                              + r_gk(6,i,j)*r_ut(i,j)
                      enddo !i
                   enddo !j
-!$acc loop vector collapse(2) private(wtemp)
-                  do j=1,ny1
-                     do i=1,nx1
+!$acc loop vector tile(lx1,ly1) private(wtemp)
+                  do j=1,ly1
+                     do i=1,lx1
                         wtemp = 0.0
-                        do l=1,nx1
+                        do l=1,lx1
                            wtemp = wtemp 
      $                                + s_d(l,i)*s_u_ur(l,j)
      $                                + s_d(l,j)*s_us(i,l)
@@ -471,12 +471,12 @@ c-----------------------------------------------------------------------
                   enddo !j
                enddo !k
 !$acc loop seq
-               do k=1,nz1
-!$acc loop vector collapse(2) private(wtemp)
-                  do j=1,ny1
-                     do i=1,nx1
+               do k=1,lz1
+!$acc loop vector tile(lx1,ly1) private(wtemp)
+                  do j=1,ly1
+                     do i=1,lx1
 !$acc loop seq
-                        do l=1,nx1
+                        do l=1,lx1
                            w(i,j,k,e) = w(i,j,k,e) 
      $                                + s_d(l,k)*ut(i,j,l,e)
                         enddo !l
