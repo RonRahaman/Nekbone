@@ -395,13 +395,13 @@ c-----------------------------------------------------------------------
 
       lt = nx1*ny1*nz1*nelt
             
-!$acc parallel num_gangs(lelt) vector_length(lx1*ly1)
+!$acc parallel num_gangs(lelt) 
 !$acc&         present(w,u,gxyz,ur,us,ut,dxm1)
 
 !$acc loop gang private(s_d,s_u_ur,s_us)
             do e = 1,lelt
 !$acc cache(s_d,s_u_ur,s_us)
-!$acc loop vector collapse(2)
+!$acc loop vector tile(lx1,ly1)
                do j=1,ly1
                   do i=1,lx1
                      ! To avoid bank conflicts, s_d is declared as:
@@ -411,13 +411,13 @@ c-----------------------------------------------------------------------
                enddo !j
 !$acc loop seq
                do k=1,lz1
-!$acc loop vector collapse(2)
+!$acc loop vector tile(lx1,ly1)
                   do j=1,ly1
                      do i=1,lx1
                         s_u_ur(i,j) = u(i,j,k,e)
                      enddo !i
                   enddo !j
-!$acc loop vector collapse(2) private(wr,ws,wt)
+!$acc loop vector tile(lx1,ly1) private(wr,ws,wt)
                   do j=1,ly1
                      do i=1,lx1
                         wr = 0
@@ -440,7 +440,7 @@ c-----------------------------------------------------------------------
      $                              + gxyz(i,j,k,6,e)*wt
                      enddo !i
                   enddo !j
-!$acc loop vector collapse(2) private(wtemp)
+!$acc loop vector tile(lx1,ly1) private(wtemp)
                   do j=1,ly1
                      do i=1,lx1
                         wtemp = 0.0
@@ -456,7 +456,7 @@ c-----------------------------------------------------------------------
                enddo !k
 !$acc loop seq
                do k=1,lz1
-!$acc loop vector collapse(2) private(wtemp)
+!$acc loop vector tile(lx1,ly1) private(wtemp)
                   do j=1,ly1
                      do i=1,lx1
                         wtemp = w(i,j,k,e)
