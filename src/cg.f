@@ -644,13 +644,13 @@ c
       return
       end
 c-----------------------------------------------------------------------
-      subroutine solveM_acc(z,r,n)
-      include 'INPUT'
-      real z(n),r(n)
+c     subroutine solveM_acc(z,r,n)
+c     include 'INPUT'
+c     real z(n),r(n)
 
-      nn = n
-      call h1mg_solve_acc(z,r,nn)
+c     nn = n
+c     call h1mg_solve_acc(z,r,nn)
 
-      return
-      end
+c     return
+c     end
 c-----------------------------------------------------------------------
