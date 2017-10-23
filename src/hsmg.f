@@ -1357,6 +1357,13 @@ c     clobbers r
                work(i) = 0.0
                work2(i) = 0.0
             enddo
+!$acc loop vector
+            do j=1,nv
+               do i=1,nv*nv
+                  j0 = i + nv*nv*(j-1)
+                  e(j0,ie) = 0.0
+               enddo
+            enddo
 
 !$acc loop seq
             do k=1,nu
@@ -1387,24 +1394,24 @@ c     clobbers r
                enddo
             enddo
 
+!$acc loop seq
+            do k=1,nu
+!$acc loop tile(nv,nv*nv) vector
+               do j=1,nv
+                  do i=1,nv*nv
+                     j0 = i + nv*nv*(j-1)
+                     i0 = i + nv*nv*(k-1)
+                     k0 = k + nu*(j-1)
+                     e(j0,ie) = e(j0,ie) + work2(i0)*s(k0,1,3,ie)
+                  enddo
+               enddo
+            enddo
+
 !======================================================================
 ! START: WIP
 !======================================================================
 
-!$ACC LOOP COLLAPSE(2) VECTOR
-            do j=1,nv
-               do i=1,nv*nv
-                  j0 = i + nv*nv*(j-1)
-                  tmp = 0.0
-!$ACC LOOP SEQ
-                  do k=1,nu
-                     i0 = i + nv*nv*(k-1)
-                     k0 = k + nu*(j-1)
-                     tmp = tmp + work2(i0)*s(k0,1,3,ie)
-                  enddo
-                  e(j0,ie) = tmp
-               enddo
-            enddo
+
 !$ACC LOOP VECTOR
             do i=1,nn
                r(i,ie)=d(i,ie)*e(i,ie)
