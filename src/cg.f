@@ -544,7 +544,9 @@ c     set machine tolerances
       miter = niter
 c     call tester(z,r,n)  
       do iter=1,miter
-         call solveM_acc(z,r,n)    ! preconditioner here
+!$acc update host(z,r)
+         call solveM(z,r,n)    ! preconditioner here
+!$acc update device(z,r)
 
          rtz2=rtz1                                                       ! OPS
          rtz1=glsc3_acc(r,c,z,n)   ! parallel weighted inner product r^T C z ! 3n
