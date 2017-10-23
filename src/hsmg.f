@@ -1348,17 +1348,16 @@ c     clobbers r
       nv=nl
 
 
-!$ACC PARALLEL COPY(e,r,s,d)
-!$ACC LOOP GANG PRIVATE(work,work2)
+!$acc parallel copy(e,r,s,d)
+!$acc loop gang private(work,work2)
          do ie=1,nelt
-!$acc loop vector tile(nu*nu,nv)
-            do j=1,nu*nu
-               do i=1,nv
-                  i0 = i + nv*(j-1)
-                  j0 = i + nv*(k-1)
-                  work(i0) = 0.0
-               enddo
+
+!$acc loop vector
+            do i=0,lwk-1
+               work(i) = 0.0
+               work2(i) = 0.0
             enddo
+
 !$acc loop seq
             do k=1,nu
 !$acc loop vector tile(nu*nu,nv)
@@ -1372,27 +1371,26 @@ c     clobbers r
                enddo
             enddo
 
+!$acc loop seq
+            do k=1,nu
+!$acc loop vector tile(nu,nv)
+               do i=1,nu
+                  do j=1,nv
+!$acc loop seq
+                     do l=1,nv
+                        i0 = l + nv*(j-1) + nv*nv*(i-1)
+                        j0 = l + nv*(k-1) + nv*nu*(i-1)
+                        k0 = k + nu*(j-1)
+                        work2(i0) = work2(i0) + work(j0)*s(k0,1,2,ie)
+                     enddo
+                  enddo
+               enddo
+            enddo
+
 !======================================================================
 ! START: WIP
 !======================================================================
 
-!$ACC LOOP COLLAPSE(3) VECTOR
-            do i=1,nu
-               do j=1,nv
-                  do l=1,nv
-                     i0 = l + nv*(j-1) + nv*nv*(i-1)
-                     tmp = 0.0
-!$ACC LOOP SEQ
-                     do k=1,nu
-                        j0 = l + nv*(k-1) + nv*nu*(i-1)
-                        k0 = k + nu*(j-1)
-                        tmp = tmp + work(j0)*s(k0,1,2,ie)
-                     enddo
-                     work2(i0) = tmp
-                  enddo
-               enddo
-            enddo
-!$ACC END LOOP
 !$ACC LOOP COLLAPSE(2) VECTOR
             do j=1,nv
                do i=1,nv*nv
