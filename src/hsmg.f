@@ -1342,7 +1342,7 @@ c     clobbers r
 
       parameter (lwk=(lx1+2)*(ly1+2)*(lz1+2))
       real work(0:lwk-1), work2(0:lwk-1)
-      real r_s(nl**ndim)
+      real r_s(nl**ndim), d_s(nl**ndim)
 
       nn=nl**ndim
       nu=nl
@@ -1350,12 +1350,13 @@ c     clobbers r
 
 
 !$ACC PARALLEL COPY(e,r,s,d)
-!$ACC LOOP GANG PRIVATE(work,work2,r_s)
+!$ACC LOOP GANG PRIVATE(work,work2,r_s,d_s)
          do ie=1,nelt
-!$ACC CACHE(r_s)
+!$ACC CACHE(r_s,d_s)
 !$ACC LOOP VECTOR
             do i=1,nl**ndim
                r_s(i) = r(i,ie)
+               d_s(i) = d(i,ie)
             enddo
 !$ACC LOOP COLLAPSE(2) VECTOR
             do j=1,nu*nu
@@ -1399,7 +1400,7 @@ c     clobbers r
                      k0 = k + nu*(j-1)
                      tmp = tmp + work2(i0)*s(k0,1,3,ie)
                   enddo
-                  r_s(j0) = d(j0,ie) * tmp
+                  r_s(j0) = d_s(j0) * tmp
                enddo
             enddo
 !$ACC LOOP COLLAPSE(2) VECTOR
