@@ -1343,6 +1343,7 @@ c     clobbers r
       real work(0:(nl+2)**ndim-1), 
      &     work2(0:(nl+2)**ndim-1)
       real r_s(nl**ndim), d_s(nl**ndim)
+      real s_s(nl*nl,2,ndim)
 
       nn=nl**ndim
       nu=nl
@@ -1350,15 +1351,23 @@ c     clobbers r
 
 
 !$ACC PARALLEL COPY(e,r,s,d) NUM_GANGS(nelt) VECTOR_LENGTH(nl*nl*nl)
-!$ACC LOOP GANG PRIVATE(work,work2,r_s,d_s)
+!$ACC LOOP GANG PRIVATE(work,work2,r_s,d_s,s_s)
          do ie=1,nelt
-!$ACC CACHE(r_s,d_s,work,work2)
+!$ACC CACHE(r_s,d_s,work,work2,s_s)
 !$ACC LOOP VECTOR
             do i=1,nl**ndim
                r_s(i) = r(i,ie)
                d_s(i) = d(i,ie)
             enddo
-!$ACC LOOP VECTOR COLLAPSE(2)
+!$ACC LOOP COLLAPSE(3) VECTOR
+            do k=1,ndim
+               do j=1,2
+                  do i=1,nl*nl
+                     s_s(i,j,k) = s(i,j,k,ie)
+                  enddo
+               enddo
+            enddo
+!$ACC LOOP VECTOR COLLAPSE(2) PRIVATE(tmp)
             do j=1,nl*nl
                do i=1,nl
                   i0 = i + nl*(j-1)
@@ -1367,12 +1376,12 @@ c     clobbers r
                   do k=1,nl
                      j0 = i + nl*(k-1)
                      k0 = k + nl*(j-1)
-                     tmp = tmp + s(j0,2,1,ie) * r_s(k0)
+                     tmp = tmp + s_s(j0,2,1) * r_s(k0)
                   enddo
                   work(i0) = tmp
                enddo
             enddo
-!$ACC LOOP VECTOR COLLAPSE(3)
+!$ACC LOOP VECTOR COLLAPSE(3) PRIVATE(tmp)
             do i=1,nl
                do j=1,nl
                   do l=1,nl
@@ -1382,13 +1391,13 @@ c     clobbers r
                      do k=1,nl
                         j0 = l + nl*(k-1) + nl*nl*(i-1)
                         k0 = k + nl*(j-1)
-                        tmp = tmp + work(j0)*s(k0,1,2,ie)
+                        tmp = tmp + work(j0)*s_s(k0,1,2)
                      enddo
                      work2(i0) = tmp
                   enddo
                enddo
             enddo
-!$ACC LOOP VECTOR COLLAPSE(2)
+!$ACC LOOP VECTOR COLLAPSE(2) PRIVATE(tmp)
             do j=1,nl
                do i=1,nl*nl
                   j0 = i + nl*nl*(j-1)
@@ -1397,12 +1406,12 @@ c     clobbers r
                   do k=1,nl
                      i0 = i + nl*nl*(k-1)
                      k0 = k + nl*(j-1)
-                     tmp = tmp + work2(i0)*s(k0,1,3,ie)
+                     tmp = tmp + work2(i0)*s_s(k0,1,3)
                   enddo
                   r_s(j0) = d_s(j0) * tmp
                enddo
             enddo
-!$ACC LOOP VECTOR COLLAPSE(2)
+!$ACC LOOP VECTOR COLLAPSE(2) PRIVATE(tmp)
             do j=1,nl*nl
                do i=1,nl
                   i0 = i + nl*(j-1)
@@ -1411,12 +1420,12 @@ c     clobbers r
                   do k=1,nl
                      j0 = i + nl*(k-1)
                      k0 = k + nl*(j-1)
-                     tmp = tmp + s(j0,1,1,ie) * r_s(k0)
+                     tmp = tmp + s_s(j0,1,1) * r_s(k0)
                   enddo
                   work(i0) = tmp
                enddo
             enddo
-!$ACC LOOP VECTOR COLLAPSE(3)
+!$ACC LOOP VECTOR COLLAPSE(3) PRIVATE(tmp)
             do i=1,nl
                do j=1,nl
                   do l=1,nl
@@ -1426,13 +1435,13 @@ c     clobbers r
                      do k=1,nl
                         j0 = l + nl*(k-1) + nl*nl*(i-1)
                         k0 = k + nl*(j-1)
-                        tmp = tmp + work(j0)*s(k0,2,2,ie)
+                        tmp = tmp + work(j0)*s_s(k0,2,2)
                      enddo
                      work2(i0) = tmp
                   enddo
                enddo
             enddo
-!$ACC LOOP VECTOR COLLAPSE(2)
+!$ACC LOOP VECTOR COLLAPSE(2) PRIVATE(tmp)
             do j=1,nl
                do i=1,nl*nl
                   j0 = i + nl*nl*(j-1)
@@ -1441,7 +1450,7 @@ c     clobbers r
                   do k=1,nl
                      i0 = i + nl*nl*(k-1)
                      k0 = k + nl*(j-1)
-                     tmp = tmp + work2(i0)*s(k0,2,3,ie)
+                     tmp = tmp + work2(i0)*s_s(k0,2,3)
                   enddo
                   e(j0,ie) = tmp
                enddo
