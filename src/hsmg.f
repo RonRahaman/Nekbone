@@ -1349,7 +1349,7 @@ c     clobbers r
       nv=nl
 
 
-!$ACC PARALLEL COPY(e,r,s,d)
+!$ACC PARALLEL COPY(e,r,s,d) NUM_GANGS(nelt) VECTOR_LENGTH(nl*nl*nl)
 !$ACC LOOP GANG PRIVATE(work,work2,r_s,d_s)
          do ie=1,nelt
 !$ACC CACHE(r_s,d_s,work,work2)
@@ -1358,90 +1358,89 @@ c     clobbers r
                r_s(i) = r(i,ie)
                d_s(i) = d(i,ie)
             enddo
-!$ACC LOOP COLLAPSE(2) VECTOR
-            do j=1,nu*nu
-               do i=1,nv
-                  i0 = i + nv*(j-1)
+!$ACC LOOP VECTOR COLLAPSE(2)
+            do j=1,nl*nl
+               do i=1,nl
+                  i0 = i + nl*(j-1)
                   tmp = 0.0
 !$ACC LOOP SEQ
-                  do k=1,nu
-                     j0 = i + nv*(k-1)
-                     k0 = k + nu*(j-1)
+                  do k=1,nl
+                     j0 = i + nl*(k-1)
+                     k0 = k + nl*(j-1)
                      tmp = tmp + s(j0,2,1,ie) * r_s(k0)
                   enddo
                   work(i0) = tmp
                enddo
             enddo
-!$ACC LOOP COLLAPSE(3) VECTOR
-            do i=1,nu
-               do j=1,nv
-                  do l=1,nv
-                     i0 = l + nv*(j-1) + nv*nv*(i-1)
+!$ACC LOOP VECTOR COLLAPSE(3)
+            do i=1,nl
+               do j=1,nl
+                  do l=1,nl
+                     i0 = l + nl*(j-1) + nl*nl*(i-1)
                      tmp = 0.0
 !$ACC LOOP SEQ
-                     do k=1,nu
-                        j0 = l + nv*(k-1) + nv*nu*(i-1)
-                        k0 = k + nu*(j-1)
+                     do k=1,nl
+                        j0 = l + nl*(k-1) + nl*nl*(i-1)
+                        k0 = k + nl*(j-1)
                         tmp = tmp + work(j0)*s(k0,1,2,ie)
                      enddo
                      work2(i0) = tmp
                   enddo
                enddo
             enddo
-!$ACC END LOOP
-!$ACC LOOP COLLAPSE(2) VECTOR
-            do j=1,nv
-               do i=1,nv*nv
-                  j0 = i + nv*nv*(j-1)
+!$ACC LOOP VECTOR COLLAPSE(2)
+            do j=1,nl
+               do i=1,nl*nl
+                  j0 = i + nl*nl*(j-1)
                   tmp = 0.0
 !$ACC LOOP SEQ
-                  do k=1,nu
-                     i0 = i + nv*nv*(k-1)
-                     k0 = k + nu*(j-1)
+                  do k=1,nl
+                     i0 = i + nl*nl*(k-1)
+                     k0 = k + nl*(j-1)
                      tmp = tmp + work2(i0)*s(k0,1,3,ie)
                   enddo
                   r_s(j0) = d_s(j0) * tmp
                enddo
             enddo
-!$ACC LOOP COLLAPSE(2) VECTOR
-            do j=1,nu*nu
-               do i=1,nv
-                  i0 = i + nv*(j-1)
+!$ACC LOOP VECTOR COLLAPSE(2)
+            do j=1,nl*nl
+               do i=1,nl
+                  i0 = i + nl*(j-1)
                   tmp = 0
 !$ACC LOOP SEQ
-                  do k=1,nu
-                     j0 = i + nv*(k-1)
-                     k0 = k + nu*(j-1)
+                  do k=1,nl
+                     j0 = i + nl*(k-1)
+                     k0 = k + nl*(j-1)
                      tmp = tmp + s(j0,1,1,ie) * r_s(k0)
                   enddo
                   work(i0) = tmp
                enddo
             enddo
-!$ACC LOOP COLLAPSE(3) VECTOR
-            do i=1,nu
-               do j=1,nv
-                  do l=1,nv
-                     i0 = l + nv*(j-1) + nv*nv*(i-1)
+!$ACC LOOP VECTOR COLLAPSE(3)
+            do i=1,nl
+               do j=1,nl
+                  do l=1,nl
+                     i0 = l + nl*(j-1) + nl*nl*(i-1)
                      tmp = 0.0
 !$ACC LOOP SEQ
-                     do k=1,nu
-                        j0 = l + nv*(k-1) + nv*nu*(i-1)
-                        k0 = k + nu*(j-1)
+                     do k=1,nl
+                        j0 = l + nl*(k-1) + nl*nl*(i-1)
+                        k0 = k + nl*(j-1)
                         tmp = tmp + work(j0)*s(k0,2,2,ie)
                      enddo
                      work2(i0) = tmp
                   enddo
                enddo
             enddo
-!$ACC LOOP COLLAPSE(2) VECTOR
-            do j=1,nv
-               do i=1,nv*nv
-                  j0 = i + nv*nv*(j-1)
+!$ACC LOOP VECTOR COLLAPSE(2)
+            do j=1,nl
+               do i=1,nl*nl
+                  j0 = i + nl*nl*(j-1)
                   tmp = 0.0
 !$ACC LOOP SEQ
-                  do k=1,nu
-                     i0 = i + nv*nv*(k-1)
-                     k0 = k + nu*(j-1)
+                  do k=1,nl
+                     i0 = i + nl*nl*(k-1)
+                     k0 = k + nl*(j-1)
                      tmp = tmp + work2(i0)*s(k0,2,3,ie)
                   enddo
                   e(j0,ie) = tmp
