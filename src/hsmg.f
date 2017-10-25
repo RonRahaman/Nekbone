@@ -1350,7 +1350,8 @@ c     clobbers r
       nv=nl
 
 
-!$ACC PARALLEL COPY(e,r,s,d) NUM_GANGS(nelt) VECTOR_LENGTH(nl*nl*nl)
+!$ACC DATA COPY(e,r,s,d)
+!$ACC PARALLEL NUM_GANGS(nelt) VECTOR_LENGTH(nl*nl*nl)
 !$ACC LOOP GANG PRIVATE(work,work2,r_s,d_s,s_s)
          do ie=1,nelt
 !$ACC CACHE(r_s,d_s,work,work2,s_s)
@@ -1457,6 +1458,7 @@ c     clobbers r
             enddo
          enddo
 !$ACC END PARALLEL
+!$ACC END DATA
 
       return
       end
