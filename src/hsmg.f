@@ -1370,89 +1370,89 @@ c     clobbers r
 !$ACC LOOP VECTOR COLLAPSE(2) PRIVATE(tmp)
             do j=1,nl*nl
                do i=1,nl
-                  i0 = i + nl*(j-1)
+                  ij = i + nl*(j-1)
                   tmp = 0.0
 !$ACC LOOP SEQ
                   do k=1,nl
-                     j0 = i + nl*(k-1)
-                     k0 = k + nl*(j-1)
-                     tmp = tmp + s_s(j0,2,1) * r_s(k0)
+                     ik = i + nl*(k-1)
+                     kj = k + nl*(j-1)
+                     tmp = tmp + s_s(ik,2,1) * r_s(kj)
                   enddo
-                  work(i0) = tmp
+                  work(ij) = tmp
                enddo
             enddo
 !$ACC LOOP VECTOR COLLAPSE(3) PRIVATE(tmp)
             do i=1,nl
                do j=1,nl
                   do l=1,nl
-                     i0 = l + nl*(j-1) + nl*nl*(i-1)
+                     lji = l + nl*(j-1) + nl*nl*(i-1)
                      tmp = 0.0
 !$ACC LOOP SEQ
                      do k=1,nl
-                        j0 = l + nl*(k-1) + nl*nl*(i-1)
-                        k0 = k + nl*(j-1)
-                        tmp = tmp + work(j0)*s_s(k0,1,2)
+                        lki = l + nl*(k-1) + nl*nl*(i-1)
+                        kj = k + nl*(j-1)
+                        tmp = tmp + work(lki)*s_s(kj,1,2)
                      enddo
-                     work2(i0) = tmp
+                     work2(lji) = tmp
                   enddo
                enddo
             enddo
 !$ACC LOOP VECTOR COLLAPSE(2) PRIVATE(tmp)
             do j=1,nl
                do i=1,nl*nl
-                  j0 = i + nl*nl*(j-1)
+                  ij = i + nl*nl*(j-1)
                   tmp = 0.0
 !$ACC LOOP SEQ
                   do k=1,nl
-                     i0 = i + nl*nl*(k-1)
-                     k0 = k + nl*(j-1)
-                     tmp = tmp + work2(i0)*s_s(k0,1,3)
+                     ik = i + nl*nl*(k-1)
+                     kj = k + nl*(j-1)
+                     tmp = tmp + work2(ik)*s_s(kj,1,3)
                   enddo
-                  r_s(j0) = d_s(j0) * tmp
+                  r_s(ij) = d_s(ij) * tmp
                enddo
             enddo
 !$ACC LOOP VECTOR COLLAPSE(2) PRIVATE(tmp)
             do j=1,nl*nl
                do i=1,nl
-                  i0 = i + nl*(j-1)
+                  ij = i + nl*(j-1)
                   tmp = 0
 !$ACC LOOP SEQ
                   do k=1,nl
-                     j0 = i + nl*(k-1)
-                     k0 = k + nl*(j-1)
-                     tmp = tmp + s_s(j0,1,1) * r_s(k0)
+                     ik = i + nl*(k-1)
+                     kj = k + nl*(j-1)
+                     tmp = tmp + s_s(ik,1,1) * r_s(kj)
                   enddo
-                  work(i0) = tmp
+                  work(ij) = tmp
                enddo
             enddo
 !$ACC LOOP VECTOR COLLAPSE(3) PRIVATE(tmp)
             do i=1,nl
                do j=1,nl
                   do l=1,nl
-                     i0 = l + nl*(j-1) + nl*nl*(i-1)
+                     lji = l + nl*(j-1) + nl*nl*(i-1)
                      tmp = 0.0
 !$ACC LOOP SEQ
                      do k=1,nl
-                        j0 = l + nl*(k-1) + nl*nl*(i-1)
-                        k0 = k + nl*(j-1)
-                        tmp = tmp + work(j0)*s_s(k0,2,2)
+                        lki = l + nl*(k-1) + nl*nl*(i-1)
+                        kj = k + nl*(j-1)
+                        tmp = tmp + work(lki)*s_s(kj,2,2)
                      enddo
-                     work2(i0) = tmp
+                     work2(lji) = tmp
                   enddo
                enddo
             enddo
 !$ACC LOOP VECTOR COLLAPSE(2) PRIVATE(tmp)
             do j=1,nl
                do i=1,nl*nl
-                  j0 = i + nl*nl*(j-1)
+                  ij = i + nl*nl*(j-1)
                   tmp = 0.0
 !$ACC LOOP SEQ
                   do k=1,nl
-                     i0 = i + nl*nl*(k-1)
-                     k0 = k + nl*(j-1)
-                     tmp = tmp + work2(i0)*s_s(k0,2,3)
+                     ik = i + nl*nl*(k-1)
+                     kj = k + nl*(j-1)
+                     tmp = tmp + work2(ik)*s_s(kj,2,3)
                   enddo
-                  e(j0,ie) = tmp
+                  e(ij,ie) = tmp
                enddo
             enddo
          enddo
