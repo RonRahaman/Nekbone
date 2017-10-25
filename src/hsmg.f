@@ -1381,7 +1381,7 @@ c     clobbers r
                         klj = k + nl*(l-1) + nl*nl*(j-1)
                         tmp = tmp + s_s(ik,2,1) * r_s(klj)
                      enddo
-                     work(ilj) = tmp
+                     work(lij) = tmp
                   enddo
                enddo
             enddo
@@ -1390,15 +1390,16 @@ c     clobbers r
                do j=1,nl
                   do l=1,nl
                      lji = l + nl*(j-1) + nl*nl*(i-1)
+                     ilj = i + nl*(l-1) + nl*nl*(j-1)
                      tmp = 0.0
 !$ACC LOOP SEQ
                      do k=1,nl
                         lki = l + nl*(k-1) + nl*nl*(i-1)
                         kli = k + nl*(l-1) + nl*nl*(i-1)
                         kj = k + nl*(j-1)
-                        tmp = tmp + work(lki)*s_s(kj,1,2)
+                        tmp = tmp + work(kli)*s_s(kj,1,2)
                      enddo
-                     work2(lji) = tmp
+                     work2(ilj) = tmp
                   enddo
                enddo
             enddo
@@ -1411,8 +1412,9 @@ c     clobbers r
 !$ACC LOOP SEQ
                      do k=1,nl
                         ilk = i + nl*(l-1) + nl*nl*(k-1)
+                        kil = k + nl*(i-1) + nl*nl*(l-1)
                         kj  = k + nl*(j-1)
-                        tmp = tmp + work2(ilk)*s_s(kj,1,3)
+                        tmp = tmp + work2(kil)*s_s(kj,1,3)
                      enddo
                      r_s(ilj) = d_s(ilj) * tmp
                   enddo
@@ -1423,6 +1425,7 @@ c     clobbers r
                do j=1,nl
                   do i=1,nl
                      ijl = i + nl*(j-1) + nl*nl*(l-1)
+                     jil = j + nl*(i-1) + nl*nl*(l-1)
                      tmp = 0
 !$ACC LOOP SEQ
                      do k=1,nl
@@ -1430,7 +1433,7 @@ c     clobbers r
                         kjl = k + nl*(j-1) + nl*nl*(l-1)
                         tmp = tmp + s_s(ik,1,1) * r_s(kjl)
                      enddo
-                     work(ijl) = tmp
+                     work(jil) = tmp
                   enddo
                enddo
             enddo
@@ -1439,14 +1442,16 @@ c     clobbers r
                do j=1,nl
                   do l=1,nl
                      lji = l + nl*(j-1) + nl*nl*(i-1)
+                     ilj = i + nl*(l-1) + nl*nl*(j-1)
                      tmp = 0.0
 !$ACC LOOP SEQ
                      do k=1,nl
                         lki = l + nl*(k-1) + nl*nl*(i-1)
+                        kli = k + nl*(l-1) + nl*nl*(i-1)
                         kj = k + nl*(j-1)
-                        tmp = tmp + work(lki)*s_s(kj,2,2)
+                        tmp = tmp + work(kli)*s_s(kj,2,2)
                      enddo
-                     work2(lji) = tmp
+                     work2(ilj) = tmp
                   enddo
                enddo
             enddo
@@ -1459,8 +1464,9 @@ c     clobbers r
 !$ACC LOOP SEQ
                      do k=1,nl
                         ilk = i + nl*(l-1) + nl*nl*(k-1)
+                        kil = k + nl*(i-1) + nl*nl*(l-1)
                         kj = k + nl*(j-1)
-                        tmp = tmp + work2(ilk)*s_s(kj,2,3)
+                        tmp = tmp + work2(kil)*s_s(kj,2,3)
                      enddo
                      e(ilj,ie) = tmp
                   enddo
