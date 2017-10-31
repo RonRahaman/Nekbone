@@ -1328,8 +1328,104 @@ c     clobbers r
       return
       end
 c-----------------------------------------------------------------------
+#ifdef _CUDA
+      attributes(global) subroutine hsmg_cuda(e,r,s,d,nl,ndim,nelt)
+      implicit none
+
+      real, intent(inout) :: e(nl**ndim,nelt)
+      real, intent(in)    :: r(nl**ndim,nelt)
+      real, intent(in)    :: s(nl*nl,2,ndim,nelt)
+      real, intent(in)    :: d(nl*ndim,nelt)
+      integer, intent(in) :: nl, ndim, nelt
+
+      integer :: ie, i, j, k, l 
+      integer :: ijl, ilj, lji
+      integer :: ik, klj, lki, kj, ilk, kjl
+
+      real, shared :: work(0:(nl+2)**ndim-1), 
+     &   work2(0:(nl+2)**ndim-1),
+     $   r_s(nl**ndim), d_s(nl**ndim),
+     $   s_s(nl*nl,2,ndim)
+
+      ie = blockIdx%x
+      l = threadIdx%z
+      j = threadIdx%y
+      i = threadIdx%x
+
+      ijl = i + nl*(j-1) + nl*nl*(l-1)
+      ilj = i + nl*(l-1) + nl*nl*(j-1)
+      lji = l + nl*(j-1) + nl*nl*(i-1)
+
+      r_s(ijl) = r(ijl,ie)
+      d_s(ijl) = d(ijl,ie)
+      s_s(i,j,l) = s(i,j,l,ie)
+      work(ijl) = 0.0
+      work2(ijl) = 0.0
+
+      call syncthreads()
+
+      do k=1,nl
+         ik = i + nl*(k-1)
+         klj = k + nl*(l-1) + nl*nl*(j-1)
+         work(ilj) = work(ilj) + s_s(ik,2,1) * r_s(klj)
+      enddo
+
+      call syncthreads()
+
+      do k=1,nl
+         lki = l + nl*(k-1) + nl*nl*(i-1)
+         kj = k + nl*(j-1)
+         work2(lji) = work2(lji) + work(lki)*s_s(kj,1,2)
+      enddo
+
+      call syncthreads()
+
+      r_s(ilj) = 0.0
+      work(ilj) = 0.0
+
+      call syncthreads()
+
+      do k=1,nl
+         ilk = i + nl*(l-1) + nl*nl*(k-1)
+         kj = k + nl*(j-1)
+         r_s(ilj) = r_s(ilj) + d_s(ilj)*work2(ilk)*s_s(kj,1,3)
+      enddo
+
+      call syncthreads()
+
+      do k=1,nl
+         ik = i + nl*(k-1)
+         kjl = k + nl*(j-1) + nl*nl*(l-1)
+         work(ijl) = work(ijl) + s_s(ik,1,1) * r_s(kjl)
+      enddo
+
+      work2(ilj) = 0.0
+      e(ilj,ie) = 0.0
+
+      call syncthreads()
+
+      do k=1,nl
+         lki = l + nl*(k-1) + nl*nl*(i-1)
+         kj = k + nl*(j-1)
+         work2(lji) = work2(lji) + work(lki)*s_s(kj,2,2)
+      enddo
+
+      call syncthreads()
+
+      do k=1,nl
+         ilk = i + nl*(l-1) + nl*nl*(k-1)
+         kj = k + nl*(j-1)
+         e(ilj,ie) = e(ilj,ie) + work2(ilk)*s_s(kj,2,3)
+      enddo
+
+      end subroutine
+#endif
+c-----------------------------------------------------------------------
 c     clobbers r
       subroutine h1mg_do_fast_acc(e,r,s,d,nl)
+#ifdef _CUDA
+      use cudafor
+#endif
       include 'SIZE'
       real e(nl**ndim,nelt)
       real r(nl**ndim,nelt)
@@ -1351,6 +1447,11 @@ c     clobbers r
 
 
 !$ACC DATA COPY(e,r,s,d)
+#ifdef _CUDA
+!$ACC HOST_DATA USE_DEVICE(e,r,s,d)
+      call hsmg_cuda<<<nelt,dim3(nl,nl,nl)>>>(e,r,s,d,nl,ndim.nelt)
+!$ACC END HOST_DATA
+#else
 !$ACC PARALLEL NUM_GANGS(nelt) VECTOR_LENGTH(nl*nl*nl)
 !$ACC LOOP GANG PRIVATE(work,work2,r_s,d_s,s_s)
          do ie=1,nelt
@@ -1490,6 +1591,8 @@ c     clobbers r
                enddo
             enddo
 !$ACC END PARALLEL
+#endif
+
 !$ACC END DATA
 
       return
