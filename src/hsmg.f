@@ -1455,6 +1455,7 @@ c     clobbers r
                   do i=1,nl
                      ilj = i + nl*(l-1) + nl*nl*(j-1)
                      work2(ilj) = 0.0
+                     e(ilj,ie) = 0.0
                   enddo
                enddo
             enddo
@@ -1473,23 +1474,21 @@ c     clobbers r
                   enddo
                enddo
             enddo
-!$ACC LOOP VECTOR COLLAPSE(2) PRIVATE(tmp)
-            do j=1,nl
-               do l=1,nl
-                  do i=1,nl
-                     ilj = i + nl*(l-1) + nl*nl*(j-1)
-                     tmp = 0.0
 !$ACC LOOP SEQ
-                     do k=1,nl
+            do k=1,nl
+!$ACC LOOP VECTOR COLLAPSE(3)
+               do j=1,nl
+                  do l=1,nl
+                     do i=1,nl
+                        ilj = i + nl*(l-1) + nl*nl*(j-1)
                         ilk = i + nl*(l-1) + nl*nl*(k-1)
                         kj = k + nl*(j-1)
-                        tmp = tmp + work2(ilk)*s_s(kj,2,3)
+                        e(ilj,ie) = 
+     &  e(ilj,ie) + work2(ilk)*s_s(kj,2,3)
                      enddo
-                     e(ilj,ie) = tmp
                   enddo
                enddo
             enddo
-         enddo
 !$ACC END PARALLEL
 !$ACC END DATA
 
