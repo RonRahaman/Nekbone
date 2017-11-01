@@ -1489,6 +1489,7 @@ c     clobbers r
                   enddo
                enddo
             enddo
+         enddo
 !$ACC END PARALLEL
 !$ACC END DATA
 
