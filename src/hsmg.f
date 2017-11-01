@@ -1336,31 +1336,43 @@ c-----------------------------------------------------------------------
       real, intent(in)    :: r(nl**ndim,nelt)
       real, intent(in)    :: s(nl*nl,2,ndim,nelt)
       real, intent(in)    :: d(nl**ndim,nelt)
-      integer, intent(in) :: nl, ndim, nelt
+      integer, value, intent(in) :: nl, ndim, nelt
 
-      integer :: ie, i, j, k, l 
-      integer :: ijl, ilj, lji
+
+      integer :: ie, i, j, k, l, p, q
+      integer :: ijl, ilj, lji, ij
       integer :: ik, klj, lki, kj, ilk, kjl
 
-      real, shared :: work(0:(nl+2)**ndim-1), 
-     &   work2(0:(nl+2)**ndim-1),
-     $   r_s(nl**ndim), d_s(nl**ndim),
-     $   s_s(nl*nl,2,ndim)
+      real, shared :: 
+     &   work(1024), 
+     &   work2(1024),
+     &   r_s(1024), 
+     &   d_s(1024),
+     &   s_s(128,2,4)
 
       ie = blockIdx%x
       l = threadIdx%z
       j = threadIdx%y
       i = threadIdx%x
 
+      ij = i + nl*(j-1)
       ijl = i + nl*(j-1) + nl*nl*(l-1)
       ilj = i + nl*(l-1) + nl*nl*(j-1)
       lji = l + nl*(j-1) + nl*nl*(i-1)
 
       r_s(ijl) = r(ijl,ie)
       d_s(ijl) = d(ijl,ie)
-      s_s(i,j,l) = s(i,j,l,ie)
+
       work(ijl) = 0.0
       work2(ijl) = 0.0
+
+      if (l .eq. 1) then
+         do p=1,ndim
+            do q=1,2
+               s_s(ij,q,p) = s(ij,q,p,ie)
+            enddo
+         enddo
+      endif
 
       call syncthreads()
 
@@ -1436,22 +1448,80 @@ c     clobbers r
       integer ie,nn,i,j,k,l,i0,j0,k0,je,nu,nv,lwk
       real tmp
 
+#ifdef _CUDA
+      integer, device :: nl_d, ndim_d, nelt_d
+      real, device, allocatable :: 
+     &   e_d(:,:), r_d(:,:), s_d(:,:,:,:), d_d(:,:)
+
+      allocate(e_d(nl**ndim,nelt),stat=istat)
+      if (istat .ne. cudaSuccess) then
+         write (*,*) 'alloc e_d error:', 
+     &      cudaGetErrorString(istat)
+      endif
+
+      allocate(r_d(nl**ndim,nelt),stat=istat)
+      if (istat .ne. cudaSuccess) then
+         write (*,*) 'alloc r_d error:', 
+     &      cudaGetErrorString(istat)
+      endif
+
+      allocate(s_d(nl*nl,2,ndim,nelt),stat=istat)
+      if (istat .ne. cudaSuccess) then
+         write (*,*) 'alloc r_d error:', 
+     &      cudaGetErrorString(istat)
+      endif
+
+      allocate(d_d(nl**ndim,nelt),stat=istat)
+      if (istat .ne. cudaSuccess) then
+         write (*,*) 'alloc d_d error:', 
+     &      cudaGetErrorString(istat)
+      endif
+
+      nl_d = nl
+      ndim_d = ndim
+      nelt_d = nelt
+      e_d = e
+      r_d = r
+      s_d = s
+      d_d = d
+
+      call hsmg_cuda<<<dim3(nelt,1,1), dim3(nl,nl,nl)>>>(
+     &   e_d, 
+     &   r_d, 
+     &   s_d, 
+     &   d_d,
+     &   nl,
+     &   ndim,
+     &   nelt)
+
+      ! See Ruetsch and Fatica, CUDA Fortran for Scientists and
+      ! Engineers, Ch 1.5
+      ierrSync = cudaGetLastError()
+      ierrAsync = cudaDeviceSynchronize()
+      ! These are errors after kernel is spawned and control is passed
+      ! to host
+      if (ierrSync .ne. cudaSuccess) then
+         write (*,*) 'hsmg_cuda sync error:', 
+     &      cudaGetErrorString(ierrSync)
+      endif
+      ! These are errors on device
+      if (ierrAsync .ne. cudaSuccess) then
+         write (*,*) 'Async kernel error:', 
+     &      cudaGetErrorString(ierrAsync)
+      endif
+
+      deallocate(e_d)
+      deallocate(r_d)
+      deallocate(s_d)
+      deallocate(d_d)
+#else
+
       real work(0:(nl+2)**ndim-1), 
      &     work2(0:(nl+2)**ndim-1)
       real r_s(nl**ndim), d_s(nl**ndim)
       real s_s(nl*nl,2,ndim)
 
-      nn=nl**ndim
-      nu=nl
-      nv=nl
-
-
 !$ACC DATA COPY(e,r,s,d)
-#ifdef _CUDA
-!$ACC HOST_DATA USE_DEVICE(e,r,s,d)
-      call hsmg_cuda<<<nelt,dim3(nl,nl,nl)>>>(e,r,s,d,nl,ndim,nelt)
-!$ACC END HOST_DATA
-#else
 !$ACC PARALLEL NUM_GANGS(nelt) VECTOR_LENGTH(nl*nl*nl)
 !$ACC LOOP GANG PRIVATE(work,work2,r_s,d_s,s_s)
          do ie=1,nelt
@@ -1591,9 +1661,8 @@ c     clobbers r
                enddo
             enddo
 !$ACC END PARALLEL
-#endif
-
 !$ACC END DATA
+#endif
 
       return
       end
