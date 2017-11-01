@@ -1351,7 +1351,7 @@ c     clobbers r
 
 
 !$ACC DATA COPY(e,r,s,d)
-!$ACC PARALLEL NUM_GANGS(nelt) VECTOR_LENGTH(nl*nl*nl)
+!$ACC PARALLEL NUM_GANGS(nelt)
 !$ACC LOOP GANG PRIVATE(work,work2,r_s,d_s,s_s)
          do ie=1,nelt
 !$ACC CACHE(r_s,d_s,work,work2,s_s)
@@ -1390,8 +1390,8 @@ c     clobbers r
             enddo
 !$ACC LOOP SEQ
             do k=1,nl
-!$ACC LOOP VECTOR COLLAPSE(3)
                do j=1,nl
+!$ACC LOOP VECTOR TILE(nl,nl)
                   do l=1,nl
                      do i=1,nl
                         ilj = i + nl*(l-1) + nl*nl*(j-1)
