@@ -1345,6 +1345,7 @@ c     clobbers r
       real r_s(nl**ndim), d_s(nl**ndim)
       real s_s(nl*nl,2,ndim)
       real s_s1(nl*nl,2)
+      real s_s2(nl*nl,2)
 
       nn=nl**ndim
       nu=nl
@@ -1353,9 +1354,9 @@ c     clobbers r
 
 !$ACC DATA COPY(e,r,s,d)
 !$ACC PARALLEL NUM_GANGS(nelt)
-!$ACC LOOP GANG PRIVATE(work,work2,r_s,d_s,s_s,s_s1)
+!$ACC LOOP GANG PRIVATE(work,work2,r_s,d_s,s_s,s_s1,s_s2)
          do ie=1,nelt
-!$ACC CACHE(r_s,d_s,work,work2,s_s,s_s1)
+!$ACC CACHE(r_s,d_s,work,work2,s_s,s_s1,s_s2)
 !$ACC LOOP COLLAPSE(3) VECTOR
             do k=1,nl
                do j=1,nl
@@ -1384,7 +1385,9 @@ c     clobbers r
                do j=1,nl
                   do i=1,nl
                      ij = i + nl*(j-1)
+                     ji = j + nl*(i-1)
                      s_s1(ij,l) = s(ij,l,1,ie)
+                     s_s2(ji,l) = s(ij,l,2,ie)
                   enddo
                enddo
             enddo
@@ -1416,15 +1419,15 @@ c     clobbers r
             enddo
 !$ACC LOOP SEQ
             do k=1,nl
-!$ACC LOOP VECTOR COLLAPSE(3)
                do i=1,nl
+!$ACC LOOP VECTOR TILE(nl,nl)
                   do j=1,nl
                      do l=1,nl
                         lji = l + nl*(j-1) + nl*nl*(i-1)
                         lki = l + nl*(k-1) + nl*nl*(i-1)
-                        kj = k + nl*(j-1)
+                        jk = j + nl*(k-1)
                         ! outer/inner
-                        work2(lji) = work2(lji) + work(lki)*s_s(kj,1,2)
+                        work2(lji) = work2(lji) + work(lki)*s_s2(jk,1)
                      enddo
                   enddo
                enddo
@@ -1485,16 +1488,16 @@ c     clobbers r
             enddo
 !$ACC LOOP SEQ
             do k=1,nl
-!$ACC LOOP VECTOR COLLAPSE(3)
                do i=1,nl
+!$ACC LOOP TILE(nl,nl)
                   do j=1,nl
                      do l=1,nl
                         lji = l + nl*(j-1) + nl*nl*(i-1)
                         lki = l + nl*(k-1) + nl*nl*(i-1)
-                        kj = k + nl*(j-1)
+                        jk = j + nl*(k-1)
                         ! outer/inner
                         work2(lji) = 
-     &  work2(lji) + work(lki)*s_s(kj,2,2)
+     &  work2(lji) + work(lki)*s_s2(jk,2)
                      enddo
                   enddo
                enddo
