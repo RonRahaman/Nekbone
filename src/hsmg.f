@@ -1335,7 +1335,7 @@ c-----------------------------------------------------------------------
       real, intent(inout) :: e(nl**ndim,nelt)
       real, intent(in)    :: r(nl**ndim,nelt)
       real, intent(in)    :: s(nl*nl,2,ndim,nelt)
-      real, intent(in)    :: d(nl*ndim,nelt)
+      real, intent(in)    :: d(nl**ndim,nelt)
       integer, intent(in) :: nl, ndim, nelt
 
       integer :: ie, i, j, k, l 
@@ -1449,7 +1449,7 @@ c     clobbers r
 !$ACC DATA COPY(e,r,s,d)
 #ifdef _CUDA
 !$ACC HOST_DATA USE_DEVICE(e,r,s,d)
-      call hsmg_cuda<<<nelt,dim3(nl,nl,nl)>>>(e,r,s,d,nl,ndim.nelt)
+      call hsmg_cuda<<<nelt,dim3(nl,nl,nl)>>>(e,r,s,d,nl,ndim,nelt)
 !$ACC END HOST_DATA
 #else
 !$ACC PARALLEL NUM_GANGS(nelt) VECTOR_LENGTH(nl*nl*nl)
