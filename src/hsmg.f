@@ -1329,15 +1329,14 @@ c     clobbers r
       end
 c-----------------------------------------------------------------------
 #ifdef _CUDA
-      attributes(global) subroutine hsmg_cuda(e,r,s,d)
+      attributes(global) subroutine hsmg_cuda(e,r,s,d,nl,nelt,ndim)
       implicit none
-
-      integer, parameter :: nl=10, nelt=2048, ndim=3
 
       real, intent(inout) :: e(nl**ndim,nelt)
       real, intent(inout) :: r(nl**ndim,nelt)
       real, intent(in)    :: s(nl*nl,2,ndim,nelt)
       real, intent(in)    :: d(nl**ndim,nelt)
+      integer, value      :: nl, nelt, ndim
 
       integer :: ie, i, j, k, l, p, q
       integer :: ijl, ilj, lji, ij
@@ -1474,7 +1473,10 @@ c     clobbers r
      &   e_d, 
      &   r_d, 
      &   s_d, 
-     &   d_d)
+     &   d_d,
+     &   nl,
+     &   nelt,
+     &   ndim)
 
       ! See Ruetsch and Fatica, CUDA Fortran for Scientists and
       ! Engineers, Ch 1.5
