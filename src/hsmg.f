@@ -1440,30 +1440,30 @@ c     clobbers r
 #ifdef _CUDA
       integer, device :: nl_d, ndim_d, nelt_d
       real, device :: 
-     &   e_d(1024,2048), 
-     &   r_d(1024,2048), 
-     &   s_d(128,2,4,2048), 
-     &   d_d(1024,2048)
+     &   e_d(1024*2048), 
+     &   r_d(1024*2048), 
+     &   s_d(128*2*4*2048), 
+     &   d_d(1024*2048)
 
-      istat = cudaMemcpy(e_d, e, nl*nl*nl*nelt)
+      istat = cudaMemcpy(e_d(1), e(1,1), nl*nl*nl*nelt)
       if (istat .ne. cudaSuccess) then
          write (*,*) 'memcpy e_d error:', 
      &      cudaGetErrorString(istat)
       endif
 
-      istat = cudaMemcpy(r_d, r, nl*nl*nl*nelt)
+      istat = cudaMemcpy(r_d(1), r(1,1), nl*nl*nl*nelt)
       if (istat .ne. cudaSuccess) then
          write (*,*) 'memcpy r_d error:', 
      &      cudaGetErrorString(istat)
       endif
 
-      istat = cudaMemcpy(s_d, s, nl*nl*2*3*nelt)
+      istat = cudaMemcpy(s_d(1), s(1,1,1,1), nl*nl*2*ndim*nelt)
       if (istat .ne. cudaSuccess) then
          write (*,*) 'memcpy s_d error:', 
      &      cudaGetErrorString(istat)
       endif
 
-      istat = cudaMemcpy(d_d, d, nl*nl*nl*nelt)
+      istat = cudaMemcpy(d_d(1), d(1,1), nl*nl*nl*nelt)
       if (istat .ne. cudaSuccess) then
          write (*,*) 'memcpy d_d error:', 
      &      cudaGetErrorString(istat)
@@ -1494,25 +1494,25 @@ c     clobbers r
      &      cudaGetErrorString(ierrAsync)
       endif
 
-      istat = cudaMemcpy(e, e_d, nl*nl*nl*nelt)
+      istat = cudaMemcpy(e(1,1), e_d(1), nl*nl*nl*nelt)
       if (istat .ne. cudaSuccess) then
          write (*,*) 'memcpy e_d error:', 
      &      cudaGetErrorString(istat)
       endif
 
-      istat = cudaMemcpy(r, r_d, nl*nl*nl*nelt)
+      istat = cudaMemcpy(r(1,1), r_d(1), nl*nl*nl*nelt)
       if (istat .ne. cudaSuccess) then
          write (*,*) 'memcpy r_d error:', 
      &      cudaGetErrorString(istat)
       endif
 
-      istat = cudaMemcpy(s, s_d, nl*nl*2*3*nelt)
+      istat = cudaMemcpy(s(1,1,1,1), s_d(1), nl*nl*2*3*nelt)
       if (istat .ne. cudaSuccess) then
          write (*,*) 'memcpy s_d error:', 
      &      cudaGetErrorString(istat)
       endif
 
-      istat = cudaMemcpy(d, d_d, nl*nl*nl*nelt)
+      istat = cudaMemcpy(d(1,1), d_d(1), nl*nl*nl*nelt)
       if (istat .ne. cudaSuccess) then
          write (*,*) 'memcpy d_d error:', 
      &      cudaGetErrorString(istat)
