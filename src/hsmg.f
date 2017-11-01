@@ -1333,7 +1333,7 @@ c-----------------------------------------------------------------------
       implicit none
 
       real, intent(inout) :: e(nl**ndim,nelt)
-      real, intent(in)    :: r(nl**ndim,nelt)
+      real, intent(inout) :: r(nl**ndim,nelt)
       real, intent(in)    :: s(nl*nl,2,ndim,nelt)
       real, intent(in)    :: d(nl**ndim,nelt)
       integer, value, intent(in) :: nl, ndim, nelt
@@ -1343,12 +1343,7 @@ c-----------------------------------------------------------------------
       integer :: ijl, ilj, lji, ij
       integer :: ik, klj, lki, kj, ilk, kjl
 
-      real, shared :: 
-     &   work(1024), 
-     &   work2(1024),
-     &   r_s(1024), 
-     &   d_s(1024),
-     &   s_s(128,2,4)
+      real, shared :: work(1024), work2(1024)
 
       ie = blockIdx%x
       l = threadIdx%z
@@ -1360,26 +1355,15 @@ c-----------------------------------------------------------------------
       ilj = i + nl*(l-1) + nl*nl*(j-1)
       lji = l + nl*(j-1) + nl*nl*(i-1)
 
-      r_s(ijl) = r(ijl,ie)
-      d_s(ijl) = d(ijl,ie)
-
       work(ijl) = 0.0
       work2(ijl) = 0.0
-
-      if (l .eq. 1) then
-         do p=1,ndim
-            do q=1,2
-               s_s(ij,q,p) = s(ij,q,p,ie)
-            enddo
-         enddo
-      endif
 
       call syncthreads()
 
       do k=1,nl
          ik = i + nl*(k-1)
          klj = k + nl*(l-1) + nl*nl*(j-1)
-         work(ilj) = work(ilj) + s_s(ik,2,1) * r_s(klj)
+         work(ilj) = work(ilj) + s(ik,2,1,ie) * r(klj,ie)
       enddo
 
       call syncthreads()
@@ -1387,12 +1371,12 @@ c-----------------------------------------------------------------------
       do k=1,nl
          lki = l + nl*(k-1) + nl*nl*(i-1)
          kj = k + nl*(j-1)
-         work2(lji) = work2(lji) + work(lki)*s_s(kj,1,2)
+         work2(lji) = work2(lji) + work(lki)*s(kj,1,2,ie)
       enddo
 
       call syncthreads()
 
-      r_s(ilj) = 0.0
+      r(ilj,ie) = 0.0
       work(ilj) = 0.0
 
       call syncthreads()
@@ -1400,7 +1384,7 @@ c-----------------------------------------------------------------------
       do k=1,nl
          ilk = i + nl*(l-1) + nl*nl*(k-1)
          kj = k + nl*(j-1)
-         r_s(ilj) = r_s(ilj) + d_s(ilj)*work2(ilk)*s_s(kj,1,3)
+         r(ilj,ie) = r(ilj,ie) + d(ilj,ie)*work2(ilk)*s(kj,1,3,ie)
       enddo
 
       call syncthreads()
@@ -1408,7 +1392,7 @@ c-----------------------------------------------------------------------
       do k=1,nl
          ik = i + nl*(k-1)
          kjl = k + nl*(j-1) + nl*nl*(l-1)
-         work(ijl) = work(ijl) + s_s(ik,1,1) * r_s(kjl)
+         work(ijl) = work(ijl) + s(ik,1,1,ie) * r(kjl,ie)
       enddo
 
       work2(ilj) = 0.0
@@ -1419,7 +1403,7 @@ c-----------------------------------------------------------------------
       do k=1,nl
          lki = l + nl*(k-1) + nl*nl*(i-1)
          kj = k + nl*(j-1)
-         work2(lji) = work2(lji) + work(lki)*s_s(kj,2,2)
+         work2(lji) = work2(lji) + work(lki)*s(kj,2,2,ie)
       enddo
 
       call syncthreads()
@@ -1427,7 +1411,7 @@ c-----------------------------------------------------------------------
       do k=1,nl
          ilk = i + nl*(l-1) + nl*nl*(k-1)
          kj = k + nl*(j-1)
-         e(ilj,ie) = e(ilj,ie) + work2(ilk)*s_s(kj,2,3)
+         e(ilj,ie) = e(ilj,ie) + work2(ilk)*s(kj,2,3,ie)
       enddo
 
       end subroutine
