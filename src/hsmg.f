@@ -1355,9 +1355,18 @@ c     clobbers r
 !$ACC LOOP GANG PRIVATE(work,work2,r_s,d_s,s_s)
          do ie=1,nelt
 !$ACC CACHE(r_s,d_s,work,work2,s_s)
+!$ACC LOOP COLLAPSE(3) VECTOR
+            do k=1,nl
+               do j=1,nl
+                  do l=1,nl
+                     ljk = l + nl*(j-1) + nl*nl*(k-1)
+                     klj = k + nl*(l-1) + nl*nl*(j-1)
+                     r_s(ljk) = r(klj,ie)
+                  enddo
+               enddo
+            enddo
 !$ACC LOOP VECTOR
             do i=1,nl**ndim
-               r_s(i) = r(i,ie)
                d_s(i) = d(i,ie)
             enddo
 !$ACC LOOP COLLAPSE(3) VECTOR
@@ -1387,8 +1396,8 @@ c     clobbers r
                      do i=1,nl
                         ilj = i + nl*(l-1) + nl*nl*(j-1)
                         ik = i + nl*(k-1)
-                        klj = k + nl*(l-1) + nl*nl*(j-1)
-                        work(ilj) = work(ilj) + s_s(ik,2,1) * r_s(klj)
+                        ljk = l + nl*(j-1) + nl*nl*(k-1)
+                        work(ilj) = work(ilj) + s_s(ik,2,1) * r_s(ljk)
                      enddo
                   enddo
                enddo
