@@ -1343,9 +1343,9 @@ c     clobbers r
       real work(0:(nl+2)**ndim-1), 
      &     work2(0:(nl+2)**ndim-1)
       real r_s(nl**ndim), d_s(nl**ndim)
-      real s_s(nl*nl,2,ndim)
       real s_s1(nl*nl,2)
       real s_s2(nl*nl,2)
+      real s_s3(nl*nl,2)
 
       nn=nl**ndim
       nu=nl
@@ -1354,9 +1354,9 @@ c     clobbers r
 
 !$ACC DATA COPY(e,r,s,d)
 !$ACC PARALLEL NUM_GANGS(nelt)
-!$ACC LOOP GANG PRIVATE(work,work2,r_s,d_s,s_s,s_s1,s_s2)
+!$ACC LOOP GANG PRIVATE(work,work2,r_s,d_s,s_s1,s_s2,s_s3)
          do ie=1,nelt
-!$ACC CACHE(r_s,d_s,work,work2,s_s,s_s1,s_s2)
+!$ACC CACHE(r_s,d_s,work,work2,s_s1,s_s2,s_s3)
 !$ACC LOOP COLLAPSE(3) VECTOR
             do k=1,nl
                do j=1,nl
@@ -1372,15 +1372,6 @@ c     clobbers r
                d_s(i) = d(i,ie)
             enddo
 !$ACC LOOP COLLAPSE(3) VECTOR
-            do k=1,ndim
-               do j=1,2
-                  do i=1,nl*nl
-                     s_s(i,j,k) = s(i,j,k,ie)
-                  enddo
-               enddo
-            enddo
-
-!$ACC LOOP COLLAPSE(2) VECTOR
             do l=1,2
                do j=1,nl
                   do i=1,nl
@@ -1388,10 +1379,10 @@ c     clobbers r
                      ji = j + nl*(i-1)
                      s_s1(ij,l) = s(ij,l,1,ie)
                      s_s2(ji,l) = s(ij,l,2,ie)
+                     s_s3(ji,l) = s(ij,l,3,ie)
                   enddo
                enddo
             enddo
-
 !$ACC LOOP VECTOR COLLAPSE(3)
             do j=1,nl
                do l=1,nl
@@ -1445,16 +1436,16 @@ c     clobbers r
             enddo
 !$ACC LOOP SEQ
             do k=1,nl
-!$ACC LOOP VECTOR COLLAPSE(3)
                do j=1,nl
+!$ACC LOOP VECTOR TILE(nl,nl)
                   do l=1,nl
                      do i=1,nl
                         ilj = i + nl*(l-1) + nl*nl*(j-1)
                         ilk = i + nl*(l-1) + nl*nl*(k-1)
-                        kj  = k + nl*(j-1)
+                        jk  = j + nl*(k-1)
                         ! outer/innner
                         r_s(ilj) = 
-     &  r_s(ilj) + d_s(ilj)*work2(ilk)*s_s(kj,1,3)
+     &  r_s(ilj) + d_s(ilj)*work2(ilk)*s_s3(jk,1)
                      enddo
                   enddo
                enddo
@@ -1504,16 +1495,16 @@ c     clobbers r
             enddo
 !$ACC LOOP SEQ
             do k=1,nl
-!$ACC LOOP VECTOR COLLAPSE(3)
                do j=1,nl
+!$ACC LOOP VECTOR TILE(nl,nl)
                   do l=1,nl
                      do i=1,nl
                         ilj = i + nl*(l-1) + nl*nl*(j-1)
                         ilk = i + nl*(l-1) + nl*nl*(k-1)
-                        kj = k + nl*(j-1)
+                        jk = j + nl*(k-1)
                         ! outer/inner
                         e(ilj,ie) = 
-     &  e(ilj,ie) + work2(ilk)*s_s(kj,2,3)
+     &  e(ilj,ie) + work2(ilk)*s_s3(jk,2)
                      enddo
                   enddo
                enddo
