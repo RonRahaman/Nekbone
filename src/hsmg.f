@@ -1329,15 +1329,15 @@ c     clobbers r
       end
 c-----------------------------------------------------------------------
 #ifdef _CUDA
-      attributes(global) subroutine hsmg_cuda(e,r,s,d,nl,ndim,nelt)
+      attributes(global) subroutine hsmg_cuda(e,r,s,d)
       implicit none
+
+      integer, parameter :: nl=10, nelt=2048, ndim=3
 
       real, intent(inout) :: e(nl**ndim,nelt)
       real, intent(inout) :: r(nl**ndim,nelt)
       real, intent(in)    :: s(nl*nl,2,ndim,nelt)
       real, intent(in)    :: d(nl**ndim,nelt)
-      integer, value, intent(in) :: nl, ndim, nelt
-
 
       integer :: ie, i, j, k, l, p, q
       integer :: ijl, ilj, lji, ij
@@ -1350,69 +1350,75 @@ c-----------------------------------------------------------------------
       j = threadIdx%y
       i = threadIdx%x
 
-      ij = i + nl*(j-1)
-      ijl = i + nl*(j-1) + nl*nl*(l-1)
-      ilj = i + nl*(l-1) + nl*nl*(j-1)
-      lji = l + nl*(j-1) + nl*nl*(i-1)
+      if (ie .le. nelt .and. 
+     &    l .le. nl .and.
+     &    j .le. nl .and.
+     &    l .le. nl) then
 
-      work(ijl) = 0.0
-      work2(ijl) = 0.0
+         ij = i + nl*(j-1)
+         ijl = i + nl*(j-1) + nl*nl*(l-1)
+         ilj = i + nl*(l-1) + nl*nl*(j-1)
+         lji = l + nl*(j-1) + nl*nl*(i-1)
 
-      call syncthreads()
+         work(ijl) = 0.0
+         work2(ijl) = 0.0
 
-      do k=1,nl
-         ik = i + nl*(k-1)
-         klj = k + nl*(l-1) + nl*nl*(j-1)
-         work(ilj) = work(ilj) + s(ik,2,1,ie) * r(klj,ie)
-      enddo
+         call syncthreads()
 
-      call syncthreads()
+         do k=1,nl
+            ik = i + nl*(k-1)
+            klj = k + nl*(l-1) + nl*nl*(j-1)
+            work(ilj) = work(ilj) + s(ik,2,1,ie) * r(klj,ie)
+         enddo
 
-      do k=1,nl
-         lki = l + nl*(k-1) + nl*nl*(i-1)
-         kj = k + nl*(j-1)
-         work2(lji) = work2(lji) + work(lki)*s(kj,1,2,ie)
-      enddo
+         call syncthreads()
 
-      call syncthreads()
+         do k=1,nl
+            lki = l + nl*(k-1) + nl*nl*(i-1)
+            kj = k + nl*(j-1)
+            work2(lji) = work2(lji) + work(lki)*s(kj,1,2,ie)
+         enddo
 
-      r(ilj,ie) = 0.0
-      work(ilj) = 0.0
+         call syncthreads()
 
-      call syncthreads()
+         r(ilj,ie) = 0.0
+         work(ilj) = 0.0
 
-      do k=1,nl
-         ilk = i + nl*(l-1) + nl*nl*(k-1)
-         kj = k + nl*(j-1)
-         r(ilj,ie) = r(ilj,ie) + d(ilj,ie)*work2(ilk)*s(kj,1,3,ie)
-      enddo
+         call syncthreads()
 
-      call syncthreads()
+         do k=1,nl
+            ilk = i + nl*(l-1) + nl*nl*(k-1)
+            kj = k + nl*(j-1)
+            r(ilj,ie) = r(ilj,ie) + d(ilj,ie)*work2(ilk)*s(kj,1,3,ie)
+         enddo
 
-      do k=1,nl
-         ik = i + nl*(k-1)
-         kjl = k + nl*(j-1) + nl*nl*(l-1)
-         work(ijl) = work(ijl) + s(ik,1,1,ie) * r(kjl,ie)
-      enddo
+         call syncthreads()
 
-      work2(ilj) = 0.0
-      e(ilj,ie) = 0.0
+         do k=1,nl
+            ik = i + nl*(k-1)
+            kjl = k + nl*(j-1) + nl*nl*(l-1)
+            work(ijl) = work(ijl) + s(ik,1,1,ie) * r(kjl,ie)
+         enddo
 
-      call syncthreads()
+         work2(ilj) = 0.0
+         e(ilj,ie) = 0.0
 
-      do k=1,nl
-         lki = l + nl*(k-1) + nl*nl*(i-1)
-         kj = k + nl*(j-1)
-         work2(lji) = work2(lji) + work(lki)*s(kj,2,2,ie)
-      enddo
+         call syncthreads()
 
-      call syncthreads()
+         do k=1,nl
+            lki = l + nl*(k-1) + nl*nl*(i-1)
+            kj = k + nl*(j-1)
+            work2(lji) = work2(lji) + work(lki)*s(kj,2,2,ie)
+         enddo
 
-      do k=1,nl
-         ilk = i + nl*(l-1) + nl*nl*(k-1)
-         kj = k + nl*(j-1)
-         e(ilj,ie) = e(ilj,ie) + work2(ilk)*s(kj,2,3,ie)
-      enddo
+         call syncthreads()
+
+         do k=1,nl
+            ilk = i + nl*(l-1) + nl*nl*(k-1)
+            kj = k + nl*(j-1)
+            e(ilj,ie) = e(ilj,ie) + work2(ilk)*s(kj,2,3,ie)
+         enddo
+      endif
 
       end subroutine
 #endif
@@ -1434,49 +1440,41 @@ c     clobbers r
 
 #ifdef _CUDA
       integer, device :: nl_d, ndim_d, nelt_d
-      real, device, allocatable :: 
-     &   e_d(:,:), r_d(:,:), s_d(:,:,:,:), d_d(:,:)
+      real, device :: 
+     &   e_d(1024,2048), 
+     &   r_d(1024,2048), 
+     &   s_d(128,2,4,2048), 
+     &   d_d(1024,2048)
 
-      allocate(e_d(nl**ndim,nelt),stat=istat)
+      istat = cudaMemcpy(e_d, e, nl*nl*nl*nelt)
       if (istat .ne. cudaSuccess) then
-         write (*,*) 'alloc e_d error:', 
+         write (*,*) 'memcpy e_d error:', 
      &      cudaGetErrorString(istat)
       endif
 
-      allocate(r_d(nl**ndim,nelt),stat=istat)
+      istat = cudaMemcpy(r_d, r, nl*nl*nl*nelt)
       if (istat .ne. cudaSuccess) then
-         write (*,*) 'alloc r_d error:', 
+         write (*,*) 'memcpy r_d error:', 
      &      cudaGetErrorString(istat)
       endif
 
-      allocate(s_d(nl*nl,2,ndim,nelt),stat=istat)
+      istat = cudaMemcpy(s_d, s, nl*nl*2*3*nelt)
       if (istat .ne. cudaSuccess) then
-         write (*,*) 'alloc r_d error:', 
+         write (*,*) 'memcpy s_d error:', 
      &      cudaGetErrorString(istat)
       endif
 
-      allocate(d_d(nl**ndim,nelt),stat=istat)
+      istat = cudaMemcpy(d_d, d, nl*nl*nl*nelt)
       if (istat .ne. cudaSuccess) then
-         write (*,*) 'alloc d_d error:', 
+         write (*,*) 'memcpy d_d error:', 
      &      cudaGetErrorString(istat)
       endif
-
-      nl_d = nl
-      ndim_d = ndim
-      nelt_d = nelt
-      e_d = e
-      r_d = r
-      s_d = s
-      d_d = d
 
       call hsmg_cuda<<<dim3(nelt,1,1), dim3(nl,nl,nl)>>>(
      &   e_d, 
      &   r_d, 
      &   s_d, 
-     &   d_d,
-     &   nl,
-     &   ndim,
-     &   nelt)
+     &   d_d)
 
       ! See Ruetsch and Fatica, CUDA Fortran for Scientists and
       ! Engineers, Ch 1.5
@@ -1494,10 +1492,29 @@ c     clobbers r
      &      cudaGetErrorString(ierrAsync)
       endif
 
-      deallocate(e_d)
-      deallocate(r_d)
-      deallocate(s_d)
-      deallocate(d_d)
+      istat = cudaMemcpy(e, e_d, nl*nl*nl*nelt)
+      if (istat .ne. cudaSuccess) then
+         write (*,*) 'memcpy e_d error:', 
+     &      cudaGetErrorString(istat)
+      endif
+
+      istat = cudaMemcpy(r, r_d, nl*nl*nl*nelt)
+      if (istat .ne. cudaSuccess) then
+         write (*,*) 'memcpy r_d error:', 
+     &      cudaGetErrorString(istat)
+      endif
+
+      istat = cudaMemcpy(s, s_d, nl*nl*2*3*nelt)
+      if (istat .ne. cudaSuccess) then
+         write (*,*) 'memcpy s_d error:', 
+     &      cudaGetErrorString(istat)
+      endif
+
+      istat = cudaMemcpy(d, d_d, nl*nl*nl*nelt)
+      if (istat .ne. cudaSuccess) then
+         write (*,*) 'memcpy d_d error:', 
+     &      cudaGetErrorString(istat)
+      endif
 #else
 
       real work(0:(nl+2)**ndim-1), 
