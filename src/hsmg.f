@@ -1341,16 +1341,16 @@ c     clobbers r
       real tmp
 
       real work(1024), work2(1024)
-      real r_s(1024), d_s(1024)
+      real r_s(1024)
       real s_s1(128,2)
       real s_s2(128,2)
       real s_s3(128,2)
 
 !$ACC DATA COPY(e,r,s,d)
 !$ACC PARALLEL NUM_GANGS(nelt)
-!$ACC LOOP GANG PRIVATE(work,work2,r_s,d_s,s_s1,s_s2,s_s3)
+!$ACC LOOP GANG PRIVATE(work,work2,r_s,s_s1,s_s2,s_s3)
          do ie=1,nelt
-!$ACC CACHE(r_s,d_s,work,work2,s_s1,s_s2,s_s3)
+!$ACC CACHE(r_s,work,work2,s_s1,s_s2,s_s3)
 !$ACC LOOP COLLAPSE(3) VECTOR
             do k=1,nl
                do j=1,nl
@@ -1363,7 +1363,6 @@ c     clobbers r
             enddo
 !$ACC LOOP VECTOR
             do k=1,nl*nl*nl
-               d_s(k) = d(k,ie)
                work(k) = 0.0
                work2(k) = 0.0
             enddo
@@ -1426,7 +1425,7 @@ c     clobbers r
                         jk  = j + nl*(k-1)
                         ! outer/innner
                         r_s(ilj) = 
-     &  r_s(ilj) + d_s(ilj)*work2(ilk)*s_s3(jk,1)
+     &  r_s(ilj) + d(ilj,ie)*work2(ilk)*s_s3(jk,1)
                      enddo
                   enddo
                enddo
