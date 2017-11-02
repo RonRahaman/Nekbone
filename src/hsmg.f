@@ -1347,7 +1347,7 @@ c     clobbers r
       real s_s3(128,2)
 
 !$ACC DATA COPY(e,r,s,d)
-!$ACC PARALLEL NUM_GANGS(nelt)
+!$ACC PARALLEL NUM_GANGS(nelt) VECTOR_LENGTH(1024)
 !$ACC LOOP GANG PRIVATE(work,work2,r_s,s_s1,s_s2,s_s3)
          do ie=1,nelt
 !$ACC CACHE(r_s,work,work2,s_s1,s_s2,s_s3)
@@ -1380,8 +1380,8 @@ c     clobbers r
             enddo
 !$ACC LOOP SEQ
             do k=1,nl
+!$ACC LOOP COLLAPSE(3) VECTOR
                do j=1,nl
-!$ACC LOOP VECTOR TILE(nl,nl)
                   do l=1,nl
                      do i=1,nl
                         ilj = i + nl*(l-1) + nl*nl*(j-1)
@@ -1395,8 +1395,8 @@ c     clobbers r
             enddo
 !$ACC LOOP SEQ
             do k=1,nl
+!$ACC LOOP COLLAPSE(3) VECTOR
                do i=1,nl
-!$ACC LOOP VECTOR TILE(nl,nl)
                   do j=1,nl
                      do l=1,nl
                         lji = l + nl*(j-1) + nl*nl*(i-1)
@@ -1416,8 +1416,8 @@ c     clobbers r
             enddo
 !$ACC LOOP SEQ
             do k=1,nl
+!$ACC LOOP COLLAPSE(3) VECTOR
                do j=1,nl
-!$ACC LOOP VECTOR TILE(nl,nl)
                   do l=1,nl
                      do i=1,nl
                         ilj = i + nl*(l-1) + nl*nl*(j-1)
@@ -1433,8 +1433,8 @@ c     clobbers r
 
 !$ACC LOOP SEQ
             do k=1,nl
+!$ACC LOOP COLLAPSE(3) VECTOR
                do l=1,nl
-!$ACC LOOP VECTOR TILE(nl,nl)
                   do j=1,nl
                      do i=1,nl
                         ijl = i + nl*(j-1) + nl*nl*(l-1)
@@ -1454,8 +1454,8 @@ c     clobbers r
             enddo
 !$ACC LOOP SEQ
             do k=1,nl
+!$ACC LOOP COLLAPSE(3) VECTOR
                do i=1,nl
-!$ACC LOOP TILE(nl,nl)
                   do j=1,nl
                      do l=1,nl
                         lji = l + nl*(j-1) + nl*nl*(i-1)
@@ -1470,8 +1470,8 @@ c     clobbers r
             enddo
 !$ACC LOOP SEQ
             do k=1,nl
+!$ACC LOOP COLLAPSE(3) VECTOR
                do j=1,nl
-!$ACC LOOP VECTOR TILE(nl,nl)
                   do l=1,nl
                      do i=1,nl
                         ilj = i + nl*(l-1) + nl*nl*(j-1)
