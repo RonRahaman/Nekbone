@@ -1291,19 +1291,19 @@ c     clobbers r
       include 'SIZE'
       include 'HSMG'
 #ifdef _OPENACC
-      if (mg_nh(l)+2 .eq. 10 .and. ldim .eq. 3) then
-      call h1mg_do_fast_acc_nl10_ndim3(e,r,
-     $      mg_fast_s(mg_fast_s_index(l,mg_fld)),
-     $      mg_fast_d(mg_fast_d_index(l,mg_fld)))
-c     call h1mg_do_fast_acc(e,r,
-c    $      mg_fast_s(mg_fast_s_index(l,mg_fld)),
-c    $      mg_fast_d(mg_fast_d_index(l,mg_fld)),
-c    $      mg_nh(l)+2)
+      if (mg_nh(l)+2 .eq. 6 .and. ldim .eq. 3) then
+         call h1mg_do_fast_acc_nl6_ndim3(e,r,
+     $         mg_fast_s(mg_fast_s_index(l,mg_fld)),
+     $         mg_fast_d(mg_fast_d_index(l,mg_fld)))
+      elseif (mg_nh(l)+2 .eq. 10 .and. ldim .eq. 3) then
+         call h1mg_do_fast_acc_nl10_ndim3(e,r,
+     $         mg_fast_s(mg_fast_s_index(l,mg_fld)),
+     $         mg_fast_d(mg_fast_d_index(l,mg_fld)))
       else
-      call h1mg_do_fast_acc(e,r,
-     $      mg_fast_s(mg_fast_s_index(l,mg_fld)),
-     $      mg_fast_d(mg_fast_d_index(l,mg_fld)),
-     $      mg_nh(l)+2)
+         call h1mg_do_fast_acc(e,r,
+     $         mg_fast_s(mg_fast_s_index(l,mg_fld)),
+     $         mg_fast_d(mg_fast_d_index(l,mg_fld)),
+     $         mg_nh(l)+2)
       endif
 #else
       call h1mg_do_fast(e,r,
@@ -1354,6 +1354,8 @@ c-----------------------------------------------------------------------
       real s_s1(128,2)
       real s_s2(128,2)
       real s_s3(128,2)
+
+      write(*,*) nl
 
 !$ACC DATA COPY(e,r,s,d)
 !$ACC PARALLEL NUM_GANGS(nelt) VECTOR_LENGTH(1024)
@@ -1486,6 +1488,167 @@ c-----------------------------------------------------------------------
                         ilj = i + nl*(l-1) + nl*nl*(j-1)
                         ilk = i + nl*(l-1) + nl*nl*(k-1)
                         jk = j + nl*(k-1)
+                        ! outer/inner
+                        e(ilj,ie) = 
+     &  e(ilj,ie) + work2(ilk)*s_s3(jk,2)
+                     enddo
+                  enddo
+               enddo
+            enddo
+         enddo
+!$ACC END PARALLEL
+!$ACC END DATA
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine h1mg_do_fast_acc_nl6_ndim3(e,r,s,d)
+      include 'SIZE'
+      real e(216,nelt)
+      real r(216,nelt)
+      real s(36,2,ndim,nelt)
+      real d(216,nelt)
+
+      integer ie,nn,i,j,k,l,i0,j0,k0,je,nu,nv,lwk
+      real tmp
+
+      real work(256), work2(256)
+      real r_s(256)
+      real s_s1(64,2)
+      real s_s2(64,2)
+      real s_s3(64,2)
+
+!$ACC DATA COPY(e,r,s,d)
+!$ACC PARALLEL NUM_GANGS(nelt) VECTOR_LENGTH(256)
+!$ACC LOOP GANG PRIVATE(work,work2,r_s,s_s1,s_s2,s_s3)
+         do ie=1,nelt
+!$ACC CACHE(r_s,work,work2,s_s1,s_s2,s_s3)
+!$ACC LOOP COLLAPSE(3) VECTOR
+            do k=1,6
+               do j=1,6
+                  do l=1,6
+                     ljk = l + 6*(j-1) + 36*(k-1)
+                     klj = k + 6*(l-1) + 36*(j-1)
+                     r_s(ljk) = r(klj,ie)
+                  enddo
+               enddo
+            enddo
+!$ACC LOOP VECTOR
+            do k=1,216
+               work(k) = 0.0
+               work2(k) = 0.0
+            enddo
+!$ACC LOOP COLLAPSE(3) VECTOR
+            do l=1,2
+               do j=1,6
+                  do i=1,6
+                     ij = i + 6*(j-1)
+                     ji = j + 6*(i-1)
+                     s_s1(ij,l) = s(ij,l,1,ie)
+                     s_s2(ji,l) = s(ij,l,2,ie)
+                     s_s3(ji,l) = s(ij,l,3,ie)
+                  enddo
+               enddo
+            enddo
+!$ACC LOOP SEQ
+            do k=1,6
+!$ACC LOOP COLLAPSE(3) VECTOR
+               do j=1,6
+                  do l=1,6
+                     do i=1,6
+                        ilj = i + 6*(l-1) + 36*(j-1)
+                        ik = i + 6*(k-1)
+                        ljk = l + 6*(j-1) + 36*(k-1)
+                        ! inner/outer
+                        work(ilj) = work(ilj) + s_s1(ik,2) * r_s(ljk)
+                     enddo
+                  enddo
+               enddo
+            enddo
+!$ACC LOOP SEQ
+            do k=1,6
+!$ACC LOOP COLLAPSE(3) VECTOR
+               do i=1,6
+                  do j=1,6
+                     do l=1,6
+                        lji = l + 6*(j-1) + 36*(i-1)
+                        lki = l + 6*(k-1) + 36*(i-1)
+                        jk = j + 6*(k-1)
+                        ! outer/inner
+                        work2(lji) = work2(lji) + work(lki)*s_s2(jk,1)
+                     enddo
+                  enddo
+               enddo
+            enddo
+
+!$ACC LOOP VECTOR
+            do k=1,216
+               r_s(k) = 0.0
+               work(k) = 0.0
+            enddo
+!$ACC LOOP SEQ
+            do k=1,6
+!$ACC LOOP COLLAPSE(3) VECTOR
+               do j=1,6
+                  do l=1,6
+                     do i=1,6
+                        ilj = i + 6*(l-1) + 36*(j-1)
+                        ilk = i + 6*(l-1) + 36*(k-1)
+                        jk  = j + 6*(k-1)
+                        ! outer/innner
+                        r_s(ilj) = 
+     &  r_s(ilj) + d(ilj,ie)*work2(ilk)*s_s3(jk,1)
+                     enddo
+                  enddo
+               enddo
+            enddo
+
+!$ACC LOOP SEQ
+            do k=1,6
+!$ACC LOOP COLLAPSE(3) VECTOR
+               do l=1,6
+                  do j=1,6
+                     do i=1,6
+                        ijl = i + 6*(j-1) + 36*(l-1)
+                        ik = i + 6*(k-1)
+                        kjl = k + 6*(j-1) + 36*(l-1)
+                        ! inner/outer
+                        work(ijl) = work(ijl) + s_s1(ik,1) * r_s(kjl)
+                     enddo
+                  enddo
+               enddo
+            enddo
+
+!$ACC LOOP VECTOR
+            do k=1,216
+               work2(k) = 0.0
+               e(k,ie) = 0.0
+            enddo
+!$ACC LOOP SEQ
+            do k=1,6
+!$ACC LOOP COLLAPSE(3) VECTOR
+               do i=1,6
+                  do j=1,6
+                     do l=1,6
+                        lji = l + 6*(j-1) + 36*(i-1)
+                        lki = l + 6*(k-1) + 36*(i-1)
+                        jk = j + 6*(k-1)
+                        ! outer/inner
+                        work2(lji) = 
+     &  work2(lji) + work(lki)*s_s2(jk,2)
+                     enddo
+                  enddo
+               enddo
+            enddo
+!$ACC LOOP SEQ
+            do k=1,6
+!$ACC LOOP COLLAPSE(3) VECTOR
+               do j=1,6
+                  do l=1,6
+                     do i=1,6
+                        ilj = i + 6*(l-1) + 36*(j-1)
+                        ilk = i + 6*(l-1) + 36*(k-1)
+                        jk = j + 6*(k-1)
                         ! outer/inner
                         e(ilj,ie) = 
      &  e(ilj,ie) + work2(ilk)*s_s3(jk,2)
