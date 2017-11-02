@@ -1368,8 +1368,10 @@ c     clobbers r
                enddo
             enddo
 !$ACC LOOP VECTOR
-            do i=1,nl**ndim
-               d_s(i) = d(i,ie)
+            do k=1,nl*nl*nl
+               d_s(k) = d(k,ie)
+               work(k) = 0.0
+               work2(k) = 0.0
             enddo
 !$ACC LOOP COLLAPSE(3) VECTOR
             do l=1,2
@@ -1380,16 +1382,6 @@ c     clobbers r
                      s_s1(ij,l) = s(ij,l,1,ie)
                      s_s2(ji,l) = s(ij,l,2,ie)
                      s_s3(ji,l) = s(ij,l,3,ie)
-                  enddo
-               enddo
-            enddo
-!$ACC LOOP VECTOR COLLAPSE(3)
-            do j=1,nl
-               do l=1,nl
-                  do i=1,nl
-                     ilj = i + nl*(l-1) + nl*nl*(j-1)
-                     work(ilj) = 0.0
-                     work2(ilj) = 0.0
                   enddo
                enddo
             enddo
@@ -1424,15 +1416,10 @@ c     clobbers r
                enddo
             enddo
 
-!$ACC LOOP VECTOR COLLAPSE(3)
-            do j=1,nl
-               do l=1,nl
-                  do i=1,nl
-                     ilj = i + nl*(l-1) + nl*nl*(j-1)
-                     r_s(ilj) = 0.0
-                     work(ilj) = 0.0
-                  enddo
-               enddo
+!$ACC LOOP VECTOR
+            do k=1,nl*nl*nl
+               r_s(k) = 0.0
+               work(k) = 0.0
             enddo
 !$ACC LOOP SEQ
             do k=1,nl
@@ -1467,15 +1454,10 @@ c     clobbers r
                enddo
             enddo
 
-!$ACC LOOP VECTOR COLLAPSE(3)
-            do j=1,nl
-               do l=1,nl
-                  do i=1,nl
-                     ilj = i + nl*(l-1) + nl*nl*(j-1)
-                     work2(ilj) = 0.0
-                     e(ilj,ie) = 0.0
-                  enddo
-               enddo
+!$ACC LOOP VECTOR
+            do k=1,nl*nl*nl
+               work2(k) = 0.0
+               e(k,ie) = 0.0
             enddo
 !$ACC LOOP SEQ
             do k=1,nl
