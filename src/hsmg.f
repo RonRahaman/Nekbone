@@ -1340,17 +1340,11 @@ c     clobbers r
       integer ie,nn,i,j,k,l,i0,j0,k0,je,nu,nv,lwk
       real tmp
 
-      real work(0:(nl+2)**ndim-1), 
-     &     work2(0:(nl+2)**ndim-1)
-      real r_s(nl**ndim), d_s(nl**ndim)
-      real s_s1(nl*nl,2)
-      real s_s2(nl*nl,2)
-      real s_s3(nl*nl,2)
-
-      nn=nl**ndim
-      nu=nl
-      nv=nl
-
+      real work(1024), work2(1024)
+      real r_s(1024), d_s(1024)
+      real s_s1(128,2)
+      real s_s2(128,2)
+      real s_s3(128,2)
 
 !$ACC DATA COPY(e,r,s,d)
 !$ACC PARALLEL NUM_GANGS(nelt)
