@@ -398,7 +398,7 @@ c-----------------------------------------------------------------------
       lt = nx1*ny1*nz1*nelt
 
 !$acc host_data use_device(w,u,gxyz,ur,us,ut,dxm1)
-      call ax_cuf<<<nelt,dim3(nx1,ny1,1),3*(lx1+1)*lx1>>>(
+      call ax_cuf<<<nelt,dim3(nx1,ny1,1),24*(lx1+1)*lx1>>>(
      $   w,u,ur,us,ut,gxyz,dxm1)
 !$acc end host_data
             
