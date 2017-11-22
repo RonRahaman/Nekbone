@@ -368,6 +368,8 @@ c  1  format(7i7,a8)
 c-----------------------------------------------------------------------
       subroutine ax_acc(w,u,gxyz,ur,us,ut,wk,n) ! Matrix-vector product: w=A*u
 
+      use cudafor
+
       include 'SIZE'
       include 'TOTAL'
 
@@ -394,82 +396,86 @@ c-----------------------------------------------------------------------
       integer cuda_err
 
       lt = nx1*ny1*nz1*nelt
-            
-!$acc parallel num_gangs(lelt) 
-!$acc&         present(w,u,gxyz,ur,us,ut,dxm1)
 
-!$acc loop gang private(s_d,s_u_ur,s_us)
-            do e = 1,lelt
-!$acc cache(s_d,s_u_ur,s_us)
-!$acc loop vector tile(lx1,ly1)
-               do j=1,ly1
-                  do i=1,lx1
-                     ! To avoid bank conflicts, s_d is declared as:
-                     !    real s_d(lx1+1,lx1)
-                     s_d(i,j) = dxm1(i,j)
-                  enddo !i
-               enddo !j
-!$acc loop seq
-               do k=1,lz1
-!$acc loop vector tile(lx1,ly1)
-                  do j=1,ly1
-                     do i=1,lx1
-                        s_u_ur(i,j) = u(i,j,k,e)
-                     enddo !i
-                  enddo !j
-!$acc loop vector tile(lx1,ly1) private(wr,ws,wt)
-                  do j=1,ly1
-                     do i=1,lx1
-                        wr = 0
-                        ws = 0
-                        wt = 0
-!$acc loop seq
-                        do l=1,lx1
-                           wr = wr + s_d(i,l)*s_u_ur(l,j)
-                           ws = ws + s_d(j,l)*s_u_ur(i,l)
-                           wt = wt + s_d(k,l)*u(i,j,l,e)
-                        enddo !l
-                        s_u_ur(i,j) = gxyz(i,j,k,1,e)*wr
-     $                              + gxyz(i,j,k,2,e)*ws
-     $                              + gxyz(i,j,k,3,e)*wt
-                        s_us(i,j)   = gxyz(i,j,k,2,e)*wr
-     $                              + gxyz(i,j,k,4,e)*ws
-     $                              + gxyz(i,j,k,5,e)*wt
-                        ut(i,j,k,e) = gxyz(i,j,k,3,e)*wr
-     $                              + gxyz(i,j,k,5,e)*ws
-     $                              + gxyz(i,j,k,6,e)*wt
-                     enddo !i
-                  enddo !j
-!$acc loop vector tile(lx1,ly1) private(wtemp)
-                  do j=1,ly1
-                     do i=1,lx1
-                        wtemp = 0.0
-!$acc loop seq
-                        do l=1,lx1
-                           wtemp = wtemp 
-     $                           + s_d(l,i)*s_u_ur(l,j)
-     $                           + s_d(l,j)*s_us(i,l)
-                        enddo !l
-                        w(i,j,k,e) = wtemp
-                     enddo !i
-                  enddo !j
-               enddo !k
-!$acc loop seq
-               do k=1,lz1
-!$acc loop vector tile(lx1,ly1) private(wtemp)
-                  do j=1,ly1
-                     do i=1,lx1
-                        wtemp = w(i,j,k,e)
-!$acc loop seq
-                        do l=1,lx1
-                           wtemp = wtemp + s_d(l,k)*ut(i,j,l,e)
-                        enddo !l
-                        w(i,j,k,e) = wtemp
-                     enddo !i
-                  enddo !j
-               enddo !k
-            enddo !e
-!$acc end parallel
+!$acc host_data use_device(w,u,gxyz,ur,us,ut,dxm1)
+      call ax_cuf<<<nelt,dim3(nx1,ny1,1)>>>(w,u,ur,us,ut,gxyz,dxm1)
+!$acc end host_data
+            
+c !$acc parallel num_gangs(lelt) 
+c !$acc&         present(w,u,gxyz,ur,us,ut,dxm1)
+c 
+c !$acc loop gang private(s_d,s_u_ur,s_us)
+c             do e = 1,lelt
+c !$acc cache(s_d,s_u_ur,s_us)
+c !$acc loop vector tile(lx1,ly1)
+c                do j=1,ly1
+c                   do i=1,lx1
+c                      ! To avoid bank conflicts, s_d is declared as:
+c                      !    real s_d(lx1+1,lx1)
+c                      s_d(i,j) = dxm1(i,j)
+c                   enddo !i
+c                enddo !j
+c !$acc loop seq
+c                do k=1,lz1
+c !$acc loop vector tile(lx1,ly1)
+c                   do j=1,ly1
+c                      do i=1,lx1
+c                         s_u_ur(i,j) = u(i,j,k,e)
+c                      enddo !i
+c                   enddo !j
+c !$acc loop vector tile(lx1,ly1) private(wr,ws,wt)
+c                   do j=1,ly1
+c                      do i=1,lx1
+c                         wr = 0
+c                         ws = 0
+c                         wt = 0
+c !$acc loop seq
+c                         do l=1,lx1
+c                            wr = wr + s_d(i,l)*s_u_ur(l,j)
+c                            ws = ws + s_d(j,l)*s_u_ur(i,l)
+c                            wt = wt + s_d(k,l)*u(i,j,l,e)
+c                         enddo !l
+c                         s_u_ur(i,j) = gxyz(i,j,k,1,e)*wr
+c      $                              + gxyz(i,j,k,2,e)*ws
+c      $                              + gxyz(i,j,k,3,e)*wt
+c                         s_us(i,j)   = gxyz(i,j,k,2,e)*wr
+c      $                              + gxyz(i,j,k,4,e)*ws
+c      $                              + gxyz(i,j,k,5,e)*wt
+c                         ut(i,j,k,e) = gxyz(i,j,k,3,e)*wr
+c      $                              + gxyz(i,j,k,5,e)*ws
+c      $                              + gxyz(i,j,k,6,e)*wt
+c                      enddo !i
+c                   enddo !j
+c !$acc loop vector tile(lx1,ly1) private(wtemp)
+c                   do j=1,ly1
+c                      do i=1,lx1
+c                         wtemp = 0.0
+c !$acc loop seq
+c                         do l=1,lx1
+c                            wtemp = wtemp 
+c      $                           + s_d(l,i)*s_u_ur(l,j)
+c      $                           + s_d(l,j)*s_us(i,l)
+c                         enddo !l
+c                         w(i,j,k,e) = wtemp
+c                      enddo !i
+c                   enddo !j
+c                enddo !k
+c !$acc loop seq
+c                do k=1,lz1
+c !$acc loop vector tile(lx1,ly1) private(wtemp)
+c                   do j=1,ly1
+c                      do i=1,lx1
+c                         wtemp = w(i,j,k,e)
+c !$acc loop seq
+c                         do l=1,lx1
+c                            wtemp = wtemp + s_d(l,k)*ut(i,j,l,e)
+c                         enddo !l
+c                         w(i,j,k,e) = wtemp
+c                      enddo !i
+c                   enddo !j
+c                enddo !k
+c             enddo !e
+c !$acc end parallel
 
 #ifdef GPUDIRECT
       call dssum(w)         ! Gather-scatter operation  ! w   = QQ  w

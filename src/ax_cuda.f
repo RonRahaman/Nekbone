@@ -1,104 +1,74 @@
 #ifdef _CUDA
-
-      attributes(global) subroutine ax_cuf2(w,u,ur,us,ut,
-     &                gxyz,dxm1,dxtm1)
+      attributes(global) subroutine ax_cuf(
+     $   w,u,ur,us,ut,gxyz,dxm1)
 
       include 'SIZE'
 
-      real, intent(out) :: w(lx1,ly1,lz1,lelt)
-      real u(lx1,ly1,lz1,lelt)
-      real ur  (lx1,ly1,lz1,lelt)
-      real us  (lx1,ly1,lz1,lelt)
-      real ut  (lx1,ly1,lz1,lelt)
+      real :: w(lx1,ly1,lz1,lelt)
+      real :: u(lx1,ly1,lz1,lelt)
+      real :: ur  (lx1,ly1,lz1,lelt)
+      real :: us  (lx1,ly1,lz1,lelt)
+      real :: ut  (lx1,ly1,lz1,lelt)
+      real :: gxyz(lx1,ly1,lz1,2*ldim,lelt)
+      real :: dxm1(lx1,lx1)
 
-      real gxyz(lx1,ly1,lz1,2*ldim,lelt)
+      real, shared :: s_d(lx1+1,lx1)
+      real, shared :: s_u_ur(lx1+1,lx1)
+      real, shared :: s_us(lx1+1,lx1)
 
-      real, intent(in) :: dxm1(lx1,lx1)
-      real, intent(in) :: dxtm1(lx1,lx1)
+      real :: wr, ws, wt, wtemp
+      integer :: e, i, j, k, l
 
-      real rtmp,stmp,ttmp,wijke
-      real, shared :: shdxm1(lx1,ly1)
-      real, shared :: shdxtm1(lx1,ly1)
-      integer l,e,i,j,k,kk,n,nstrides
+      e = blockIdx % x
+      i = threadIdx % x
+      j = threadIdx % y
 
-      e = blockIdx%x
-      k = threadIdx%z
-      j = threadIdx%y
-      i = threadIdx%x
+      s_d(i,j) = dxm1(i,j)
 
-      if (k.eq.1) then
-         shdxm1(i,j) = dxm1(i,j)
-         shdxtm1(i,j) = dxtm1(i,j)
-      end if
-      call syncthreads()
+      do k=1,lz1
 
-c Figure out how many strided accesses that this block needs to perform
-      nstrides = lz1 / blockDim%z
-      if (mod(lz1, blockDim%z) .gt. 0) then
-        nstrides = nstrides + 1
-      endif
+         s_u_ur(i,j) = u(i,j,k,e)
 
-c Perform the strided accesses.  Each thread in the block proceeds in
-c lockstep.
-      kk = k
-      do n = 1, nstrides
-        if (kk .le. lz1) then
-          rtmp = 0.0
-          stmp = 0.0
-          ttmp = 0.0
-          do l = 1, lx1
-            rtmp = rtmp + shdxm1(i,l)  * u(l,j,kk,e)
-            stmp = stmp + shdxm1(j,l)  * u(i,l,kk,e)
-            ttmp = ttmp + shdxm1(kk,l) * u(i,j,l,e)
-          enddo
-          ur(i,j,kk,e) = gxyz(i,j,kk,1,e)*rtmp
-     $                 + gxyz(i,j,kk,2,e)*stmp
-     $                 + gxyz(i,j,kk,3,e)*ttmp
-          us(i,j,kk,e) = gxyz(i,j,kk,2,e)*rtmp
-     $                 + gxyz(i,j,kk,4,e)*stmp
-     $                 + gxyz(i,j,kk,5,e)*ttmp
-          ut(i,j,kk,e) = gxyz(i,j,kk,3,e)*rtmp
-     $                 + gxyz(i,j,kk,5,e)*stmp
-     $                 + gxyz(i,j,kk,6,e)*ttmp
-        endif
-        kk = kk + blockDim%z
-c       rahaman 2017-03-31: The optimized kernels (e.g.nek_kernel16.cuf)
-c       called synchthreads after each strided access.  I don't believe
-c       this is necessary.  When I omit the thread sync, I see no
-c       runtime erros and the solution matches CPU version
-c       call syncthreads()
+         call syncthreads()
+
+         wr = 0.0
+         ws = 0.0
+         wt = 0.0
+         do l=1,lx1
+            wr = wr + s_d(i,l)*s_u_ur(l,j)
+            ws = ws + s_d(j,l)*s_u_ur(i,l)
+            wt = wt + s_d(k,l)*u(i,j,l,e)
+         enddo
+         s_u_ur(i,j) = gxyz(i,j,k,1,e)*wr
+     $               + gxyz(i,j,k,2,e)*ws
+     $               + gxyz(i,j,k,3,e)*wt
+         s_us(i,j)   = gxyz(i,j,k,2,e)*wr
+     $               + gxyz(i,j,k,4,e)*ws
+     $               + gxyz(i,j,k,5,e)*wt
+         ut(i,j,k,e) = gxyz(i,j,k,3,e)*wr
+     $               + gxyz(i,j,k,5,e)*ws
+     $               + gxyz(i,j,k,6,e)*wt
+         
+         call syncthreads()
+
+         wtemp = 0.0
+         do l=1,lx1
+            wtemp = wtemp 
+     $            + s_d(l,i)*s_u_ur(l,j)
+     $            + s_d(l,j)*s_us(i,l)
+         enddo
+         w(i,j,k,e) = wtemp
+
+         call syncthreads()
+
+         wtemp = w(i,j,k,e)
+         do l=1,lx1
+            wtemp = wtemp + s_d(l,k)*ut(i,j,l,e)
+         enddo
+         w(i,j,k,e) = wtemp
+
       enddo
 
-      call syncthreads()
-
-      kk = k
-      do n = 1, nstrides
-        if (kk .le. lz1) then
-          wijke = 0.0
-          do l = 1, lx1
-            wijke = wijke + shdxtm1(i,l)  * ur(l,j,kk,e) 
-     $                    + shdxtm1(j,l)  * us(i,l,kk,e)
-     $                    + shdxtm1(kk,l) * ut(i,j,l,e)
-          enddo
-          w(i,j,kk,e) = wijke
-        endif
-        kk = kk + blockDim%z
-c       rahaman 2017-03-31: The optimized kernels (e.g.nek_kernel16.cuf)
-c       called synchthreads after each strided access.  I don't believe
-c       this is necessary.  When I omit the thread sync, I see no
-c       runtime erros and the solution matches CPU version
-c       call syncthreads()
-      enddo
-
-      return
-      end
-
-#else
-
-      subroutine ax_cuf2(w,u,ur,us,ut,gxyz,dxm1,dxtm1)
-        call err_chk(
-     $ 'ERROR: Called ax_cuf2 but did not compile with CUDA')
-      return
-      end
+      end subroutine
 
 #endif
