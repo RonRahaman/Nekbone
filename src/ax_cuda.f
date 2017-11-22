@@ -4,13 +4,13 @@
 
       include 'SIZE'
 
-      real :: w(lx1,ly1,lz1,lelt)
-      real :: u(lx1,ly1,lz1,lelt)
-      real :: ur  (lx1,ly1,lz1,lelt)
-      real :: us  (lx1,ly1,lz1,lelt)
-      real :: ut  (lx1,ly1,lz1,lelt)
-      real :: gxyz(lx1,ly1,lz1,2*ldim,lelt)
-      real :: dxm1(lx1,lx1)
+      real, intent(out) :: w(lx1,ly1,lz1,lelt)
+      real, intent(in) :: u(lx1,ly1,lz1,lelt)
+      real, intent(in) :: ur  (lx1,ly1,lz1,lelt)
+      real, intent(in) :: us  (lx1,ly1,lz1,lelt)
+      real, intent(in) :: ut  (lx1,ly1,lz1,lelt)
+      real, intent(in) :: gxyz(lx1,ly1,lz1,2*ldim,lelt)
+      real, intent(in) :: dxm1(lx1,lx1)
 
       real, shared :: s_d(lx1+1,lx1)
       real, shared :: s_u_ur(lx1+1,lx1)
