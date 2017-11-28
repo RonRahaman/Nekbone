@@ -368,7 +368,7 @@ c  1  format(7i7,a8)
 c-----------------------------------------------------------------------
       subroutine ax_acc(w,u,gxyz,ur,us,ut,wk,n) ! Matrix-vector product: w=A*u
 
-      use cudafor
+      use iso_c_binding
 
       include 'SIZE'
       include 'TOTAL'
@@ -395,11 +395,25 @@ c-----------------------------------------------------------------------
       
       integer cuda_err
 
+      interface
+         subroutine ax_cuda(w, u, ur, us, ut, gxyz, dxm1) 
+     $         bind(c, name='ax_cuda_wrapper')
+            use iso_c_binding
+            type(c_ptr), value :: w, u, ur, us, ut, gxyz, dxm1
+         end subroutine
+      end interface
+
       lt = nx1*ny1*nz1*nelt
 
 !$acc host_data use_device(w,u,gxyz,ur,us,ut,dxm1)
-      call ax_cuf<<<nelt,dim3(nx1,ny1,1),24*(lx1+1)*lx1>>>(
-     $   w,u,ur,us,ut,gxyz,dxm1)
+      call ax_cuda(
+     $   c_loc(w(1,1,1,1)),
+     $   c_loc(u(1,1,1,1)),
+     $   c_loc(ur(1,1,1,1)),
+     $   c_loc(us(1,1,1,1)),
+     $   c_loc(ut(1,1,1,1)),
+     $   c_loc(gxyz(1,1,1,1,1)),
+     $   c_loc(dxm1(1,1)))
 !$acc end host_data
             
 c !$acc parallel num_gangs(lelt) 
@@ -494,6 +508,7 @@ c !$acc end parallel
       end
 c-----------------------------------------------------------------------
       subroutine cg_acc(x,f,g,c,r,w,p,z,n,niter,flop_cg)
+
       include 'SIZE'
 
 c     Solve Ax=f where A is SPD and is invoked by ax()

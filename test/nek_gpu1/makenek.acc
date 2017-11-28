@@ -15,7 +15,7 @@ CC="pgcc"
 # pre-processor symbol list 
 # (set PPLIST=? to get a list of available symbols)
 # NEKCOMM, NEKDLAY, BG, MGRID
-PPLIST="MGRID"
+# PPLIST="MGRID"
 
 
 # OPTIONAL SETTINGS
@@ -30,10 +30,10 @@ IFMPI="false"
 #USR="foo.o"
 
 # linking flags
-USR_LFLAGS="-Mcuda=cc60,cuda8.0 -ta=nvidia:cc60,cuda8.0"
+USR_LFLAGS="-g -Mcuda=cc50,cc60,cuda8.0 -ta=nvidia:cc50,cc60,cuda8.0"
 
 # generic compiler flags
-G="-acc -O3 -Munroll -Minfo=all -Mcuda=cc60,cuda8.0 -ta=nvidia:cc60,cuda8.0"
+G="-acc -g -Munroll -Minfo=all -Mcuda=cc50,cc60,cuda8.0 -ta=nvidia:cc50,cc60,cuda8.0"
 
 # optimization flags
 #OPT_FLAGS_STD=""
